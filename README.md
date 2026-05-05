@@ -1,5 +1,7 @@
 # 🎨 图标空间站 • IconStation
 
+> 打造属于自己的图标库
+
 > 私有化图标库，集成多个图标源，支持一键复制使用；用户可自上传图标进行收集管理。
 
 ![IconStation Preview](https://github.com/user-attachments/assets/f0f9e6f1-a011-42ed-b8de-b97e5af33bed)
@@ -19,7 +21,21 @@
 
 ## 🚀 快速开始
 
-### 方式一：Docker Compose 部署
+### 方式一：飞牛应用 FPK 下载安装
+
+📦 下载 FPK 安装包：  
+
+[![点击下载 FPK](https://img.shields.io/badge/Download-FPK-ff69b4?style=for-the-badge)](https://fndesk.imcq.top/?url=dl\&at=GitHUb)
+
+***
+
+### 方式二：飞牛三方商店 Fndepot
+
+🏪 直接在 Fndepot 商店 搜索 **"图标空间站"** 下载安装
+
+***
+
+### 方式三：Docker Compose 部署
 
 #### 1️⃣ 创建 docker-compose.yml 文件
 
@@ -45,26 +61,12 @@ docker-compose up -d
 
 ***
 
-### 方式二：飞牛应用 FPK 下载安装
-
-📦 下载 FPK 安装包：
-
-[![点击下载 FPK](https://img.shields.io/badge/Download-FPK-ff69b4?style=for-the-badge)](https://fndesk.imcq.top/?url=dl\&at=GitHUb)
-
-***
-
-### 方式三：飞牛三方商店 Fndepot
-
-🏪 直接在 Fndepot 商店 搜索 **"图标空间站"** 下载安装
-
-***
-
 ## 📁 目录结构
 
 | 路径                   | 说明          |
 | -------------------- | ----------- |
 | `./UserData`         | 用户图标持久化存储目录 |
-| `./UserData/icons`   | 用户上传的图标文件   |
+| `./UserData/icons`   | 用户上传的图标目录   |
 | `./UserData/pw.json` | 登录密码配置文件    |
 
 ***
@@ -82,7 +84,7 @@ docker-compose up -d
 | 操作          | 方法                            |
 | ----------- | ----------------------------- |
 | 🔑 重置密码     | 删除 `UserData/pw.json` 文件后重启服务 |
-| 🗑️ 备份或移植图标 | 删除 `UserData/icons` 目录下所有文件   |
+| 🗑️ 备份或移植图标 | 备份 `UserData/icons` 目录下所有文件   |
 
 ***
 
