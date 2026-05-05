@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="icon.png" type="image/png">
+    <title>图标空间站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00f0ff;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --card-bg: rgba(20, 30, 60, 0.4);
+            --dark-bg: rgba(10, 15, 30, 0.7);
+            --border-color: rgba(25, 52, 75, 0.3);
+            --text-secondary: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1040 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.1) 0%, transparent 30%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 30%),
+                        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 40%);
+            z-index: 0;
+            animation: glowMove 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes glowMove {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(5%, 5%); }
+            66% { transform: translate(-5%, 5%); }
+        }
+
+        .dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: url('https://t.alcy.cc/fj') center/cover;
+            filter: blur(3px);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .navbar {
+            background: linear-gradient(180deg, rgba(20, 30, 60, 0.7) 0%, rgba(20, 30, 60, 0.3) 100%);
+            backdrop-filter: blur(25px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .navbar-title {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .navbar-icon {
+            width: 54px;
+            border-radius: 0px;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .navbar-title-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .navbar-title-main {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .navbar-title-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--primary);
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.1);
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            color: var(--primary);
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
+        }
+
+        .auth-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            min-width: 150px;
+            width: 100%;
+            margin: 0;
+            flex: 1;
+            box-sizing: border-box;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 55px 16px 24px;
+            font-size: 15px;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 18px;
+            outline: none;
+            background: rgba(20, 30, 60, 0.6);
+            color: white;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 240, 255, 0.1),
+                        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 8px 40px rgba(0, 240, 255, 0.25),
+                        0 0 0 4px rgba(0, 240, 255, 0.1),
+                        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            background: rgba(20, 30, 60, 0.8);
+        }
+
+        .search-box input::placeholder {
+            color: rgba(148, 163, 184, 0.7);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 20px;
+            filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(20, 30, 60, 0.6);
+            backdrop-filter: blur(10px);
+            transition: .4s;
+            border-radius: 24px;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        input:checked + .slider {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 0.5rem;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .icon-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 16px;
+            padding: 1.2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(0, 240, 255, 0.03),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+
+        .icon-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 20px 50px rgba(0, 240, 255, 0.15),
+                        0 0 30px rgba(0, 240, 255, 0.08),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .icon-card:hover::before {
+            opacity: 1;
+            animation: shimmer 1.5s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .icon-image {
+            width: 100%;
+            height: 130px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.8rem;
+            transition: all 0.4s;
+        }
+
+        .icon-card:hover .icon-image {
+            transform: scale(1.05);
+            filter: drop-shadow(0 8px 20px rgba(0, 240, 255, 0.3));
+        }
+
+        .icon-name {
+            font-size: 0.85rem;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            max-height: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .icon-name span {
+            font-size: 18px;
+            margin-right: 4px;
+        }
+
+        .icon-buttons {
+            display: flex;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+
+        .icon-btn {
+            flex: 1;
+            min-width: auto;
+            padding: 0.4rem 0.3rem;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .icon-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2);
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+
+        .delete-btn {
+            border-color: rgba(236, 72, 153, 0.4);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            color: #ec4899;
+        }
+
+        .delete-btn:hover {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+            border-color: rgba(236, 72, 153, 0.6);
+        }
+
+        .pagination {
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(20, 30, 60, 0.3) 100%);
+            color: var(--primary);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 90px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            color: #0f172a;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.4);
+            border-color: transparent;
+        }
+
+        .pagination button:disabled {
+            background: rgba(20, 30, 60, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: rgba(148, 163, 184, 0.4);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pagination .page-info {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, rgba(20, 30, 60, 0.7) 0%, rgba(20, 30, 60, 0.4) 100%);
+            border-radius: 12px;
+            font-weight: bold;
+            color: var(--primary);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 5rem;
+            font-size: 1.2rem;
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 5rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(0, 240, 255, 0.08);
+            color: var(--primary);
+            padding: 1rem 1.8rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1600px) and (min-width: 1400px) {
+            .grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 1400px) and (min-width: 1200px) {
+            .grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 1200px) and (min-width: 1000px) {
+            .grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 1000px) and (min-width: 760px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.9rem;
+            }
+        }
+
+        @media (max-width: 760px) and (min-width: 540px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.8rem;
+            }
+        }
+
+        @media (max-width: 540px) and (min-width: 380px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.7rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .grid {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 0.6rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 0.5rem;
+            }
+
+            .navbar-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .navbar-title {
+                align-items: center;
+            }
+
+            .icon-image {
+                height: 80px;
+            }
+
+            .control-panel {
+                padding: 0.3rem;
+                margin: 0.3rem;
+            }
+
+            .search-box {
+                min-width: 150px;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+
+            .content {
+                padding: 0.3rem;
+            }
+
+            .grid {
+                gap: 0.5rem;
+            }
+
+            .icon-card {
+                padding: 0.8rem;
+            }
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: 100%;
+            left: 110%;
+            transform: translateX(10%);
+            background: rgba(20, 30, 60, 0.5);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            backdrop-filter: blur(12px);
+            font-size: 0.85rem;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 30%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: transparent transparent rgba(0, 240, 255, 0.3) transparent;
+            filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .tooltip-container:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(8px);
+        }
+
+        .checkbox-wrapper {
+            position: relative;
+        }
+
+        .toggle-btn {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .toggle-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .toggle-btn svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn.expanded svg {
+            transform: rotate(180deg);
+        }
+
+        .checkbox-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.5rem;
+            background: rgba(20, 30, 60, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 150px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .checkbox-content.expanded {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cyberpunk-checkbox {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            border-radius: 6px;
+            background: rgba(20, 30, 60, 0.5);
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            position: relative;
+            margin-right: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyberpunk-checkbox:before {
+            content: "";
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+        }
+
+        .cyberpunk-checkbox:checked:before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .cyberpunk-checkbox:checked {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyberpunk-checkbox-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .cyberpunk-checkbox-label:hover {
+            color: var(--primary);
+        }
+
+        .control-panel {
+            background: rgba(20, 30, 60, 0.4);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 0.5rem;
+            margin: 0.5rem;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            color: var(--primary);
+            border-radius: 16px;
+            padding: 0.5rem 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
+        }
+
+        .upload-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .cdn-select {
+            background: rgba(20, 30, 60, 0.6);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            color: white;
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            backdrop-filter: blur(15px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            min-width: 120px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .cdn-select:hover,
+        .cdn-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
+            outline: none;
+        }
+
+        .cdn-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .warning-msg {
+            background: rgba(255, 153, 0, 0.1);
+            border: 1px solid rgba(255, 153, 0, 0.3);
+            color: #ff9900;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .dialog-box {
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.95) 0%, rgba(20, 30, 60, 0.95) 100%);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            min-width: 350px;
+            max-width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes dialogSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dialog-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dialog-message {
+            color: #cbd5e1;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .dialog-input-wrapper {
+            margin-bottom: 1.5rem;
+        }
+
+        .dialog-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 10px;
+            outline: none;
+            background: rgba(20, 30, 60, 0.6);
+            color: white;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .dialog-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 4px 25px rgba(0, 240, 255, 0.25),
+                        0 0 0 4px rgba(0, 240, 255, 0.1);
+        }
+
+        .dialog-input::placeholder {
+            color: rgba(148, 163, 184, 0.6);
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .dialog-btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cancel-btn {
+            background: rgba(148, 163, 184, 0.15);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: #94a3b8;
+        }
+
+        .cancel-btn:hover {
+            background: rgba(148, 163, 184, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .confirm-btn {
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            color: #0f172a;
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .confirm-btn.danger:hover {
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+    <script>
+        (function() {
+            window.checkLoginStatus = function() {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                const loginTimestamp = localStorage.getItem('loginTimestamp');
+                const currentTime = new Date().getTime();
+                const thirtyMinutes = 30 * 60 * 1000;
+
+                if (!isLoggedIn || !loginTimestamp || (currentTime - parseInt(loginTimestamp)) > thirtyMinutes) {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('loginTimestamp');
+                    
+                    localStorage.setItem('returnUrl', window.location.href);
+                    
+                    window.location.href = '/login.html';
+                    return false;
+                }
+                
+                localStorage.setItem('loginTimestamp', currentTime.toString());
+                return true;
+            };
+
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options = {}) {
+                if (url.includes('/api/') && !url.includes('/api/login')) {
+                    const authToken = localStorage.getItem('authToken');
+                    if (authToken) {
+                        options.headers = options.headers || {};
+                        if (options.headers instanceof Headers) {
+                            options.headers.append('X-Auth-Token', authToken);
+                        } else if (Array.isArray(options.headers)) {
+                            options.headers.push(['X-Auth-Token', authToken]);
+                        } else {
+                            options.headers['X-Auth-Token'] = authToken;
+                        }
+                    }
+                }
+
+                return originalFetch(url, options).then(response => {
+                    if (response.status === 401) {
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('loginTimestamp');
+                        localStorage.setItem('returnUrl', window.location.href);
+                        window.location.href = '/login.html';
+                        return Promise.reject(new Error('未授权'));
+                    }
+                    return response;
+                });
+            };
+        })();
+    </script>
+</head>
+<body>
+    <div class="dynamic-bg"></div>
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-title">
+                <img src="icon.png" class="navbar-icon" alt="Icon">
+                <div class="navbar-title-text">
+                    <div class="navbar-title-main">图标空间站</div>
+                    <div class="navbar-title-sub">icon station | 怒增两万六个图标，无需下载直接使用（也支持上传图标）</div>
+                </div>
+            </div>
+            <button id="authBtn" class="auth-btn" onclick="handleAuth()">
+                <span id="authBtnText">🔑 登录</span>
+            </button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="control-panel">
+            <div style="display: flex; align-items: center; gap: 1.5rem; justify-content: center; flex-wrap: wrap; width: 100%;">
+                <div class="tooltip-container">
+                    <button id="uploadBtn" class="upload-btn">
+                        <span>📤</span> 上传
+                    </button>
+                    <div class="tooltip">也可以把图标放到以下目录直接管理：<br>【 Docker Compose 目录里的 UserData/icons 】</div>
+                </div>
+                <div class="checkbox-wrapper">
+                    <button class="toggle-btn" id="toggleFilterBtn">
+                        <span>📚</span> 图标库源
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="checkbox-content" id="checkboxContent">
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkUserIcons" checked>
+                            用户图标
+                        </label>
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkBuiltinIcons" checked>
+                            HD-Icons
+                        </label>
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
+                            MacIcon
+                        </label>
+                    </div>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索图标名称...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+                    <span>加载模式</span>
+                    <select id="cdnMode" class="cdn-select">
+                        <option value="ghfast" selected>🟦Github加速</option>
+                        <option value="cdn">🟪CDN加速</option>                        
+                        <option value="raw">🟧Github原地址</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="warning" class="warning-msg" style="display: none;">⚠️ 检测到本地文件模式，部分功能可能受限。请使用本地服务器运行此页面以获得最佳体验。</div>
+        </div>
+
+        <div class="content">
+            <div id="iconGrid" class="grid"></div>
+            <div id="pagination" class="pagination"></div>
+        </div>
+    </div>
+    </div>
+
+    <div id="customDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box">
+            <div class="dialog-title" id="dialogTitle">确认</div>
+            <div class="dialog-message" id="dialogMessage"></div>
+            <div class="dialog-input-wrapper" id="dialogInputWrapper" style="display: none;">
+                <input type="text" class="dialog-input" id="dialogInput" placeholder="">
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel-btn" id="dialogCancelBtn">取消</button>
+                <button class="dialog-btn confirm-btn" id="dialogConfirmBtn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (typeof __webpack_require__ !== 'undefined') {
+            __webpack_require__.p = '';
+        }
+        
+        let iconsData = [];
+        let filteredIcons = [];
+        let currentPage = 1;
+        let iconsPerPage = parseInt(localStorage.getItem('iconsPerPage')) || 32;
+        const CDN_PREFIX = 'https://ghfast.top/';
+        const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
+        let urlMode = 'ghfast';
+
+        async function loadIcons(keepPage = false) {
+            try {
+                let uploadedIcons = [];
+                try {
+                    const uploadRes = await fetch('/api/list-upload-icons');
+                    if (uploadRes.ok) {
+                        const uploadData = await uploadRes.json();
+                        if (uploadData.files && Array.isArray(uploadData.files)) {
+                            uploadedIcons = uploadData.files.map(file => ({
+                                name: file,
+                                download_url: `/deskdata/user_icon/${encodeURIComponent(file)}`,
+                                isUploaded: true
+                            }));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('加载上传图标失败', e);
+                }
+
+                const response = await fetch('HDiconsV2.json');
+                if (!response.ok) throw new Error('文件加载失败');
+                const raw = await response.json();
+                const jsonIcons = Array.isArray(raw)
+                    ? raw
+                    : (Array.isArray(raw.icons)
+                        ? raw.icons.map(i => ({
+                            name: (() => {
+                                const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                            })(),
+                            download_url: i.url
+                        }))
+                        : []);
+
+                let macIcons = [];
+                try {
+                    const macResponse = await fetch('MacIcons.json');
+                    if (macResponse.ok) {
+                        const macRaw = await macResponse.json();
+                        macIcons = Array.isArray(macRaw.icons)
+                            ? macRaw.icons.map(i => ({
+                                name: (() => {
+                                    const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                    return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                                })(),
+                                download_url: i.url,
+                                isMacIcon: true
+                            }))
+                            : [];
+                    }
+                } catch (e) {
+                    console.warn('加载MacIcons失败', e);
+                }
+
+                iconsData = [...uploadedIcons, ...jsonIcons, ...macIcons];
+                applyFilters(!keepPage);
+            } catch (error) {
+                console.error('加载错误:', error);
+                document.getElementById('iconGrid').innerHTML = 
+                    `<div class="no-results">
+                        <p>⚠️ 加载失败</p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem;">请使用本地服务器打开此页面,例如:</p>
+                        <p style="font-size: 0.9rem; color: #8b5cf6; margin-top: 0.5rem;">python -m http.server 8000</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">然后访问: http://localhost:8000/icon-viewer.html</p>
+                    </div>`;
+            }
+        }
+
+        function updateStats() {
+        }
+
+        function handleImageError(img) {
+            const name = img.getAttribute('data-name');
+            const url = img.getAttribute('data-url');
+            let index = parseInt(img.getAttribute('data-fallback-index') || '0');
+            
+            const fallbacks = [
+                { mode: 'ghfast', url: CDN_PREFIX + url, emoji: '🟦' },
+                { mode: 'cdn', url: JSDELIVR_PREFIX + name, emoji: '🟪' },
+                { mode: 'raw', url: url, emoji: '🟧' }
+            ];
+            
+            const sortedFallbacks = [
+                ...fallbacks.filter(f => f.mode === urlMode),
+                ...fallbacks.filter(f => f.mode !== urlMode)
+            ];
+            
+            if (index < sortedFallbacks.length) {
+                const next = sortedFallbacks[index];
+                if (next.url && !next.url.endsWith('undefined') && !next.url.endsWith('null')) {
+                    img.src = next.url;
+                    const card = img.closest('.icon-card');
+                    if (card) {
+                        const emojiSpan = card.querySelector('.icon-name span');
+                        if (emojiSpan) emojiSpan.textContent = next.emoji;
+                        card.title = next.url;
+                    }
+                    img.setAttribute('data-fallback-index', index + 1);
+                } else {
+                    img.setAttribute('data-fallback-index', index + 1);
+                    handleImageError(img);
+                }
+            } else {
+                img.onerror = null;
+                const card = img.closest('.icon-card');
+                if (card) {
+                    const emojiSpan = card.querySelector('.icon-name span');
+                    if (emojiSpan) emojiSpan.textContent = '❌';
+                }
+            }
+        }
+
+        function renderIcons() {
+            const grid = document.getElementById('iconGrid');
+            const start = (currentPage - 1) * iconsPerPage;
+            const end = start + iconsPerPage;
+            const pageIcons = filteredIcons.slice(start, end);
+
+            if (pageIcons.length === 0) {
+                grid.innerHTML = '<div class="no-results">未找到匹配的图标</div>';
+                renderPagination();
+                return;
+            }
+
+            grid.innerHTML = pageIcons.map(icon => {
+                const nameWithoutExt = icon.name.replace(/\.png$/i, '');
+                const isMac = !!icon.isMacIcon;
+                const isUser = !!icon.isUploaded;
+                const localPath = isUser
+                    ? `/deskdata/user_icon/${encodeURIComponent(icon.name)}`
+                    : (isMac ? icon.download_url : icon.download_url);
+                const iconSrc = isMac ? icon.download_url : localPath;
+                const iconEmoji = isMac ? '🍎' : (isUser ? '✅' : '🟦');
+
+                const safeName = icon.name.replace(/"/g, '&quot;');
+                const safeUrl = (icon.download_url || '').replace(/"/g, '&quot;');
+
+                return `
+                    <div class="icon-card" title="${localPath}">
+                        <img class="icon-image"
+                             src="${iconSrc}"
+                             alt="${nameWithoutExt}"
+                             data-name="${safeName}"
+                             data-url="${safeUrl}"
+                             data-fallback-index="0"
+                             onerror="handleImageError(this)">
+                        <div class="icon-name"><span>${iconEmoji}</span> ${nameWithoutExt}</div>
+                        <div class="icon-buttons" data-name="${safeName}" data-uploaded="${icon.isUploaded}">
+                            <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">💾</button>
+                            <button class="icon-btn" onclick="copyUrl(event);" title="复制链接">📋</button>
+                            ${icon.isUploaded ? `<button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="更多功能">☰</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
+            
+            if (totalPages <= 1) {
+                const simpleContainerHtml = `
+                    <div style="background: rgba(15, 23, 42, 0.7); border-radius: 16px; border: 1px solid rgba(0, 240, 255, 0.2); padding: 0.5rem 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; backdrop-filter: blur(15px);">
+                        <div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 1rem;">
+                            <span>共 <span style="color: var(--primary); font-weight: bold;">${filteredIcons.length}</span> 个图标</span>
+                            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                每页显示
+                                <select id="pageSizeSelect" onchange="changeIconsPerPage(this.value)" style="background: rgba(20, 30, 60, 0.8); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; color: var(--primary); padding: 0.3rem 0.5rem; font-size: 0.85rem; cursor: pointer;">
+                                    <option value="16" ${iconsPerPage === 16 ? 'selected' : ''}>16</option>
+                                    <option value="24" ${iconsPerPage === 24 ? 'selected' : ''}>24</option>
+                                    <option value="32" ${iconsPerPage === 32 ? 'selected' : ''}>32</option>
+                                    <option value="40" ${iconsPerPage === 40 ? 'selected' : ''}>40</option>
+                                    <option value="64" ${iconsPerPage === 64 ? 'selected' : ''}>64</option>
+                                    <option value="96" ${iconsPerPage === 96 ? 'selected' : ''}>96</option>
+                                    <option value="128" ${iconsPerPage === 128 ? 'selected' : ''}>128</option>
+                                </select>
+                                个
+                            </span>
+                        </div>
+                        <div style="color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+                            第 1 / 1 页
+                        </div>
+                    </div>
+                `;
+                pagination.innerHTML = simpleContainerHtml;
+                return;
+            }
+            
+            const containerHtml = `
+                <div style="background: rgba(15, 23, 42, 0.7); border-radius: 16px; border: 1px solid rgba(0, 240, 255, 0.2); padding: 0.2rem 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; backdrop-filter: blur(15px);">
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 1rem; white-space: nowrap;">
+                        <span>共 <span style="color: var(--primary); font-weight: bold;">${filteredIcons.length}</span> 个图标</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">
+                            每页显示
+                            <select id="pageSizeSelect" onchange="changeIconsPerPage(this.value)" style="background: rgba(20, 30, 60, 0.8); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; color: var(--primary); padding: 0.3rem 0.5rem; font-size: 0.85rem; cursor: pointer;">
+                                    <option value="16" ${iconsPerPage === 16 ? 'selected' : ''}>16</option>
+                                    <option value="24" ${iconsPerPage === 24 ? 'selected' : ''}>24</option>
+                                    <option value="32" ${iconsPerPage === 32 ? 'selected' : ''}>32</option>
+                                    <option value="40" ${iconsPerPage === 40 ? 'selected' : ''}>40</option>
+                                    <option value="64" ${iconsPerPage === 64 ? 'selected' : ''}>64</option>
+                                    <option value="96" ${iconsPerPage === 96 ? 'selected' : ''}>96</option>
+                                    <option value="128" ${iconsPerPage === 128 ? 'selected' : ''}>128</option>
+                            </select>
+                            个
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+                        <button onclick="changePage(1)" ${currentPage === 1 ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">首页</button>
+                        <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">上页</button>
+                        <span class="page-info" style="min-width: 80px; text-align: center; padding: 0.5rem 1rem;">
+                            ${currentPage} / ${totalPages}
+                        </span>
+                        <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">下页</button>
+                        <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">末页</button>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-secondary); font-size: 0.85rem; white-space: nowrap;">
+                        跳转:
+                        <input type="number" 
+                               min="1" 
+                               max="${totalPages}" 
+                               value="${currentPage}" 
+                               style="width: 60px; padding: 0.5rem; background: rgba(20, 30, 60, 0.6); border: 2px solid rgba(0, 240, 255, 0.3); border-radius: 10px; color: white; text-align: center; backdrop-filter: blur(10px);"
+                               onchange="if(this.value >= 1 && this.value <= ${totalPages}) changePage(parseInt(this.value));">
+                        <button onclick="const input = this.previousElementSibling; if(input.value >= 1 && input.value <= ${totalPages}) changePage(parseInt(input.value));" 
+                                class="icon-btn">
+                            Go
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            pagination.innerHTML = containerHtml;
+        }
+
+        function changeIconsPerPage(value) {
+            iconsPerPage = parseInt(value);
+            localStorage.setItem('iconsPerPage', value);
+            currentPage = 1;
+            renderIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function applyFilters(resetPage = true) {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const showUser = document.getElementById('checkUserIcons').checked;
+            const showBuiltin = document.getElementById('checkBuiltinIcons').checked;
+            const showMac = document.getElementById('checkMacIcons').checked;
+
+            filteredIcons = iconsData.filter(icon => {
+                const isUser = !!icon.isUploaded;
+                const isMac = !!icon.isMacIcon;
+                if (isUser && !showUser) return false;
+                if (!isUser && !isMac && !showBuiltin) return false;
+                if (isMac && !showMac) return false;
+
+                return icon.name.toLowerCase().includes(keyword);
+            });
+
+            if (resetPage) {
+                currentPage = 1;
+            } else {
+                const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                }
+            }
+            updateStats();
+            renderIcons();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+        function saveCheckboxState() {
+            const state = {
+                user: document.getElementById('checkUserIcons').checked,
+                builtin: document.getElementById('checkBuiltinIcons').checked,
+                mac: document.getElementById('checkMacIcons').checked
+            };
+            localStorage.setItem('iconSourceState', JSON.stringify(state));
+        }
+
+        function loadCheckboxState() {
+            const saved = localStorage.getItem('iconSourceState');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    document.getElementById('checkUserIcons').checked = state.user;
+                    document.getElementById('checkBuiltinIcons').checked = state.builtin;
+                    document.getElementById('checkMacIcons').checked = state.mac;
+                } catch (e) {}
+            }
+        }
+
+        document.getElementById('checkUserIcons').addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        document.getElementById('checkBuiltinIcons').addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        document.getElementById('checkMacIcons').addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+
+        loadCheckboxState();
+
+        const toggleBtn = document.getElementById('toggleFilterBtn');
+        const checkboxContent = document.getElementById('checkboxContent');
+        
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleBtn.classList.toggle('expanded');
+            checkboxContent.classList.toggle('expanded');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!checkboxContent.contains(e.target) && !toggleBtn.contains(e.target)) {
+                toggleBtn.classList.remove('expanded');
+                checkboxContent.classList.remove('expanded');
+            }
+        });
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.4s reverse';
+                setTimeout(() => toast.remove(), 400);
+            }, 2000);
+        }
+
+        function copyUrl(event) {
+            if (event) event.stopPropagation();
+            
+            const button = event.target;
+            const card = button.closest('.icon-card');
+            const img = card.querySelector('.icon-image');
+            let actualUrl = img.src;
+
+            if (actualUrl.includes('/deskdata/user_icon/')) {
+                const parts = actualUrl.split('/deskdata/user_icon/');
+                if (parts.length > 1) {
+                    actualUrl = '/deskdata/user_icon/' + parts.pop();
+                    actualUrl = decodeURIComponent(actualUrl);
+                }
+            }
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(actualUrl).then(() => {
+                    showToast('✓ 链接已复制到剪贴板');
+                }).catch((err) => {
+                    console.error('Clipboard API 失败:', err);
+                    fallbackCopyTextToClipboard(actualUrl);
+                });
+            } else {
+                fallbackCopyTextToClipboard(actualUrl);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✓ 链接已复制到剪贴板');
+            } catch (err) {
+                console.error('传统复制方法失败:', err);
+                showToast('✗ 复制失败');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function downloadIcon(event) {
+            if (event) event.stopPropagation();
+            event.preventDefault();
+            
+            const button = event.target;
+            const card = button.closest('.icon-card');
+            const img = card.querySelector('.icon-image');
+            const actualUrl = img.src;
+            const iconNameElement = card.querySelector('.icon-name');
+            const baseName = iconNameElement.textContent.replace(/^[^\w\u4e00-\u9fa5]+/, '').trim();
+            
+            fetch(actualUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('网络响应错误');
+                    return response.blob().then(blob => ({ blob, type: response.headers.get('content-type') || blob.type || '' }));
+                })
+                .then(async ({ blob, type }) => {
+                    const mime = (type || '').toLowerCase();
+                    if (mime.includes('svg')) {
+                        try {
+                            await convertSvgBlobToPng(blob, baseName + '.png');
+                            showToast('✓ 开始下载: ' + baseName + '.png');
+                        } catch (e) {
+                            const a = document.createElement('a');
+                            const blobUrl = URL.createObjectURL(blob);
+                            a.href = blobUrl;
+                            a.download = baseName + '.svg';
+                            document.body.appendChild(a);
+                            a.click();
+                            setTimeout(() => {
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(blobUrl);
+                            }, 100);
+                            showToast('✓ 开始下载: ' + baseName + '.svg');
+                        }
+                        return;
+                    }
+                    const ext = mime.includes('png') ? '.png' : (mime.includes('jpeg') ? '.jpg' : (mime.includes('webp') ? '.webp' : '.png'));
+                    const a = document.createElement('a');
+                    const blobUrl = URL.createObjectURL(blob);
+                    a.href = blobUrl;
+                    a.download = baseName + ext;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(blobUrl);
+                    }, 100);
+                    showToast('✓ 开始下载: ' + baseName + ext);
+                })
+                .catch(error => {
+                    console.error('下载失败:', error);
+                    showToast('✗ 下载失败: ' + error.message);
+                });
+        }
+        
+        function convertSvgBlobToPng(svgBlob, filename) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const url = URL.createObjectURL(svgBlob);
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.naturalWidth || img.width || 0;
+                        let h = img.naturalHeight || img.height || 0;
+                        const canvas = document.createElement('canvas');
+                        if (!w || !h) {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const text = reader.result || '';
+                                const m = String(text).match(/viewBox=["']\s*0\s+0\s+(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s*["']/i);
+                                w = m ? Math.ceil(parseFloat(m[1])) : 512;
+                                h = m ? Math.ceil(parseFloat(m[3])) : 512;
+                                canvas.width = w;
+                                canvas.height = h;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, w, h);
+                                canvas.toBlob(b => {
+                                    if (!b) return reject(new Error('转换失败'));
+                                    const a = document.createElement('a');
+                                    const blobUrl = URL.createObjectURL(b);
+                                    a.href = blobUrl;
+                                    a.download = filename;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    setTimeout(() => {
+                                        document.body.removeChild(a);
+                                        URL.revokeObjectURL(blobUrl);
+                                        URL.revokeObjectURL(url);
+                                    }, 100);
+                                    resolve(null);
+                                }, 'image/png');
+                            };
+                            reader.readAsText(svgBlob);
+                            return;
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        canvas.toBlob(b => {
+                            if (!b) return reject(new Error('转换失败'));
+                            const a = document.createElement('a');
+                            const blobUrl = URL.createObjectURL(b);
+                            a.href = blobUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            setTimeout(() => {
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(blobUrl);
+                                URL.revokeObjectURL(url);
+                            }, 100);
+                            resolve(null);
+                        }, 'image/png');
+                    };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        reject(new Error('图片加载失败'));
+                    };
+                    img.src = url;
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            if (typeof window.checkLoginStatus === 'function') {
+                if (!window.checkLoginStatus()) return;
+            }
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            let successCount = 0;
+            let failCount = 0;
+
+            showToast(`⏳ 正在上传 ${files.length} 个文件...`);
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                try {
+                    const result = await uploadFileChunked(file);
+                    if (result.success) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                        console.error(`上传 ${file.name} 失败:`, result.message || result.error);
+                    }
+                } catch (error) {
+                    failCount++;
+                    console.error(`上传 ${file.name} 出错:`, error);
+                }
+            }
+
+            if (successCount > 0) {
+                showToast(`✓ 成功上传 ${successCount} 个文件` + (failCount > 0 ? `，失败 ${failCount} 个` : ''));
+                loadIcons();
+            } else {
+                showToast(`✗ 上传失败 ${failCount} 个文件`);
+            }
+            
+            e.target.value = '';
+        });
+
+        async function uploadFileChunked(file) {
+            const CHUNK_SIZE = 1 * 1024 * 1024;
+            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+            const uploadId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const fileName = file.name;
+
+            try {
+                const authToken = localStorage.getItem('authToken') || '';
+                const initRes = await fetch('/api/upload/user_icon/init', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Auth-Token': authToken
+                    },
+                    body: JSON.stringify({
+                        fileName,
+                        fileSize: file.size,
+                        totalChunks,
+                        fileType: 'user_icon',
+                        uploadId,
+                        fieldName: 'file'
+                    })
+                });
+                
+                if (!initRes.ok) throw new Error('初始化上传失败');
+
+                for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                    const start = chunkIndex * CHUNK_SIZE;
+                    const end = Math.min(start + CHUNK_SIZE, file.size);
+                    const chunk = file.slice(start, end);
+
+                    const formData = new FormData();
+                    formData.append('chunkIndex', chunkIndex.toString());
+                    formData.append('totalChunks', totalChunks.toString());
+                    formData.append('uploadId', uploadId);
+                    formData.append('fieldName', 'file');
+                    formData.append('file', chunk, fileName);
+
+                    const chunkRes = await fetch('/api/upload/user_icon/chunk', {
+                        method: 'POST',
+                        headers: {
+                            'X-Auth-Token': authToken
+                        },
+                        body: formData
+                    });
+
+                    if (!chunkRes.ok) {
+                        const errText = await chunkRes.text();
+                        throw new Error(`分片 ${chunkIndex + 1}/${totalChunks} 上传失败: ${errText}`);
+                    }
+                }
+
+                const mergeRes = await fetch('/api/upload/user_icon/merge', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Auth-Token': authToken
+                    },
+                    body: JSON.stringify({
+                        uploadId,
+                        fileName,
+                        fieldName: 'file'
+                    })
+                });
+
+                if (mergeRes.ok) {
+                    return await mergeRes.json();
+                } else {
+                    const errText = await mergeRes.text();
+                    throw new Error('合并文件失败: ' + errText);
+                }
+            } catch (e) {
+                console.error(e);
+                return { success: false, message: e.message };
+            }
+        }
+
+        document.getElementById('cdnMode').addEventListener('change', (e) => {
+            urlMode = e.target.value;
+            renderIcons();
+        });
+
+        function toggleMenu(event) {
+            if (event) event.stopPropagation();
+            
+            const target = event.target;
+            const button = target.tagName === 'I' ? target.parentElement : target;
+            const buttonsContainer = button.closest('.icon-buttons');
+
+            const isMenuActive = buttonsContainer.classList.contains('menu-active');
+
+            document.querySelectorAll('.icon-buttons').forEach(container => {
+                if (container.classList.contains('menu-active')) {
+                    showDefaultButtons(container);
+                }
+            });
+
+            if (!isMenuActive) {
+                if (typeof window.checkLoginStatus === 'function') {
+                    if (!window.checkLoginStatus()) return;
+                }
+                
+                const iconName = buttonsContainer.getAttribute('data-name').replace(/&quot;/g, '"');
+                showMenuButtons(buttonsContainer, iconName);
+            }
+        }
+
+        function showDefaultButtons(container) {
+            container.classList.remove('menu-active');
+            container.innerHTML = `
+                <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">💾</button>
+                <button class="icon-btn" onclick="copyUrl(event);" title="复制链接">📋</button>
+                <button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="更多功能">☰</button>
+            `;
+        }
+
+        function showMenuButtons(container, iconName) {
+            container.classList.add('menu-active');
+            container.innerHTML = `
+                <button class="icon-btn" onclick="renameIcon('${iconName.replace(/'/g, "\\'")}');" title="重命名图标">✏️</button>
+                <button class="icon-btn delete-btn" onclick="deleteIcon('${iconName.replace(/'/g, "\\'")}');" title="删除图标">🗑️</button>
+                <button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="返回">←</button>
+            `;
+        }
+
+        async function renameIcon(oldName) {
+            if (typeof window.checkLoginStatus === 'function') {
+                if (!window.checkLoginStatus()) return;
+            }
+
+            const newName = await showDialog({
+                title: '重命名图标',
+                message: '请输入新的图标名称（不含扩展名）：',
+                input: true,
+                defaultValue: oldName.replace(/\.(png|svg|jpg|jpeg|webp)$/i, ''),
+                confirmText: '重命名'
+            });
+
+            if (newName === null || newName.trim() === '') return;
+            
+            const ext = oldName.match(/\.(png|svg|jpg|jpeg|webp)$/i);
+            const newFileName = newName.trim() + (ext ? ext[0] : '.png');
+            
+            if (newFileName === oldName) {
+                showToast('名称未改变');
+                return;
+            }
+
+            try {
+                showToast('⏳ 正在重命名...');
+                
+                const response = await fetch('/api/rename/user_icon', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Auth-Token': localStorage.getItem('authToken') || ''
+                    },
+                    body: JSON.stringify({
+                        oldName: oldName,
+                        newName: newFileName
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('✓ 重命名成功');
+                    loadIcons(false);
+                } else {
+                    showToast('✗ 重命名失败: ' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('重命名失败:', error);
+                showToast('✗ 重命名失败: ' + error.message);
+            }
+        }
+
+        async function deleteIcon(iconName) {
+            if (typeof window.checkLoginStatus === 'function') {
+                if (!window.checkLoginStatus()) return;
+            }
+
+            const confirmed = await showDialog({
+                title: '删除图标',
+                message: `确定要删除图标 "${iconName}" 吗？此操作无法撤销。`,
+                confirmText: '删除',
+                danger: true
+            });
+
+            if (!confirmed) return;
+
+            try {
+                showToast('⏳ 正在删除...');
+                
+                const response = await fetch('/api/delete/user_icon', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Auth-Token': localStorage.getItem('authToken') || ''
+                    },
+                    body: JSON.stringify({
+                        fileName: iconName
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('✓ 删除成功');
+                    loadIcons(false);
+                } else {
+                    showToast('✗ 删除失败: ' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                showToast('✗ 删除失败: ' + error.message);
+            }
+        }
+
+        if (window.location.protocol === 'file:') {
+            document.getElementById('warning').style.display = 'block';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    changePage(currentPage - 1);
+                }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    changePage(currentPage + 1);
+                }
+            }
+        });
+
+        function updateAuthButton() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loginTimestamp = localStorage.getItem('loginTimestamp');
+            const currentTime = new Date().getTime();
+            const thirtyMinutes = 30 * 60 * 1000;
+            const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+
+            const authBtnText = document.getElementById('authBtnText');
+            const authBtn = document.getElementById('authBtn');
+
+            if (isValid) {
+                authBtnText.textContent = '🚪 退出登录';
+            } else {
+                authBtnText.textContent = '🔑 登录';
+            }
+        }
+
+        async function handleAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loginTimestamp = localStorage.getItem('loginTimestamp');
+            const currentTime = new Date().getTime();
+            const thirtyMinutes = 30 * 60 * 1000;
+            const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+
+            if (isValid) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('loginTimestamp');
+                updateAuthButton();
+                showToast('已退出登录');
+            } else {
+                window.location.href = '/login.html';
+            }
+        }
+
+        let dialogResolve = null;
+
+        function showDialog(options) {
+            return new Promise((resolve) => {
+                dialogResolve = resolve;
+                const dialog = document.getElementById('customDialog');
+                const title = document.getElementById('dialogTitle');
+                const message = document.getElementById('dialogMessage');
+                const inputWrapper = document.getElementById('dialogInputWrapper');
+                const input = document.getElementById('dialogInput');
+                const confirmBtn = document.getElementById('dialogConfirmBtn');
+
+                title.textContent = options.title || '确认';
+                message.textContent = options.message || '';
+
+                if (options.input) {
+                    inputWrapper.style.display = 'block';
+                    input.value = options.defaultValue || '';
+                    input.placeholder = options.placeholder || '';
+                    input.focus();
+                } else {
+                    inputWrapper.style.display = 'none';
+                }
+
+                confirmBtn.textContent = options.confirmText || '确认';
+                confirmBtn.className = 'dialog-btn confirm-btn' + (options.danger ? ' danger' : '');
+
+                dialog.style.display = 'flex';
+            });
+        }
+
+        function closeDialog() {
+            document.getElementById('customDialog').style.display = 'none';
+            if (dialogResolve) {
+                dialogResolve(null);
+            }
+        }
+
+        document.getElementById('dialogCancelBtn').addEventListener('click', closeDialog);
+
+        document.getElementById('dialogConfirmBtn').addEventListener('click', () => {
+            const dialog = document.getElementById('customDialog');
+            const inputWrapper = document.getElementById('dialogInputWrapper');
+            const input = document.getElementById('dialogInput');
+
+            let result;
+            if (inputWrapper.style.display !== 'none') {
+                result = input.value;
+            } else {
+                result = true;
+            }
+
+            dialog.style.display = 'none';
+            if (dialogResolve) {
+                dialogResolve(result);
+            }
+        });
+
+        document.getElementById('customDialog').addEventListener('click', (e) => {
+            if (e.target.id === 'customDialog') {
+                closeDialog();
+            }
+        });
+
+        async function checkInitAndLoad() {
+            try {
+                const res = await fetch('/api/check-init');
+                const data = await res.json();
+                if (!data.initialized) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+            } catch (e) {
+                console.warn('检查初始化状态失败', e);
+            }
+            loadIcons();
+            updateAuthButton();
+        }
+
+        checkInitAndLoad();
+    </script>
+</body>
+</html>
