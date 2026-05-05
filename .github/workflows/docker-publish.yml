@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       dockerhub_tag:
-        description: 'Docker Hub tag (e.g., latest, v1.0.0)'
+        description: 'Docker Hub tag (e.g., v1.0.0, 0.1.3)'
         required: true
         default: 'latest'
+      push_latest:
+        description: 'Also push as latest? (true/false)'
+        required: true
+        default: 'true'
 
 env:
   GHCR_REGISTRY: ghcr.io
@@ -70,6 +74,7 @@ jobs:
           tags: |
             ${{ steps.meta-ghcr.outputs.tags }}
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ inputs.dockerhub_tag }}
+            ${{ inputs.push_latest == 'true' && format('{0}/{1}:latest', env.DOCKERHUB_REGISTRY, env.DOCKERHUB_IMAGE_NAME) || '' }}
           labels: |
             ${{ steps.meta-ghcr.outputs.labels }}
           platforms: linux/amd64,linux/arm64
