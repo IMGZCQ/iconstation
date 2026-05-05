@@ -298,6 +298,26 @@ type UploadMergeRequest struct {
 	FileName string `json:"fileName"`
 }
 
+func getUniqueFileName(fileName string, dir string) (string, bool) {
+	ext := filepath.Ext(fileName)
+	name := strings.TrimSuffix(fileName, ext)
+	path := filepath.Join(dir, fileName)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fileName, false
+	}
+
+	for i := 1; i <= 999; i++ {
+		newName := fmt.Sprintf("%s_%d%s", name, i, ext)
+		path := filepath.Join(dir, newName)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return newName, true
+		}
+	}
+
+	return fileName, false
+}
+
 func uploadMerge(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -311,7 +331,8 @@ func uploadMerge(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uploadDir := filepath.Join(chunksDir, req.UploadID)
-	dstPath := filepath.Join(userDataDir, req.FileName)
+	actualFileName, renamed := getUniqueFileName(req.FileName, userDataDir)
+	dstPath := filepath.Join(userDataDir, actualFileName)
 
 	outFile, err := os.Create(dstPath)
 	if err != nil {
@@ -338,7 +359,11 @@ func uploadMerge(w http.ResponseWriter, r *http.Request) {
 	}
 
 	os.RemoveAll(uploadDir)
-	sendJSON(w, map[string]interface{}{"success": true, "path": dstPath})
+	if renamed {
+		sendJSON(w, map[string]interface{}{"success": true, "path": dstPath, "renamed": true, "message": fmt.Sprintf("文件名已存在,已自动改名为%s", actualFileName)})
+	} else {
+		sendJSON(w, map[string]interface{}{"success": true, "path": dstPath})
+	}
 }
 
 type RenameRequest struct {
@@ -359,19 +384,24 @@ func renameIcon(w http.ResponseWriter, r *http.Request) {
 	}
 
 	oldPath := filepath.Join(userDataDir, req.OldName)
-	newPath := filepath.Join(userDataDir, req.NewName)
-
 	if _, err := os.Stat(oldPath); os.IsNotExist(err) {
 		sendJSON(w, map[string]interface{}{"success": false, "message": "File not found"})
 		return
 	}
+
+	actualNewName, renamed := getUniqueFileName(req.NewName, userDataDir)
+	newPath := filepath.Join(userDataDir, actualNewName)
 
 	if err := os.Rename(oldPath, newPath); err != nil {
 		sendJSON(w, map[string]interface{}{"success": false, "message": "Failed to rename"})
 		return
 	}
 
-	sendJSON(w, map[string]interface{}{"success": true})
+	if renamed {
+		sendJSON(w, map[string]interface{}{"success": true, "renamed": true, "message": fmt.Sprintf("文件名已存在,已自动改名为%s", actualNewName)})
+	} else {
+		sendJSON(w, map[string]interface{}{"success": true})
+	}
 }
 
 type DeleteRequest struct {

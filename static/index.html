@@ -516,7 +516,7 @@
 
         .toast {
             position: fixed;
-            top: 2rem;
+            top: 4rem;
             right: 2rem;
             background: rgba(0, 240, 255, 0.08);
             color: var(--primary);
@@ -1229,9 +1229,7 @@
                 document.getElementById('iconGrid').innerHTML = 
                     `<div class="no-results">
                         <p>⚠️ 加载失败</p>
-                        <p style="font-size: 0.9rem; margin-top: 1rem;">请使用本地服务器打开此页面,例如:</p>
-                        <p style="font-size: 0.9rem; color: #8b5cf6; margin-top: 0.5rem;">python -m http.server 8000</p>
-                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">然后访问: http://localhost:8000/icon-viewer.html</p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem;">暂时没有任何图标数据</p>
                     </div>`;
             }
         }
@@ -1516,11 +1514,7 @@
             let actualUrl = img.src;
 
             if (actualUrl.includes('/deskdata/user_icon/')) {
-                const parts = actualUrl.split('/deskdata/user_icon/');
-                if (parts.length > 1) {
-                    actualUrl = '/deskdata/user_icon/' + parts.pop();
-                    actualUrl = decodeURIComponent(actualUrl);
-                }
+                actualUrl = decodeURIComponent(actualUrl);
             }
             
             if (navigator.clipboard && window.isSecureContext) {
@@ -1702,6 +1696,9 @@
                     const result = await uploadFileChunked(file);
                     if (result.success) {
                         successCount++;
+                        if (result.renamed) {
+                            showToast(result.message || `文件名已存在,已自动改名为${result.path.split('/').pop()}`);
+                        }
                     } else {
                         failCount++;
                         console.error(`上传 ${file.name} 失败:`, result.message || result.error);
@@ -1713,7 +1710,11 @@
             }
 
             if (successCount > 0) {
-                showToast(`✓ 成功上传 ${successCount} 个文件` + (failCount > 0 ? `，失败 ${failCount} 个` : ''));
+                if (failCount > 0) {
+                    showToast(`✓ 成功上传 ${successCount} 个文件，失败 ${failCount} 个`);
+                } else {
+                    showToast(`✓ 成功上传 ${successCount} 个文件`);
+                }
                 loadIcons();
             } else {
                 showToast(`✗ 上传失败 ${failCount} 个文件`);
@@ -1887,7 +1888,11 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    showToast('✓ 重命名成功');
+                    if (result.renamed) {
+                        showToast(result.message || '文件名已存在,已自动改名');
+                    } else {
+                        showToast('✓ 重命名成功');
+                    }
                     loadIcons(false);
                 } else {
                     showToast('✗ 重命名失败: ' + (result.message || '未知错误'));
