@@ -16,6 +16,7 @@
 | 📋 一键复制  | 支持直接使用，点击即可复制    |
 | 📤 自上传   | 用户可自上传图标，个性化收集管理 |
 | 💾 数据持久化 | 用户数据本地安全存储       |
+| 🖥️ 全平台支持 | Windows amd64, Linux amd64/arm64, macOS amd64/arm64 |
 
 ***
 
@@ -100,7 +101,7 @@ docker-compose up -d
 
 ![2](https://github.com/user-attachments/assets/88eedbb8-7f92-4aa9-b49a-d2a90f8f5464)
 
-## ![1](https://github.com/user-attachments/assets/fb015080-dc63-4a85-80fd-5f6ad25f5630)
+## ![1](https://github.com/user-attachments/assets/fb015080-dc63-4a85-80fd-5f6ad25f5630)  
 
 ## 📝 开源协议
 
