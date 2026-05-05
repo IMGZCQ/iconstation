@@ -26,13 +26,11 @@
 ```yaml
 services:
   iconstation:
-    container_name: iconstation
-    image: imgzcq/iconstation
-    ports:
-      - "9168:9168"
-    volumes:
-      - ./UserData:/app/UserData
-    restart: always
+    container_name: iconstation         # 容器名称
+    image: imgzcq/iconstation           # Docker镜像名称
+    ports: [9168:9168]                  # 访问端口:内部端口
+    volumes: [./UserData:/app/UserData] # 用户图标持久化目录
+    restart: always                     # 开机自启
 ```
 
 #### 2️⃣ 启动服务
