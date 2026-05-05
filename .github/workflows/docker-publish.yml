@@ -6,7 +6,7 @@ on:
       dockerhub_tag:
         description: 'Docker Hub tag (e.g., latest, v1.0.0)'
         required: true
-        default: 'test'
+        default: 'latest'
 
 env:
   GHCR_REGISTRY: ghcr.io
@@ -68,7 +68,6 @@ jobs:
           tags: |
             ${{ steps.meta-ghcr.outputs.tags }}
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ inputs.dockerhub_tag }}
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ github.sha }}
           labels: |
             ${{ steps.meta-ghcr.outputs.labels }}
           platforms: linux/amd64,linux/arm64
