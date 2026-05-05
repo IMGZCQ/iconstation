@@ -1,11 +1,13 @@
 package main
 
 import (
+	"embed"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -15,8 +17,10 @@ import (
 	"time"
 )
 
+//go:embed static
+var staticFS embed.FS
+
 var (
-	staticDir    = "./static"
 	userDataDir  = "./UserData/icons"
 	chunksDir    = "./UserData/chunks"
 	userDataRoot = "./UserData"
@@ -41,22 +45,19 @@ func main() {
 	os.MkdirAll(chunksDir, 0755)
 	os.MkdirAll(userDataRoot, 0755)
 
-	absStatic, _ := filepath.Abs(staticDir)
-	log.Printf("Static directory: %s", absStatic)
-
-	if _, err := os.Stat(staticDir + "/index.html"); os.IsNotExist(err) {
-		log.Printf("WARNING: index.html not found in %s", staticDir)
-	} else {
-		log.Printf("index.html found")
+	// 创建静态文件系统（去掉 static 前缀）
+	staticSubFS, err := fs.Sub(staticFS, "static")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s", r.Method, r.URL.Path)
 		if r.URL.Path == "/" {
-			http.ServeFile(w, r, staticDir+"/index.html")
+			http.ServeFileFS(w, r, staticSubFS, "index.html")
 			return
 		}
-		http.FileServer(http.Dir(staticDir)).ServeHTTP(w, r)
+		http.FileServer(http.FS(staticSubFS)).ServeHTTP(w, r)
 	})
 
 	http.HandleFunc("/api/check-init", checkInit)
