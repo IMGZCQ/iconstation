@@ -1,13 +1,20 @@
+FROM golang:1.26-alpine AS builder
+
+WORKDIR /build
+
+COPY go.mod ./
+RUN go mod download
+
+COPY main.go ./
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o iconstation main.go
+
 FROM alpine:latest
 WORKDIR /app
 
-# 复制二进制文件（运行时通过参数指定具体文件）
-ARG BIN_FILE
-COPY ${BIN_FILE} ./iconstation
+COPY --from=builder /build/iconstation ./
 COPY static /app/static
 COPY icon.png /usr/share/icons/icon.png
 
-# 一次性创建目录 + 装证书时区
 RUN mkdir -p /app/UserData/icons /app/UserData/chunks \
     && apk add --no-cache ca-certificates tzdata
 
