@@ -4,7 +4,8 @@
 
 > 私有化图标库，集成多个图标源，支持一键复制使用；用户可自上传图标进行收集管理。
 
-![IconStation Preview](https://github.com/user-attachments/assets/f0f9e6f1-a011-42ed-b8de-b97e5af33bed)
+<img width="1280" height="640" src="https://github.com/user-attachments/assets/5598c9ca-cc6c-4682-9405-c115db928cb2" />
+
 
 ***
 
