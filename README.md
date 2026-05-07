@@ -7,7 +7,7 @@
 
 
 <img width="1280" height="640" src="https://github.com/user-attachments/assets/0bf7ba21-7e8a-4367-99a6-bd237287ee22" />
-<img width="1543" height="1028" alt="PixPin_2026-05-07_11-24-43" src="https://github.com/user-attachments/assets/f6833fae-c239-48b1-bb05-27263f73d216" />
+
 
 ***
 
@@ -26,6 +26,10 @@
 | 📤 自上传   | 用户可自上传图标，个性化收集管理 |
 | 💾 数据持久化 | 用户数据本地安全存储       |
 | 🖥️ 全平台支持 | Windows amd64, Linux amd64/arm64, macOS amd64/arm64 |
+
+***
+
+<img width="1543" height="1028" alt="PixPin_2026-05-07_11-24-43" src="https://github.com/user-attachments/assets/f6833fae-c239-48b1-bb05-27263f73d216" />  
 
 ***
 
