@@ -1065,8 +1065,8 @@
 
         .tooltip {
             position: absolute;
-            top: auto;
-            bottom: 120%;
+            top: 120%;
+            bottom: auto;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 30, 60, 0.9);
@@ -1092,18 +1092,18 @@
         .tooltip::after {
             content: "";
             position: absolute;
-            top: 100%;
+            top: -12px;
             left: 50%;
             transform: translateX(-50%);
             border-width: 6px;
             border-style: solid;
-            border-color: rgba(0, 240, 255, 0.3) transparent transparent transparent;
+            border-color: transparent transparent rgba(0, 240, 255, 0.3) transparent;
         }
 
         .tooltip-container:hover .tooltip {
             visibility: visible;
             opacity: 1;
-            transform: translateX(-50%) translateY(-4px);
+            transform: translateX(-50%) translateY(4px);
         }
 
         .checkbox-wrapper {
@@ -1708,7 +1708,7 @@
                 <img src="icon.png" class="navbar-icon" alt="Icon">
                 <div class="navbar-title-text">
                     <div class="navbar-title-main">图标空间站</div>
-                    <div class="navbar-title-sub">Icon Station v0.1.5</div>
+                    <div class="navbar-title-sub">Icon Station v0.1.6</div>
                 </div>
             </div>
             <button id="authBtn" class="auth-btn" onclick="handleAuth()">
@@ -1723,7 +1723,7 @@
                     <button id="uploadBtn" class="upload-btn">
                         <span>📤</span> 上传
                     </button>
-                    <div class="tooltip">也可以把图标放到以下目录直接管理：\n【 Docker Compose 目录里的 UserData/icons 】</div>
+                    <div class="tooltip">也可以在此目录直接管理：<br>【 UserData/icons 】</div>
                 </div>
                 <div class="checkbox-wrapper">
                     <button class="toggle-btn" id="toggleFilterBtn">
@@ -1794,6 +1794,7 @@
         </div>
     </div>
 
+    <script src="common.js"></script>
     <script>
         if (typeof __webpack_require__ !== 'undefined') {
             __webpack_require__.p = '';
@@ -1929,7 +1930,7 @@
                 return;
             }
 
-            grid.innerHTML = pageIcons.map(icon => {
+            grid.innerHTML = pageIcons.map((icon, index) => {
                 const nameWithoutExt = icon.name.replace(/\.png$/i, '');
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
@@ -1950,6 +1951,9 @@
                              data-name="${safeName}"
                              data-url="${safeUrl}"
                              data-fallback-index="0"
+                             data-global-index="${start + index}"
+                             onclick="previewIcon(event);"
+                             style="cursor: pointer;"
                              onerror="handleImageError(this)">
                         <div class="icon-name"><span>${iconEmoji}</span> ${nameWithoutExt}</div>
                         <div class="icon-buttons" data-name="${safeName}" data-uploaded="${icon.isUploaded}">
@@ -1962,6 +1966,21 @@
             }).join('');
 
             renderPagination();
+        }
+
+        function previewIcon(event) {
+            const img = event.target;
+            const globalIndex = parseInt(img.getAttribute('data-global-index'));
+            
+            const iconUrls = filteredIcons.map(icon => {
+                const isMac = !!icon.isMacIcon;
+                const isUser = !!icon.isUploaded;
+                return isUser
+                    ? `/deskdata/user_icon/${encodeURIComponent(icon.name)}`
+                    : (isMac ? icon.download_url : icon.download_url);
+            });
+            
+            showIconPreview(iconUrls, globalIndex);
         }
 
         function renderPagination() {
@@ -2610,6 +2629,8 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            if (window.isPreviewActive) return;
+            
             const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
