@@ -6,7 +6,7 @@
     <link rel="icon" href="icon.png" type="image/png">
     <title>图标空间站</title>
     <style>
-        * {
+         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -21,11 +21,54 @@
             --border-color: rgba(25, 52, 75, 0.3);
             --text-secondary: #94a3b8;
             --glass-border: rgba(255, 255, 255, 0.1);
+            --body-bg-start: #0a0e27;
+            --body-bg-mid: #1a1040;
+            --body-bg-end: #0f172a;
+            --grid-color: rgba(0, 240, 255, 0.03);
+            --glow-color: rgba(0, 240, 255, 0.1);
+            --text-primary: #ffffff;
+            --icon-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="light"] {
+            --primary: #1e40af;
+            --secondary: #7c3aed;
+            --accent: #dc2626;
+            --card-bg: #ffffff;
+            --dark-bg: #f8fafc;
+            --border-color: rgba(226, 232, 240, 1);
+            --text-secondary: #6b7280;
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --body-bg-start: #ffffff;
+            --body-bg-mid: #f8fafc;
+            --body-bg-end: #ffffff;
+            --grid-color: rgba(0, 0, 0, 0);
+            --glow-color: rgba(0, 0, 0, 0);
+            --text-primary: #1e293b;
+            --icon-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        :root[data-theme="dark"] {
+            --primary: #38bdf8;
+            --secondary: #a78bfa;
+            --accent: #fb7185;
+            --card-bg: #1f2937;
+            --dark-bg: #111827;
+            --border-color: rgba(75, 85, 99, 0.5);
+            --text-secondary: #d1d5db;
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --body-bg-start: #000000;
+            --body-bg-mid: #0f172a;
+            --body-bg-end: #000000;
+            --grid-color: rgba(56, 189, 248, 0);
+            --glow-color: rgba(56, 189, 248, 0);
+            --text-primary: #ffffff;
+            --icon-bg: rgba(255, 255, 255, 0.05);
         }
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1040 50%, #0f172a 100%);
+            background: linear-gradient(135deg, var(--body-bg-start) 0%, var(--body-bg-mid) 50%, var(--body-bg-end) 100%);
             min-height: 100vh;
             padding: 0;
             overflow-x: hidden;
@@ -40,8 +83,8 @@
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 50px 50px;
             z-index: 0;
             animation: gridMove 20s linear infinite;
@@ -59,9 +102,9 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.1) 0%, transparent 30%),
-                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 30%),
-                        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 40%);
+            background: radial-gradient(circle at 20% 20%, var(--glow-color) 0%, transparent 30%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 30%),
+                        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 40%);
             z-index: 0;
             animation: glowMove 15s ease-in-out infinite;
             pointer-events: none;
@@ -86,11 +129,19 @@
             pointer-events: none;
         }
 
+        :root[data-theme="light"] .dynamic-bg {
+            opacity: 0.1;
+        }
+
+        :root[data-theme="dark"] .dynamic-bg {
+            opacity: 0.3;
+        }
+
 
         .container {
             max-width: 1500px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 0 0.5rem;
             position: relative;
             z-index: 1;
             width: 100%;
@@ -109,6 +160,16 @@
                         inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
+        :root[data-theme="light"] .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        :root[data-theme="dark"] .navbar {
+            background: rgba(17, 24, 39, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
         .navbar-content {
             display: flex;
             justify-content: space-between;
@@ -116,29 +177,45 @@
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 1rem;
+            gap: 1rem;
         }
 
         .navbar-title {
             display: flex;
             align-items: center;
             gap: .5rem;
+            flex-shrink: 0;
         }
 
         .navbar-icon {
-            width: 54px;
+            width: 44px;
             border-radius: 0px;
             box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        :root[data-theme="light"] .navbar-icon {
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.6);
+            border: 2px solid rgba(30, 64, 175, 0.7);
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        :root[data-theme="dark"] .navbar-icon {
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
         }
 
         .navbar-title-text {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            min-width: 0;
         }
 
         .navbar-title-main {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 700;
             background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 50%, #ec4899 100%);
             -webkit-background-clip: text;
@@ -146,12 +223,14 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .navbar-title-sub {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             line-height: 1.5;
+            white-space: nowrap;
         }
 
         .back-btn {
@@ -193,6 +272,9 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(15px);
             box-shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 0.9rem;
         }
 
         .auth-btn:hover {
@@ -214,10 +296,10 @@
 
         .search-box input {
             width: 100%;
-            padding: 16px 55px 16px 24px;
-            font-size: 15px;
+            padding: 12px 45px 12px 16px;
+            font-size: 14px;
             border: 2px solid rgba(0, 240, 255, 0.3);
-            border-radius: 18px;
+            border-radius: 16px;
             outline: none;
             background: rgba(20, 30, 60, 0.6);
             color: white;
@@ -241,11 +323,11 @@
 
         .search-icon {
             position: absolute;
-            right: 22px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--primary);
-            font-size: 20px;
+            font-size: 18px;
             filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
         }
 
@@ -305,34 +387,37 @@
         }
 
         .content {
-            padding: 0.5rem;
+            padding: 0.5rem 0.25rem;
             position: relative;
             width: 100%;
             box-sizing: border-box;
-            overflow-x: auto;
+            overflow-x: visible;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 1rem;
+            gap: 0.75rem;
             margin-bottom: 1rem;
             width: 100%;
             box-sizing: border-box;
         }
 
         .icon-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
             backdrop-filter: blur(20px) saturate(180%);
             border-radius: 16px;
-            padding: 1.2rem;
+            padding: 1rem;
             text-align: center;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
                         inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
         .icon-card::before {
@@ -355,30 +440,46 @@
 
         .icon-card:hover {
             transform: translateY(-8px) scale(1.02);
-            border-color: rgba(0, 240, 255, 0.4);
+            border-color: var(--primary);
             box-shadow: 0 20px 50px rgba(0, 240, 255, 0.15),
                         0 0 30px rgba(0, 240, 255, 0.08),
                         inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        :root[data-theme="light"] .icon-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        :root[data-theme="light"] .icon-card:hover {
+            box-shadow: 0 12px 30px rgba(30, 64, 175, 0.15);
+        }
+
+        :root[data-theme="dark"] .icon-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="dark"] .icon-card:hover {
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
         .icon-card:hover::before {
             opacity: 1;
             animation: shimmer 1.5s ease-in-out;
         }
-
-        @keyframes shimmer {
+         @keyframes shimmer {
             0% { transform: translateX(-100%) rotate(45deg); }
             100% { transform: translateX(100%) rotate(45deg); }
         }
 
         .icon-image {
             width: 100%;
-            height: 130px;
+            aspect-ratio: 1/1;
             object-fit: contain;
             border-radius: 12px;
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--icon-bg);
             padding: 0.8rem;
             transition: all 0.4s;
+            flex-shrink: 0;
         }
 
         .icon-card:hover .icon-image {
@@ -386,21 +487,36 @@
             filter: drop-shadow(0 8px 20px rgba(0, 240, 255, 0.3));
         }
 
+        :root[data-theme="light"] .icon-card:hover .icon-image {
+            filter: drop-shadow(0 8px 20px rgba(30, 64, 175, 0.2));
+        }
+
+        :root[data-theme="dark"] .icon-card:hover .icon-image {
+            filter: drop-shadow(0 8px 20px rgba(56, 189, 248, 0.2));
+        }
+
         .icon-name {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--primary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1.5;
-            max-height: 1.5rem;
-            margin-bottom: 1rem;
+            line-height: 1.4;
             font-weight: 600;
             text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            min-height: 1.4rem;
+        }
+
+        :root[data-theme="light"] .icon-name {
+            text-shadow: none;
+        }
+
+        :root[data-theme="dark"] .icon-name {
+            text-shadow: none;
         }
 
         .icon-name span {
-            font-size: 18px;
+            font-size: 16px;
             margin-right: 4px;
         }
 
@@ -408,6 +524,7 @@
             display: flex;
             gap: 0.25rem;
             justify-content: center;
+            margin-top: auto;
         }
 
         .icon-btn {
@@ -419,12 +536,22 @@
             color: var(--primary);
             border-radius: 10px;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(10px);
             letter-spacing: 0.5px;
             white-space: nowrap;
+        }
+
+        :root[data-theme="light"] .icon-btn {
+            border-color: rgba(30, 64, 175, 0.3);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        :root[data-theme="dark"] .icon-btn {
+            border-color: rgba(56, 189, 248, 0.3);
+            background: rgba(56, 189, 248, 0.08);
         }
 
         .icon-btn:hover {
@@ -451,21 +578,21 @@
         .pagination {
             justify-content: center;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
         .pagination button {
-            padding: 0.8rem 1.5rem;
+            padding: 0.6rem 1rem;
             border: 1px solid rgba(0, 240, 255, 0.3);
             background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(20, 30, 60, 0.3) 100%);
             color: var(--primary);
             border-radius: 12px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 90px;
+            min-width: 50px;
             backdrop-filter: blur(15px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
@@ -488,7 +615,7 @@
         }
 
         .pagination .page-info {
-            padding: 0.8rem 1.5rem;
+            padding: 0.6rem 1rem;
             background: linear-gradient(135deg, rgba(20, 30, 60, 0.7) 0%, rgba(20, 30, 60, 0.4) 100%);
             border-radius: 12px;
             font-weight: bold;
@@ -497,6 +624,278 @@
             backdrop-filter: blur(15px);
             box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
             text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            min-width: 70px;
+            text-align: center;
+        }
+
+        :root[data-theme="light"] .pagination button {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(30, 64, 175, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        :root[data-theme="light"] .pagination button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.35);
+        }
+
+        :root[data-theme="light"] .pagination button:disabled {
+            background: rgba(241, 245, 249, 0.8);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: rgba(107, 114, 128, 0.4);
+        }
+
+        :root[data-theme="light"] .pagination .page-info {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(30, 64, 175, 0.2);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            text-shadow: none;
+        }
+
+        :root[data-theme="dark"] .pagination button {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 100%);
+            color: #0f172a;
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
+        }
+
+        :root[data-theme="dark"] .pagination button:disabled {
+            background: rgba(17, 24, 39, 0.8);
+            border-color: rgba(255, 255, 255, 0.05);
+            color: rgba(148, 163, 184, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination .page-info {
+            background: rgba(17, 24, 39, 0.9);
+            border-color: rgba(56, 189, 248, 0.2);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            text-shadow: none;
+        }
+
+        .pagination-container {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            backdrop-filter: blur(15px);
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            white-space: nowrap;
+        }
+
+        .pagination-count {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .pagination-pagesize {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-select {
+            background: rgba(20, 30, 60, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 8px;
+            color: var(--primary);
+            padding: 0.3rem 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .pagination-current {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            min-width: 45px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(20, 30, 60, 0.3) 100%);
+            color: var(--primary);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            color: #0f172a;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.4);
+            border-color: transparent;
+        }
+
+        .pagination-btn:disabled {
+            background: rgba(20, 30, 60, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: rgba(148, 163, 184, 0.4);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pagination-jump {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .pagination-input {
+            width: 50px;
+            padding: 0.4rem;
+            background: rgba(20, 30, 60, 0.6);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .pagination-go-btn {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .pagination-go-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2);
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+
+        :root[data-theme="light"] .pagination-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        :root[data-theme="light"] .pagination-select {
+            background: rgba(241, 245, 249, 0.9);
+            border-color: rgba(30, 64, 175, 0.2);
+            color: var(--primary);
+        }
+
+        :root[data-theme="light"] .pagination-select option {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        :root[data-theme="light"] .pagination-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(30, 64, 175, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        :root[data-theme="light"] .pagination-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.35);
+        }
+
+        :root[data-theme="light"] .pagination-btn:disabled {
+            background: rgba(241, 245, 249, 0.8);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: rgba(107, 114, 128, 0.4);
+        }
+
+        :root[data-theme="light"] .pagination-input {
+            background: rgba(241, 245, 249, 0.9);
+            border-color: rgba(30, 64, 175, 0.2);
+            color: #1e293b;
+        }
+
+        :root[data-theme="light"] .pagination-go-btn {
+            background: rgba(30, 64, 175, 0.08);
+            border-color: rgba(30, 64, 175, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination-container {
+            background: rgba(17, 24, 39, 0.9);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        :root[data-theme="dark"] .pagination-select {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination-select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        :root[data-theme="dark"] .pagination-btn {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 100%);
+            color: #0f172a;
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
+        }
+
+        :root[data-theme="dark"] .pagination-btn:disabled {
+            background: rgba(17, 24, 39, 0.8);
+            border-color: rgba(255, 255, 255, 0.05);
+            color: rgba(148, 163, 184, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination-input {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        :root[data-theme="dark"] .pagination-go-btn {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.3);
         }
 
         .loading {
@@ -509,18 +908,19 @@
 
         .no-results {
             text-align: center;
-            padding: 5rem;
+            padding: 5rem 2rem;
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1rem;
+            grid-column: 1/-1;
         }
 
         .toast {
             position: fixed;
-            top: 4rem;
-            right: 2rem;
+            top: 5rem;
+            right: 1rem;
             background: rgba(0, 240, 255, 0.08);
             color: var(--primary);
-            padding: 1rem 1.8rem;
+            padding: 0.8rem 1.2rem;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             z-index: 9999;
@@ -528,6 +928,8 @@
             font-weight: 600;
             backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 240, 255, 0.3);
+            max-width: calc(100vw - 2rem);
+            font-size: 0.9rem;
         }
 
         @keyframes slideIn {
@@ -541,64 +943,63 @@
             }
         }
 
-        @media (max-width: 1600px) and (min-width: 1400px) {
+        @media (max-width: 1500px) and (min-width: 1300px) {
             .grid {
                 grid-template-columns: repeat(7, 1fr);
-                gap: 1rem;
+                gap: 0.75rem;
             }
         }
 
-        @media (max-width: 1400px) and (min-width: 1200px) {
+        @media (max-width: 1300px) and (min-width: 1100px) {
             .grid {
                 grid-template-columns: repeat(6, 1fr);
-                gap: 1rem;
+                gap: 0.75rem;
             }
         }
 
-        @media (max-width: 1200px) and (min-width: 1000px) {
+        @media (max-width: 1100px) and (min-width: 900px) {
             .grid {
                 grid-template-columns: repeat(5, 1fr);
-                gap: 1rem;
+                gap: 0.75rem;
             }
         }
 
-        @media (max-width: 1000px) and (min-width: 760px) {
+        @media (max-width: 900px) and (min-width: 700px) {
             .grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 0.9rem;
+                gap: 0.75rem;
             }
         }
 
-        @media (max-width: 760px) and (min-width: 540px) {
+        @media (max-width: 700px) and (min-width: 480px) {
             .grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.8rem;
+                gap: 0.75rem;
             }
         }
 
-        @media (max-width: 540px) and (min-width: 380px) {
+        @media (max-width: 480px) and (min-width: 300px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.7rem;
+                gap: 0.75rem;
             }
         }
 
-        @media (max-width: 380px) {
+        @media (max-width: 300px) {
             .grid {
                 grid-template-columns: repeat(1, 1fr);
-                gap: 0.6rem;
+                gap: 0.75rem;
             }
         }
 
         @media (max-width: 768px) {
             .content {
-                padding: 0.5rem;
+                padding: 0.5rem 0.25rem;
             }
 
             .navbar-content {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
+                gap: 0.5rem;
+                padding: 0 0.75rem;
             }
 
             .navbar-title {
@@ -606,7 +1007,7 @@
             }
 
             .icon-image {
-                height: 80px;
+                padding: 0.5rem;
             }
 
             .control-panel {
@@ -615,18 +1016,27 @@
             }
 
             .search-box {
-                min-width: 150px;
+                min-width: 140px;
                 max-width: 100%;
+            }
+            
+            .navbar-title-main {
+                font-size: 1rem;
+            }
+            
+            .auth-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
             }
         }
 
         @media (max-width: 540px) {
             .container {
-                padding: 0 0.5rem;
+                padding: 0 0.25rem;
             }
 
             .content {
-                padding: 0.3rem;
+                padding: 0.25rem;
             }
 
             .grid {
@@ -634,7 +1044,17 @@
             }
 
             .icon-card {
-                padding: 0.8rem;
+                padding: 0.75rem;
+                gap: 0.5rem;
+            }
+            
+            .icon-name {
+                font-size: 0.75rem;
+            }
+            
+            .icon-btn {
+                font-size: 0.9rem;
+                padding: 0.35rem 0.25rem;
             }
         }
 
@@ -645,43 +1065,45 @@
 
         .tooltip {
             position: absolute;
-            top: 100%;
-            left: 110%;
-            transform: translateX(10%);
-            background: rgba(20, 30, 60, 0.5);
+            top: auto;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 60, 0.9);
             color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
             border: 1px solid rgba(0, 240, 255, 0.3);
             backdrop-filter: blur(12px);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-align: center;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            white-space: pre-line;
             visibility: hidden;
             opacity: 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             z-index: 1000;
             pointer-events: none;
+            width: max-content;
+            max-width: 240px;
+            line-height: 1.4;
         }
 
         .tooltip::after {
             content: "";
             position: absolute;
-            bottom: 100%;
-            left: 30%;
+            top: 100%;
+            left: 50%;
             transform: translateX(-50%);
-            border-width: 8px;
+            border-width: 6px;
             border-style: solid;
-            border-color: transparent transparent rgba(0, 240, 255, 0.3) transparent;
-            filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.3));
+            border-color: rgba(0, 240, 255, 0.3) transparent transparent transparent;
         }
 
         .tooltip-container:hover .tooltip {
             visibility: visible;
             opacity: 1;
-            transform: translateX(-50%) translateY(8px);
+            transform: translateX(-50%) translateY(-4px);
         }
 
         .checkbox-wrapper {
@@ -692,7 +1114,7 @@
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
             border: 1px solid rgba(0, 240, 255, 0.3);
             border-radius: 10px;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 0.8rem;
             color: var(--primary);
             font-size: 0.9rem;
             font-weight: 600;
@@ -702,6 +1124,7 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            white-space: nowrap;
         }
 
         .toggle-btn:hover {
@@ -722,19 +1145,19 @@
         .checkbox-content {
             display: none;
             position: absolute;
-            top: 100%;
+            top: 110%;
             left: 0;
-            margin-top: 0.5rem;
-            background: rgba(20, 30, 60, 0.95);
+            margin-top: 0.25rem;
+            background: rgba(20, 30, 60, 0.98);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 240, 255, 0.3);
             border-radius: 12px;
-            padding: 1rem;
+            padding: 0.75rem;
             flex-direction: column;
             gap: 0.5rem;
             min-width: 150px;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             animation: fadeIn 0.2s ease;
         }
 
@@ -755,8 +1178,8 @@
 
         .cyberpunk-checkbox {
             appearance: none;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border: 2px solid rgba(0, 240, 255, 0.5);
             border-radius: 6px;
             background: rgba(20, 30, 60, 0.5);
@@ -776,9 +1199,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            width: 12px;
-            height: 12px;
-            border-radius: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
         }
@@ -793,7 +1216,7 @@
         }
 
         .cyberpunk-checkbox-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             cursor: pointer;
             user-select: none;
@@ -810,32 +1233,45 @@
         .control-panel {
             background: rgba(20, 30, 60, 0.4);
             backdrop-filter: blur(25px);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 0.5rem;
             margin: 0.5rem;
-            border: 1px solid rgba(0, 240, 255, 0.2);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 1;
             width: 100%;
             box-sizing: border-box;
         }
 
+        :root[data-theme="light"] .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        :root[data-theme="dark"] .control-panel {
+            background: rgba(17, 24, 39, 0.9);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
         .upload-btn {
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
             border: 2px solid rgba(0, 240, 255, 0.4);
             color: var(--primary);
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 0.5rem 0.8rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.5rem;
             font-weight: 700;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(15px);
             box-shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
+            white-space: nowrap;
+            font-size: 0.9rem;
         }
 
         .upload-btn:hover {
@@ -850,7 +1286,7 @@
             border: 2px solid rgba(0, 240, 255, 0.3);
             color: white;
             border-radius: 12px;
-            padding: 0.7rem 1rem;
+            padding: 0.6rem 0.8rem;
             backdrop-filter: blur(15px);
             font-weight: 600;
             cursor: pointer;
@@ -859,6 +1295,7 @@
             min-width: 120px;
             max-width: 100%;
             box-sizing: border-box;
+            font-size: 0.85rem;
         }
 
         .cdn-select:hover,
@@ -873,15 +1310,208 @@
             color: white;
         }
 
+        :root[data-theme="light"] .cdn-select option {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        :root[data-theme="dark"] .cdn-select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        .theme-select {
+            background: rgba(20, 30, 60, 0.6);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            color: white;
+            border-radius: 12px;
+            padding: 0.6rem 0.8rem;
+            backdrop-filter: blur(15px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            min-width: 120px;
+            max-width: 100%;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .theme-select:hover,
+        .theme-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
+            outline: none;
+        }
+
+        .theme-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        :root[data-theme="light"] .theme-select {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(30, 64, 175, 0.3);
+            color: #1e293b;
+        }
+
+        :root[data-theme="light"] .theme-select option {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        :root[data-theme="dark"] .theme-select {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(56, 189, 248, 0.3);
+            color: #e2e8f0;
+        }
+
+        :root[data-theme="dark"] .theme-select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        :root[data-theme="light"] .search-box input {
+            background: rgba(255, 255, 255, 0.8);
+            color: #1e293b;
+            border-color: rgba(30, 64, 175, 0.3);
+        }
+
+        :root[data-theme="light"] .search-box input::placeholder {
+            color: rgba(107, 114, 128, 0.7);
+        }
+
+        :root[data-theme="light"] .dialog-input {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            border-color: rgba(30, 64, 175, 0.3);
+        }
+
+        :root[data-theme="light"] .dialog-input::placeholder {
+            color: rgba(107, 114, 128, 0.6);
+        }
+
+        :root[data-theme="light"] .icon-name {
+            text-shadow: none;
+        }
+
+        :root[data-theme="light"] .page-info {
+            text-shadow: none;
+        }
+
+        :root[data-theme="light"] .navbar-title-main {
+            text-shadow: none;
+        }
+
+        :root[data-theme="dark"] .search-box input {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        :root[data-theme="dark"] .dialog-input {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        :root[data-theme="light"] body {
+            color: var(--text-primary);
+        }
+
+        :root[data-theme="light"] .upload-btn {
+            background: rgba(30, 64, 175, 0.08);
+            border-color: rgba(30, 64, 175, 0.3);
+            color: var(--primary);
+        }
+
+        :root[data-theme="dark"] .upload-btn {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.3);
+            color: var(--primary);
+        }
+
+        :root[data-theme="light"] .auth-btn {
+            background: rgba(30, 64, 175, 0.1);
+            border-color: rgba(30, 64, 175, 0.3);
+            color: var(--primary);
+        }
+
+        :root[data-theme="dark"] .auth-btn {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.3);
+            color: var(--primary);
+        }
+
+        :root[data-theme="light"] .toggle-btn {
+            background: rgba(30, 64, 175, 0.08);
+            border-color: rgba(30, 64, 175, 0.2);
+            color: var(--primary);
+        }
+
+        :root[data-theme="dark"] .toggle-btn {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.2);
+            color: var(--primary);
+        }
+
+        :root[data-theme="light"] .checkbox-content {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="dark"] .checkbox-content {
+            background: rgba(17, 24, 39, 0.98);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        :root[data-theme="light"] .cyberpunk-checkbox {
+            background: rgba(241, 245, 249, 0.8);
+            border-color: rgba(30, 64, 175, 0.3);
+        }
+
+        :root[data-theme="dark"] .cyberpunk-checkbox {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        :root[data-theme="light"] .cyberpunk-checkbox-label {
+            color: var(--text-primary);
+        }
+
+        :root[data-theme="light"] .dialog-box {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="dark"] .dialog-box {
+            background: rgba(17, 24, 39, 0.98);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        :root[data-theme="light"] .dialog-message {
+            color: var(--text-primary);
+        }
+
+        :root[data-theme="light"] .cancel-btn {
+            background: rgba(107, 114, 128, 0.1);
+            border-color: rgba(107, 114, 128, 0.2);
+            color: var(--text-primary);
+        }
+
+        :root[data-theme="dark"] .cancel-btn {
+            background: rgba(107, 114, 128, 0.15);
+            border-color: rgba(107, 114, 128, 0.3);
+        }
+
         .warning-msg {
             background: rgba(255, 153, 0, 0.1);
             border: 1px solid rgba(255, 153, 0, 0.3);
             color: #ff9900;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1rem;
             border-radius: 12px;
-            margin-top: 1rem;
+            margin-top: 0.75rem;
             font-weight: 600;
             backdrop-filter: blur(10px);
+            font-size: 0.85rem;
         }
 
         .dialog-overlay {
@@ -896,17 +1526,17 @@
             justify-content: center;
             z-index: 10000;
             backdrop-filter: blur(5px);
+            padding: 1rem;
         }
 
         .dialog-box {
             background: linear-gradient(135deg, rgba(10, 15, 30, 0.95) 0%, rgba(20, 30, 60, 0.95) 100%);
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 16px;
-            padding: 2rem;
-            min-width: 350px;
-            max-width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 16px 40px rgba(0, 240, 255, 0.2);
             animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -922,7 +1552,7 @@
         }
 
         .dialog-title {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--primary);
             margin-bottom: 1rem;
@@ -934,19 +1564,19 @@
 
         .dialog-message {
             color: #cbd5e1;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
         }
 
         .dialog-input-wrapper {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .dialog-input {
             width: 100%;
-            padding: 12px 16px;
-            font-size: 0.95rem;
+            padding: 10px 14px;
+            font-size: 0.9rem;
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 10px;
             outline: none;
@@ -974,13 +1604,15 @@
         }
 
         .dialog-btn {
-            padding: 0.6rem 1.5rem;
+            padding: 0.6rem 1.25rem;
             border: none;
             border-radius: 10px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex: 1;
+            text-align: center;
         }
 
         .cancel-btn {
@@ -1012,7 +1644,7 @@
 
         .confirm-btn.danger:hover {
             box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
-        }
+        } 
     </style>
     <script>
         (function() {
@@ -1076,7 +1708,7 @@
                 <img src="icon.png" class="navbar-icon" alt="Icon">
                 <div class="navbar-title-text">
                     <div class="navbar-title-main">图标空间站</div>
-                    <div class="navbar-title-sub">Icon Station v0.1.4</div>
+                    <div class="navbar-title-sub">Icon Station v0.1.5</div>
                 </div>
             </div>
             <button id="authBtn" class="auth-btn" onclick="handleAuth()">
@@ -1086,12 +1718,12 @@
     </div>
     <div class="container">
         <div class="control-panel">
-            <div style="display: flex; align-items: center; gap: 1.5rem; justify-content: center; flex-wrap: wrap; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%;">
                 <div class="tooltip-container">
                     <button id="uploadBtn" class="upload-btn">
                         <span>📤</span> 上传
                     </button>
-                    <div class="tooltip">也可以把图标放到以下目录直接管理：<br>【 Docker Compose 目录里的 UserData/icons 】</div>
+                    <div class="tooltip">也可以把图标放到以下目录直接管理：\n【 Docker Compose 目录里的 UserData/icons 】</div>
                 </div>
                 <div class="checkbox-wrapper">
                     <button class="toggle-btn" id="toggleFilterBtn">
@@ -1122,11 +1754,19 @@
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
-                    <span>加载模式</span>
+                    <span>模式</span>
                     <select id="cdnMode" class="cdn-select">
                         <option value="ghfast" selected>🟦Github加速</option>
                         <option value="cdn">🟪CDN加速</option>                        
                         <option value="raw">🟧Github原地址</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+                    <span>主题</span>
+                    <select id="themeSelect" class="theme-select">
+                        <option value="default" selected>🎨 默认</option>
+                        <option value="light">☀️ 浅色</option>
+                        <option value="dark">🌙 深色</option>
                     </select>
                 </div>
             </div>
@@ -1138,7 +1778,6 @@
             <div id="iconGrid" class="grid"></div>
             <div id="pagination" class="pagination"></div>
         </div>
-    </div>
     </div>
 
     <div id="customDialog" class="dialog-overlay" style="display: none;">
@@ -1331,12 +1970,12 @@
             
             if (totalPages <= 1) {
                 const simpleContainerHtml = `
-                    <div style="background: rgba(15, 23, 42, 0.7); border-radius: 16px; border: 1px solid rgba(0, 240, 255, 0.2); padding: 0.5rem 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; backdrop-filter: blur(15px);">
-                        <div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 1rem;">
-                            <span>共 <span style="color: var(--primary); font-weight: bold;">${filteredIcons.length}</span> 个图标</span>
-                            <span style="display: flex; align-items: center; gap: 0.5rem;">
-                                每页显示
-                                <select id="pageSizeSelect" onchange="changeIconsPerPage(this.value)" style="background: rgba(20, 30, 60, 0.8); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; color: var(--primary); padding: 0.3rem 0.5rem; font-size: 0.85rem; cursor: pointer;">
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            <span>共 <span class="pagination-count">${filteredIcons.length}</span> 个图标</span>
+                            <span class="pagination-pagesize">
+                                每页
+                                <select id="pageSizeSelect" onchange="changeIconsPerPage(this.value)" class="pagination-select">
                                     <option value="16" ${iconsPerPage === 16 ? 'selected' : ''}>16</option>
                                     <option value="24" ${iconsPerPage === 24 ? 'selected' : ''}>24</option>
                                     <option value="32" ${iconsPerPage === 32 ? 'selected' : ''}>32</option>
@@ -1348,7 +1987,7 @@
                                 个
                             </span>
                         </div>
-                        <div style="color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+                        <div class="pagination-current">
                             第 1 / 1 页
                         </div>
                     </div>
@@ -1358,12 +1997,12 @@
             }
             
             const containerHtml = `
-                <div style="background: rgba(15, 23, 42, 0.7); border-radius: 16px; border: 1px solid rgba(0, 240, 255, 0.2); padding: 0.2rem 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; backdrop-filter: blur(15px);">
-                    <div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 1rem; white-space: nowrap;">
-                        <span>共 <span style="color: var(--primary); font-weight: bold;">${filteredIcons.length}</span> 个图标</span>
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            每页显示
-                            <select id="pageSizeSelect" onchange="changeIconsPerPage(this.value)" style="background: rgba(20, 30, 60, 0.8); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; color: var(--primary); padding: 0.3rem 0.5rem; font-size: 0.85rem; cursor: pointer;">
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        <span>共 <span class="pagination-count">${filteredIcons.length}</span> 个图标</span>
+                        <span class="pagination-pagesize">
+                            每页
+                            <select id="pageSizeSelect" onchange="changeIconsPerPage(this.value)" class="pagination-select">
                                     <option value="16" ${iconsPerPage === 16 ? 'selected' : ''}>16</option>
                                     <option value="24" ${iconsPerPage === 24 ? 'selected' : ''}>24</option>
                                     <option value="32" ${iconsPerPage === 32 ? 'selected' : ''}>32</option>
@@ -1376,26 +2015,26 @@
                         </span>
                     </div>
                     
-                    <div style="display: flex; justify-content: center; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
-                        <button onclick="changePage(1)" ${currentPage === 1 ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">首页</button>
-                        <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">上页</button>
-                        <span class="page-info" style="min-width: 80px; text-align: center; padding: 0.5rem 1rem;">
+                    <div class="pagination-controls">
+                        <button onclick="changePage(1)" ${currentPage === 1 ? 'disabled' : ''} class="pagination-btn">|&lt;</button>
+                        <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="pagination-btn">&lt;</button>
+                        <span class="page-info">
                             ${currentPage} / ${totalPages}
                         </span>
-                        <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">下页</button>
-                        <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 0.5rem 1rem; min-width: 70px;">末页</button>
+                        <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="pagination-btn">&gt;</button>
+                        <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} class="pagination-btn">&gt;|</button>
                     </div>
                     
-                    <div style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-secondary); font-size: 0.85rem; white-space: nowrap;">
-                        跳转:
+                    <div class="pagination-jump">
+                        <span>跳转:</span>
                         <input type="number" 
                                min="1" 
                                max="${totalPages}" 
                                value="${currentPage}" 
-                               style="width: 60px; padding: 0.5rem; background: rgba(20, 30, 60, 0.6); border: 2px solid rgba(0, 240, 255, 0.3); border-radius: 10px; color: white; text-align: center; backdrop-filter: blur(10px);"
+                               class="pagination-input"
                                onchange="if(this.value >= 1 && this.value <= ${totalPages}) changePage(parseInt(this.value));">
                         <button onclick="const input = this.previousElementSibling; if(input.value >= 1 && input.value <= ${totalPages}) changePage(parseInt(input.value));" 
-                                class="icon-btn">
+                                class="pagination-go-btn">
                             Go
                         </button>
                     </div>
@@ -1804,6 +2443,28 @@
             urlMode = e.target.value;
             renderIcons();
         });
+
+        function setTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'default') {
+                root.removeAttribute('data-theme');
+            } else {
+                root.setAttribute('data-theme', theme);
+            }
+            localStorage.setItem('iconStationTheme', theme);
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('iconStationTheme') || 'default';
+            document.getElementById('themeSelect').value = savedTheme;
+            setTheme(savedTheme);
+        }
+
+        document.getElementById('themeSelect').addEventListener('change', (e) => {
+            setTheme(e.target.value);
+        });
+
+        loadTheme();
 
         function toggleMenu(event) {
             if (event) event.stopPropagation();
