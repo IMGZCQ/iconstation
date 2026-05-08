@@ -1648,6 +1648,23 @@
     </style>
     <script>
         (function() {
+            function isMobileDevice() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                       (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /Macintosh/i.test(navigator.userAgent));
+            }
+
+            function isSmallScreen() {
+                return window.innerWidth <= 768;
+            }
+
+            if (isMobileDevice() && isSmallScreen() && !localStorage.getItem('forceDesktop')) {
+                var urlParams = new URLSearchParams(window.location.search);
+                if (!urlParams.has('desktop')) {
+                    window.location.href = '/mobile.html';
+                    return;
+                }
+            }
+
             window.checkLoginStatus = function() {
                 const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
                 const loginTimestamp = localStorage.getItem('loginTimestamp');
@@ -1708,7 +1725,7 @@
                 <img src="icon.png" class="navbar-icon" alt="Icon">
                 <div class="navbar-title-text">
                     <div class="navbar-title-main">图标空间站</div>
-                    <div class="navbar-title-sub">Icon Station v0.1.6</div>
+                    <div class="navbar-title-sub">Icon Station v0.1.7</div>
                 </div>
             </div>
             <button id="authBtn" class="auth-btn" onclick="handleAuth()">
@@ -1735,7 +1752,7 @@
                     <div class="checkbox-content" id="checkboxContent">
                         <label class="cyberpunk-checkbox-label">
                             <input type="checkbox" class="cyberpunk-checkbox" id="checkUserIcons" checked>
-                            用户图标
+                            本地图标
                         </label>
                         <label class="cyberpunk-checkbox-label">
                             <input type="checkbox" class="cyberpunk-checkbox" id="checkBuiltinIcons" checked>
@@ -1812,15 +1829,48 @@
             try {
                 let uploadedIcons = [];
                 try {
-                    const uploadRes = await fetch('/api/list-upload-icons');
-                    if (uploadRes.ok) {
-                        const uploadData = await uploadRes.json();
-                        if (uploadData.files && Array.isArray(uploadData.files)) {
-                            uploadedIcons = uploadData.files.map(file => ({
-                                name: file,
-                                download_url: `/deskdata/user_icon/${encodeURIComponent(file)}`,
-                                isUploaded: true
-                            }));
+                    // 检查是否登录
+                    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                    const loginTimestamp = localStorage.getItem('loginTimestamp');
+                    const currentTime = new Date().getTime();
+                    const thirtyMinutes = 30 * 60 * 1000;
+                    const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+                    const token = localStorage.getItem('authToken');
+                    
+                    // 判断是否应该显示用户图标
+                    // 规则：open=0 且未登录 → 不显示；其他情况都显示
+                    let shouldShowUserIcons = true;
+                    if (!isValid) {
+                        try {
+                            const openRes = await fetch('/api/get-open');
+                            if (openRes.ok) {
+                                const openData = await openRes.json();
+                                shouldShowUserIcons = openData.open;
+                            }
+                        } catch (e) {
+                            console.warn('获取 open 状态失败', e);
+                        }
+                    }
+                    
+                    // 显示用户图标
+                    if (shouldShowUserIcons) {
+                        let uploadUrl = '/api/list-upload-icons';
+                        if (isValid && token) {
+                            uploadUrl = `${uploadUrl}?token=${encodeURIComponent(token)}`;
+                        }
+                        const uploadRes = await fetch(uploadUrl);
+                        if (uploadRes.ok) {
+                            const uploadData = await uploadRes.json();
+                            if (uploadData.files && Array.isArray(uploadData.files)) {
+                                uploadedIcons = uploadData.files.map(file => {
+                                    const url = `/deskdata/user_icon/${encodeURIComponent(file)}`;
+                                    return {
+                                        name: file,
+                                        download_url: isValid && token ? `${url}?token=${encodeURIComponent(token)}` : url,
+                                        isUploaded: true
+                                    };
+                                });
+                            }
                         }
                     }
                 } catch (e) {
@@ -1934,17 +1984,14 @@
                 const nameWithoutExt = icon.name.replace(/\.png$/i, '');
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
-                const localPath = isUser
-                    ? `/deskdata/user_icon/${encodeURIComponent(icon.name)}`
-                    : (isMac ? icon.download_url : icon.download_url);
-                const iconSrc = isMac ? icon.download_url : localPath;
+                const iconSrc = icon.download_url;
                 const iconEmoji = isMac ? '🍎' : (isUser ? '✅' : '🟦');
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeUrl = (icon.download_url || '').replace(/"/g, '&quot;');
 
                 return `
-                    <div class="icon-card" title="${localPath}">
+                    <div class="icon-card" title="${safeName}">
                         <img class="icon-image"
                              src="${iconSrc}"
                              alt="${nameWithoutExt}"
@@ -1972,13 +2019,7 @@
             const img = event.target;
             const globalIndex = parseInt(img.getAttribute('data-global-index'));
             
-            const iconUrls = filteredIcons.map(icon => {
-                const isMac = !!icon.isMacIcon;
-                const isUser = !!icon.isUploaded;
-                return isUser
-                    ? `/deskdata/user_icon/${encodeURIComponent(icon.name)}`
-                    : (isMac ? icon.download_url : icon.download_url);
-            });
+            const iconUrls = filteredIcons.map(icon => icon.download_url);
             
             showIconPreview(iconUrls, globalIndex);
         }
@@ -2081,9 +2122,12 @@
 
         function applyFilters(resetPage = true) {
             const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const showUser = document.getElementById('checkUserIcons').checked;
-            const showBuiltin = document.getElementById('checkBuiltinIcons').checked;
-            const showMac = document.getElementById('checkMacIcons').checked;
+            const checkUserIcons = document.getElementById('checkUserIcons');
+            const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
+            const checkMacIcons = document.getElementById('checkMacIcons');
+            const showUser = checkUserIcons ? checkUserIcons.checked : false;
+            const showBuiltin = checkBuiltinIcons ? checkBuiltinIcons.checked : true;
+            const showMac = checkMacIcons ? checkMacIcons.checked : true;
 
             filteredIcons = iconsData.filter(icon => {
                 const isUser = !!icon.isUploaded;
@@ -2110,10 +2154,13 @@
         document.getElementById('searchInput').addEventListener('input', applyFilters);
 
         function saveCheckboxState() {
+            const checkUserIcons = document.getElementById('checkUserIcons');
+            const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
+            const checkMacIcons = document.getElementById('checkMacIcons');
             const state = {
-                user: document.getElementById('checkUserIcons').checked,
-                builtin: document.getElementById('checkBuiltinIcons').checked,
-                mac: document.getElementById('checkMacIcons').checked
+                user: checkUserIcons ? checkUserIcons.checked : false,
+                builtin: checkBuiltinIcons ? checkBuiltinIcons.checked : true,
+                mac: checkMacIcons ? checkMacIcons.checked : true
             };
             localStorage.setItem('iconSourceState', JSON.stringify(state));
         }
@@ -2123,16 +2170,22 @@
             if (saved) {
                 try {
                     const state = JSON.parse(saved);
-                    document.getElementById('checkUserIcons').checked = state.user;
-                    document.getElementById('checkBuiltinIcons').checked = state.builtin;
-                    document.getElementById('checkMacIcons').checked = state.mac;
+                    const checkUserIcons = document.getElementById('checkUserIcons');
+                    const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
+                    const checkMacIcons = document.getElementById('checkMacIcons');
+                    if (checkUserIcons) checkUserIcons.checked = state.user;
+                    if (checkBuiltinIcons) checkBuiltinIcons.checked = state.builtin;
+                    if (checkMacIcons) checkMacIcons.checked = state.mac;
                 } catch (e) {}
             }
         }
 
-        document.getElementById('checkUserIcons').addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
-        document.getElementById('checkBuiltinIcons').addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
-        document.getElementById('checkMacIcons').addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        const checkUserIcons = document.getElementById('checkUserIcons');
+        const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
+        const checkMacIcons = document.getElementById('checkMacIcons');
+        if (checkUserIcons) checkUserIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        if (checkBuiltinIcons) checkBuiltinIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        if (checkMacIcons) checkMacIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
 
         loadCheckboxState();
 
@@ -2755,11 +2808,38 @@
             } catch (e) {
                 console.warn('检查初始化状态失败', e);
             }
-            loadIcons();
+            await loadIcons();
             updateAuthButton();
+            await updateLocalIconsVisibility();
         }
 
-        checkInitAndLoad();
+        async function updateLocalIconsVisibility() {
+            try {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                const loginTimestamp = localStorage.getItem('loginTimestamp');
+                const currentTime = new Date().getTime();
+                const thirtyMinutes = 30 * 60 * 1000;
+                const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+
+                const checkUserIcons = document.getElementById('checkUserIcons');
+                const label = checkUserIcons?.closest('label');
+                if (!label) return;
+
+                if (!isValid) {
+                    const openRes = await fetch('/api/get-open');
+                    if (openRes.ok) {
+                        const openData = await openRes.json();
+                        label.style.display = openData.open ? 'flex' : 'none';
+                    }
+                } else {
+                    label.style.display = 'flex';
+                }
+            } catch (e) {
+                console.warn('获取 open 状态失败', e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkInitAndLoad);
     </script>
 </body>
 </html>

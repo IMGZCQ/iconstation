@@ -30,14 +30,17 @@ var (
 type PasswordData struct {
 	PasswordHash string    `json:"passwordHash"`
 	CreatedAt   time.Time `json:"createdAt"`
+	Open        *bool     `json:"open,omitempty"`
 }
 
 type LoginRequest struct {
 	Password string `json:"password"`
+	Open     bool   `json:"open"`
 }
 
 type InitPasswordRequest struct {
 	Password string `json:"password"`
+	Open     bool   `json:"open"`
 }
 
 func main() {
@@ -64,6 +67,7 @@ func main() {
 	http.HandleFunc("/api/init-password", initPassword)
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
+	http.HandleFunc("/api/get-open", getOpen)
 	http.HandleFunc("/api/list-upload-icons", listUploadIcons)
 	http.HandleFunc("/api/upload/user_icon/init", withAuth(uploadInit))
 	http.HandleFunc("/api/upload/user_icon/chunk", withAuth(uploadChunk))
@@ -72,6 +76,11 @@ func main() {
 	http.HandleFunc("/api/delete/user_icon", withAuth(deleteIcon))
 
 	http.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
+		if !isUserIconAccessible(r) {
+			http.Error(w, `{"error": "Forbidden"}`, http.StatusForbidden)
+			return
+		}
+
 		filePath := filepath.Join(userDataDir, filepath.Base(r.URL.Path))
 		http.ServeFile(w, r, filePath)
 	})
@@ -86,6 +95,45 @@ func checkInit(w http.ResponseWriter, r *http.Request) {
 	sendJSON(w, map[string]interface{}{
 		"initialized": err == nil,
 	})
+}
+
+func getOpen(w http.ResponseWriter, r *http.Request) {
+	sendJSON(w, map[string]interface{}{"open": getOpenStatus()})
+}
+
+func isUserIconAccessible(r *http.Request) bool {
+	token := r.Header.Get("X-Auth-Token")
+	if token == "" {
+		token = r.URL.Query().Get("token")
+	}
+	
+	if token != "" {
+		if exp, ok := validTokens.Load(token); ok {
+			if time.Now().Before(exp.(time.Time)) {
+				return true
+			}
+		}
+	}
+	
+	return getOpenStatus()
+}
+
+func getOpenStatus() bool {
+	pwFile := filepath.Join(userDataRoot, "pw.json")
+	data, err := os.ReadFile(pwFile)
+	if err != nil {
+		return false
+	}
+	
+	var pwData PasswordData
+	if err := json.Unmarshal(data, &pwData); err != nil {
+		return false
+	}
+	
+	if pwData.Open == nil {
+		return false
+	}
+	return *pwData.Open
 }
 
 func hashPassword(password string) string {
@@ -119,6 +167,7 @@ func initPassword(w http.ResponseWriter, r *http.Request) {
 	pwData := PasswordData{
 		PasswordHash: hashPassword(req.Password),
 		CreatedAt:    time.Now(),
+		Open:         &req.Open,
 	}
 
 	data, _ := json.Marshal(pwData)
@@ -161,6 +210,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, map[string]interface{}{"success": false, "message": "密码错误"})
 		return
 	}
+
+	// 更新 open 状态
+	pwData.Open = &req.Open
+	newData, _ := json.Marshal(pwData)
+	os.WriteFile(pwFile, newData, 0644)
 
 	token := generateToken()
 	validTokens.Store(token, time.Now().Add(30*time.Minute))
@@ -206,6 +260,11 @@ func withAuth(handler http.HandlerFunc) http.HandlerFunc {
 func listUploadIcons(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if !isUserIconAccessible(r) {
+		sendJSON(w, map[string]interface{}{"files": []string{}})
 		return
 	}
 

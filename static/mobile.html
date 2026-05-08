@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="icon.png" type="image/png">
+    <title>图标空间站 移动版</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #00f0ff;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --card-bg: rgba(20, 30, 60, 0.4);
+            --dark-bg: rgba(10, 15, 30, 0.7);
+            --border-color: rgba(25, 52, 75, 0.3);
+            --text-secondary: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --body-bg-start: #0a0e27;
+            --body-bg-mid: #1a1040;
+            --body-bg-end: #0f172a;
+            --text-primary: #ffffff;
+            --icon-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="light"] {
+            --primary: #1e40af;
+            --secondary: #7c3aed;
+            --accent: #dc2626;
+            --card-bg: #ffffff;
+            --dark-bg: #f8fafc;
+            --border-color: rgba(226, 232, 240, 1);
+            --text-secondary: #6b7280;
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --body-bg-start: #ffffff;
+            --body-bg-mid: #f8fafc;
+            --body-bg-end: #ffffff;
+            --text-primary: #1e293b;
+            --icon-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        :root[data-theme="dark"] {
+            --primary: #38bdf8;
+            --secondary: #a78bfa;
+            --accent: #fb7185;
+            --card-bg: #1f2937;
+            --dark-bg: #111827;
+            --border-color: rgba(75, 85, 99, 0.5);
+            --text-secondary: #d1d5db;
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --body-bg-start: #000000;
+            --body-bg-mid: #0f172a;
+            --body-bg-end: #000000;
+            --text-primary: #ffffff;
+            --icon-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--body-bg-start) 0%, var(--body-bg-mid) 50%, var(--body-bg-end) 100%);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: url('https://t.alcy.cc/fj') center/cover;
+            filter: blur(3px);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        :root[data-theme="light"] .dynamic-bg { opacity: 0.1; }
+        :root[data-theme="dark"] .dynamic-bg { opacity: 0.3; }
+
+        #root {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        .mobile-header {
+            background: linear-gradient(180deg, rgba(20, 30, 60, 0.9) 0%, rgba(20, 30, 60, 0.7) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.6rem 0.75rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="light"] .mobile-header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        :root[data-theme="dark"] .mobile-header {
+            background: rgba(17, 24, 39, 0.95);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        :root[data-theme="light"] .header-icon {
+            border: 2px solid rgba(30, 64, 175, 0.7);
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            padding: 2px;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .header-title-main {
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+
+        .header-title-sub {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .icon-btn-header {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 10px;
+            color: var(--primary);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .icon-btn-header:active {
+            transform: scale(0.95);
+        }
+
+        .mobile-search {
+            padding: 0.5rem 0.75rem;
+            background: rgba(20, 30, 60, 0.5);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        :root[data-theme="light"] .mobile-search {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        :root[data-theme="dark"] .mobile-search {
+            background: rgba(17, 24, 39, 0.8);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 14px;
+            font-size: 14px;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            outline: none;
+            background: rgba(20, 30, 60, 0.6);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        :root[data-theme="light"] .search-input {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            border-color: rgba(30, 64, 175, 0.3);
+        }
+
+        :root[data-theme="dark"] .search-input {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+        }
+
+        .search-input::placeholder {
+            color: rgba(148, 163, 184, 0.7);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.4));
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.5rem 0.75rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: rgba(20, 30, 60, 0.5);
+            border-radius: 20px;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .filter-chip:active {
+            transform: scale(0.97);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            border-color: var(--primary);
+        }
+
+        :root[data-theme="light"] .filter-chip {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(30, 64, 175, 0.2);
+        }
+
+        :root[data-theme="light"] .filter-chip.active {
+            background: rgba(30, 64, 175, 0.15);
+            border-color: rgba(30, 64, 175, 0.4);
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+            padding: 0.5rem;
+            grid-auto-rows: 1fr;
+        }
+
+        .icon-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .icon-card:active {
+            transform: scale(0.98);
+        }
+
+        :root[data-theme="light"] .icon-card {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .icon-image-wrapper {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            min-height: 60px;
+            max-height: 100px;
+            background: var(--icon-bg);
+            border-radius: 8px;
+            padding: 0.4rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .icon-name {
+            font-size: 0.7rem;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 0.4rem;
+            font-weight: 600;
+        }
+
+        .icon-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.4rem;
+            justify-content: center;
+        }
+
+        .icon-action-btn {
+            flex: 1;
+            padding: 0.35rem 0.2rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: var(--primary);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .icon-action-btn:active {
+            transform: scale(0.95);
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .icon-action-btn.delete-btn {
+            border-color: rgba(236, 72, 153, 0.4);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            color: #ec4899;
+        }
+
+        .icon-action-btn.delete-btn:active {
+            background: rgba(236, 72, 153, 0.2);
+        }
+
+        .pagination-container {
+            padding: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(20, 30, 60, 0.3) 100%);
+            color: var(--primary);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.4rem;
+        }
+
+        .page-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn.current {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #0f172a;
+            border-color: transparent;
+        }
+
+        .page-info {
+            padding: 0.4rem 0.6rem;
+            background: rgba(20, 30, 60, 0.5);
+            border-radius: 8px;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .page-stats {
+            width: 100%;
+            text-align: center;
+            padding: 0.25rem 0;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        .page-size-select {
+            background: rgba(20, 30, 60, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 8px;
+            color: var(--primary);
+            padding: 0.35rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            margin-top: 0.25rem;
+        }
+
+        .page-size-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
+        }
+
+        :root[data-theme="light"] .page-size-select {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(30, 64, 175, 0.3);
+            color: #1e293b;
+        }
+
+        :root[data-theme="dark"] .page-size-select {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+            color: #e2e8f0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--primary);
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            z-index: 9999;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            animation: toastIn 0.3s ease;
+            white-space: nowrap;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .preview-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-main {
+            max-width: 80vw;
+            max-height: 60vh;
+            object-fit: contain;
+        }
+
+        .preview-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-nav.prev {
+            left: 0.5rem;
+        }
+
+        .preview-nav.next {
+            right: 0.5rem;
+        }
+
+        .preview-counter {
+            position: absolute;
+            bottom: 1rem;
+            color: white;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .preview-actions {
+            position: absolute;
+            bottom: 3rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .preview-action-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(20, 30, 60, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            z-index: 100;
+        }
+
+        :root[data-theme="light"] .bottom-nav {
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        :root[data-theme="dark"] .bottom-nav {
+            background: rgba(17, 24, 39, 0.98);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.4rem 0.8rem;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            border: none;
+            background: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+
+        .theme-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10001;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .theme-sheet {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .theme-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .theme-options {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .theme-option {
+            flex: 1;
+            max-width: 100px;
+            padding: 0.75rem;
+            border: 2px solid var(--glass-border);
+            background: rgba(20, 30, 60, 0.5);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-option.active {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.15);
+        }
+
+        .theme-option-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .theme-option-name {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .content-area {
+            padding-bottom: 70px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dynamic-bg"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        const CDN_PREFIX = 'https://ghfast.top/';
+        const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
+
+        function App() {
+            const [icons, setIcons] = useState([]);
+            const [filteredIcons, setFilteredIcons] = useState([]);
+            const [searchKeyword, setSearchKeyword] = useState('');
+            const [currentPage, setCurrentPage] = useState(1);
+            const [iconsPerPage, setIconsPerPage] = useState(parseInt(localStorage.getItem('mobileIconsPerPage')) || 24);
+            const [theme, setTheme] = useState(localStorage.getItem('iconStationTheme') || 'default');
+            const [urlMode, setUrlMode] = useState('ghfast');
+            const [showFilters, setShowFilters] = useState({
+                user: true,
+                builtin: true,
+                mac: true
+            });
+            const [showUserFilter, setShowUserFilter] = useState(false);
+            const [previewIndex, setPreviewIndex] = useState(null);
+            const [toast, setToast] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+            const touchStartX = useRef(0);
+
+            useEffect(() => {
+                document.documentElement.setAttribute('data-theme', theme === 'default' ? '' : theme);
+                localStorage.setItem('iconStationTheme', theme);
+            }, [theme]);
+
+            useEffect(() => {
+                loadIcons();
+            }, []);
+
+            useEffect(() => {
+                applyFilters();
+            }, [searchKeyword, showFilters, icons]);
+
+            useEffect(() => {
+                const handleKeydown = (e) => {
+                    if (e.target.tagName === 'INPUT') return;
+                    if (e.key === 'ArrowLeft' && currentPage > 1) {
+                        setCurrentPage(p => p - 1);
+                    } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+                        setCurrentPage(p => p + 1);
+                    }
+                };
+                document.addEventListener('keydown', handleKeydown);
+                return () => document.removeEventListener('keydown', handleKeydown);
+            }, [currentPage, totalPages]);
+
+            const loadIcons = async () => {
+                try {
+                    let uploadedIcons = [];
+                    try {
+                        // 检查是否登录
+                        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                        const loginTimestamp = localStorage.getItem('loginTimestamp');
+                        const currentTime = new Date().getTime();
+                        const thirtyMinutes = 30 * 60 * 1000;
+                        const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+                        const token = localStorage.getItem('authToken');
+                        
+                        // 判断是否应该显示用户图标
+                        // 规则：open=0 且未登录 → 不显示；其他情况都显示
+                        let shouldShowUserIcons = true;
+                        if (!isValid) {
+                            try {
+                                const openRes = await fetch('/api/get-open');
+                                if (openRes.ok) {
+                                    const openData = await openRes.json();
+                                    shouldShowUserIcons = openData.open;
+                                }
+                            } catch (e) {
+                                console.warn('获取 open 状态失败', e);
+                            }
+                        }
+                        
+                        // 显示用户图标
+                        if (shouldShowUserIcons) {
+                            let uploadUrl = '/api/list-upload-icons';
+                            if (isValid && token) {
+                                uploadUrl = `${uploadUrl}?token=${encodeURIComponent(token)}`;
+                            }
+                            const uploadRes = await fetch(uploadUrl);
+                            if (uploadRes.ok) {
+                                const uploadData = await uploadRes.json();
+                                if (uploadData.files && Array.isArray(uploadData.files)) {
+                                    uploadedIcons = uploadData.files.map(file => {
+                                        const url = `/deskdata/user_icon/${encodeURIComponent(file)}`;
+                                        return {
+                                            name: file,
+                                            download_url: isValid && token ? `${url}?token=${encodeURIComponent(token)}` : url,
+                                            isUploaded: true
+                                        };
+                                    });
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('加载上传图标失败', e);
+                    }
+
+                    const response = await fetch('HDiconsV2.json');
+                    if (!response.ok) throw new Error('文件加载失败');
+                    const raw = await response.json();
+                    const jsonIcons = Array.isArray(raw)
+                        ? raw
+                        : (Array.isArray(raw.icons)
+                            ? raw.icons.map(i => ({
+                                name: (() => {
+                                    const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                    return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                                })(),
+                                download_url: i.url
+                            }))
+                            : []);
+
+                    let macIcons = [];
+                    try {
+                        const macResponse = await fetch('MacIcons.json');
+                        if (macResponse.ok) {
+                            const macRaw = await macResponse.json();
+                            macIcons = Array.isArray(macRaw.icons)
+                                ? macRaw.icons.map(i => ({
+                                    name: (() => {
+                                        const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                        return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                                    })(),
+                                    download_url: i.url,
+                                    isMacIcon: true
+                                }))
+                                : [];
+                        }
+                    } catch (e) {
+                        console.warn('加载MacIcons失败', e);
+                    }
+
+                    setIcons([...uploadedIcons, ...jsonIcons, ...macIcons]);
+                    
+                    if (!isValid) {
+                        try {
+                            const openRes = await fetch('/api/get-open');
+                            if (openRes.ok) {
+                                const openData = await openRes.json();
+                                setShowUserFilter(openData.open);
+                            }
+                        } catch (e) {
+                            console.warn('获取 open 状态失败', e);
+                        }
+                    } else {
+                        setShowUserFilter(true);
+                    }
+                    
+                    setLoading(false);
+                } catch (error) {
+                    console.error('加载错误:', error);
+                    setLoading(false);
+                }
+            };
+
+            const applyFilters = () => {
+                const keyword = searchKeyword.toLowerCase();
+                const filtered = icons.filter(icon => {
+                    const isUser = !!icon.isUploaded;
+                    const isMac = !!icon.isMacIcon;
+                    if (isUser && !showFilters.user) return false;
+                    if (!isUser && !isMac && !showFilters.builtin) return false;
+                    if (isMac && !showFilters.mac) return false;
+                    return icon.name.toLowerCase().includes(keyword);
+                });
+                setFilteredIcons(filtered);
+            };
+
+            const cycleTheme = () => {
+                const themes = ['default', 'light', 'dark'];
+                const currentIndex = themes.indexOf(theme);
+                const nextIndex = (currentIndex + 1) % themes.length;
+                setTheme(themes[nextIndex]);
+            };
+
+            const getThemeIcon = () => {
+                switch (theme) {
+                    case 'light': return '☀️';
+                    case 'dark': return '🌙';
+                    default: return '🎨';
+                }
+            };
+
+            const getThemeTitle = () => {
+                switch (theme) {
+                    case 'light': return '浅色主题';
+                    case 'dark': return '深色主题';
+                    default: return '默认主题';
+                }
+            };
+
+            const showToast = (message) => {
+                setToast(message);
+                setTimeout(() => setToast(null), 2000);
+            };
+
+            const handleAuth = () => {
+                if (isLoggedIn) {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('loginTimestamp');
+                    setIsLoggedIn(false);
+                    showToast('已退出登录');
+                } else {
+                    window.location.href = '/login.html';
+                }
+            };
+
+            const handleUpload = () => {
+                if (!isLoggedIn) {
+                    showToast('请先登录');
+                    setTimeout(() => window.location.href = '/login.html', 1000);
+                    return;
+                }
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.multiple = true;
+                input.onchange = async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    showToast(`上传中...`);
+                    for (let i = 0; i < files.length; i++) {
+                        await uploadFile(files[i]);
+                    }
+                    loadIcons();
+                };
+                input.click();
+            };
+
+            const uploadFile = async (file) => {
+                const CHUNK_SIZE = 1 * 1024 * 1024;
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+                const uploadId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                try {
+                    const authToken = localStorage.getItem('authToken') || '';
+                    await fetch('/api/upload/user_icon/init', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': authToken
+                        },
+                        body: JSON.stringify({
+                            fileName: file.name,
+                            fileSize: file.size,
+                            totalChunks,
+                            fileType: 'user_icon',
+                            uploadId,
+                            fieldName: 'file'
+                        })
+                    });
+
+                    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                        const start = chunkIndex * CHUNK_SIZE;
+                        const end = Math.min(start + CHUNK_SIZE, file.size);
+                        const chunk = file.slice(start, end);
+
+                        const formData = new FormData();
+                        formData.append('chunkIndex', chunkIndex.toString());
+                        formData.append('totalChunks', totalChunks.toString());
+                        formData.append('uploadId', uploadId);
+                        formData.append('fieldName', 'file');
+                        formData.append('file', chunk, file.name);
+
+                        await fetch('/api/upload/user_icon/chunk', {
+                            method: 'POST',
+                            headers: { 'X-Auth-Token': authToken },
+                            body: formData
+                        });
+                    }
+
+                    await fetch('/api/upload/user_icon/merge', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': authToken
+                        },
+                        body: JSON.stringify({ uploadId, fileName: file.name, fieldName: 'file' })
+                    });
+                    showToast(`✓ ${file.name} 上传成功`);
+                } catch (err) {
+                    showToast(`✗ ${file.name} 上传失败`);
+                }
+            };
+
+            const renameIcon = async (icon) => {
+                const newName = prompt('请输入新的图标名称（不含扩展名）：', icon.name.replace(/\.(png|svg|jpg|jpeg|webp)$/i, ''));
+                if (!newName || newName.trim() === '') return;
+                
+                const ext = icon.name.match(/\.(png|svg|jpg|jpeg|webp)$/i);
+                const newFileName = newName.trim() + (ext ? ext[0] : '.png');
+                
+                if (newFileName === icon.name) {
+                    showToast('名称未改变');
+                    return;
+                }
+
+                try {
+                    showToast('重命名中...');
+                    const response = await fetch('/api/rename/user_icon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': localStorage.getItem('authToken') || ''
+                        },
+                        body: JSON.stringify({
+                            oldName: icon.name,
+                            newName: newFileName
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast(result.renamed ? result.message : '✓ 重命名成功');
+                        loadIcons();
+                    } else {
+                        showToast('✗ 重命名失败: ' + (result.message || '未知错误'));
+                    }
+                } catch (error) {
+                    showToast('✗ 重命名失败: ' + error.message);
+                }
+            };
+
+            const deleteIcon = async (icon) => {
+                if (!confirm(`确定要删除图标 "${icon.name}" 吗？此操作无法撤销。`)) return;
+
+                try {
+                    showToast('删除中...');
+                    const response = await fetch('/api/delete/user_icon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': localStorage.getItem('authToken') || ''
+                        },
+                        body: JSON.stringify({ fileName: icon.name })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast('✓ 删除成功');
+                        loadIcons();
+                    } else {
+                        showToast('✗ 删除失败: ' + (result.message || '未知错误'));
+                    }
+                } catch (error) {
+                    showToast('✗ 删除失败: ' + error.message);
+                }
+            };
+
+            const getIconSrc = (icon) => {
+                const isMac = !!icon.isMacIcon;
+                return icon.download_url;
+            };
+
+            const getIconEmoji = (icon) => {
+                if (icon.isMacIcon) return '🍎';
+                if (icon.isUploaded) return '✅';
+                return '🟦';
+            };
+
+            const handleImageError = (e, icon) => {
+                const fallbacks = [
+                    CDN_PREFIX + icon.download_url,
+                    JSDELIVR_PREFIX + icon.name,
+                    icon.download_url
+                ];
+                const currentSrc = e.target.src;
+                const currentIndex = fallbacks.indexOf(currentSrc);
+                if (currentIndex < fallbacks.length - 1) {
+                    e.target.src = fallbacks[currentIndex + 1];
+                } else {
+                    e.target.style.display = 'none';
+                }
+            };
+
+            const copyUrl = async (icon, e) => {
+                e.stopPropagation();
+                const url = getIconSrc(icon);
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(url);
+                    } else {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = url;
+                        textArea.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                    }
+                    showToast('✓ 链接已复制');
+                } catch (err) {
+                    showToast('✗ 复制失败');
+                }
+            };
+
+            const downloadIcon = async (icon, e) => {
+                e.stopPropagation();
+                const url = getIconSrc(icon);
+                const nameWithoutExt = icon.name.replace(/\.(png|svg)$/i, '');
+                const ext = icon.name.match(/\.(png|svg)$/i)?.[1] || 'png';
+
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = nameWithoutExt + '.' + ext;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                    showToast('✓ 开始下载');
+                } catch (err) {
+                    showToast('✗ 下载失败');
+                }
+            };
+
+            const handlePreviewSwipe = (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX.current - touchEndX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        setPreviewIndex(prev => prev < filteredIcons.length - 1 ? prev + 1 : 0);
+                    } else {
+                        setPreviewIndex(prev => prev > 0 ? prev - 1 : filteredIcons.length - 1);
+                    }
+                }
+            };
+
+            const handlePreviewKeydown = (e) => {
+                if (previewIndex === null) return;
+                if (e.key === 'ArrowLeft') {
+                    setPreviewIndex(prev => prev > 0 ? prev - 1 : filteredIcons.length - 1);
+                } else if (e.key === 'ArrowRight') {
+                    setPreviewIndex(prev => prev < filteredIcons.length - 1 ? prev + 1 : 0);
+                } else if (e.key === 'Escape') {
+                    setPreviewIndex(null);
+                }
+            };
+
+            useEffect(() => {
+                document.addEventListener('keydown', handlePreviewKeydown);
+                return () => document.removeEventListener('keydown', handlePreviewKeydown);
+            }, [previewIndex]);
+
+            const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
+            const startIndex = (currentPage - 1) * iconsPerPage;
+            const currentIcons = filteredIcons.slice(startIndex, startIndex + iconsPerPage);
+
+            const renderPagination = () => {
+                if (filteredIcons.length === 0) return null;
+
+                const startIcon = (currentPage - 1) * iconsPerPage + 1;
+                const endIcon = Math.min(currentPage * iconsPerPage, filteredIcons.length);
+
+                return (
+                    <div className="pagination-container">
+                        {totalPages > 1 && (
+                            <>
+                                <button
+                                    className="page-btn"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(1)}
+                                    title="首页"
+                                >
+                                    «
+                                </button>
+                                <button
+                                    className="page-btn"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(p => p - 1)}
+                                >
+                                    ‹
+                                </button>
+                            </>
+                        )}
+                        <span className="page-info">
+                            {currentPage} / {totalPages || 1}
+                        </span>
+                        {totalPages > 1 && (
+                            <>
+                                <button
+                                    className="page-btn"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(p => p + 1)}
+                                >
+                                    ›
+                                </button>
+                                <button
+                                    className="page-btn"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(totalPages)}
+                                    title="末页"
+                                >
+                                    »
+                                </button>
+                            </>
+                        )}
+                        <select
+                            className="page-size-select"
+                            value={iconsPerPage}
+                            onChange={(e) => {
+                                setIconsPerPage(parseInt(e.target.value));
+                                localStorage.setItem('mobileIconsPerPage', e.target.value);
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <option value="12">12/页</option>
+                            <option value="24">24/页</option>
+                            <option value="36">36/页</option>
+                            <option value="48">48/页</option>
+                        </select>
+                        <div className="page-stats">
+                            共 {filteredIcons.length} 个图标，显示 {startIcon}-{endIcon}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <>
+                    <header className="mobile-header">
+                        <div className="header-content">
+                            <div className="header-left">
+                                <img src="icon.png" className="header-icon" alt="Logo" />
+                                <div className="header-title">
+                                    <div className="header-title-main">图标空间站</div>
+                                    <div className="header-title-sub">Icon Station v0.1.7</div>
+                                </div>
+                            </div>
+                            <div className="header-actions">
+                                <button className="icon-btn-header" onClick={handleUpload} title="上传图标">
+                                    📤
+                                </button>
+                                <button className="icon-btn-header" onClick={cycleTheme} title={getThemeTitle()}>
+                                    {getThemeIcon()}
+                                </button>
+                                <button className="icon-btn-header" onClick={handleAuth} title={isLoggedIn ? '退出登录' : '登录'}>
+                                    <span>{isLoggedIn ? '🚪' : '🔑'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="mobile-search">
+                        <div className="search-wrapper">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="搜索图标..."
+                                value={searchKeyword}
+                                onChange={(e) => setSearchKeyword(e.target.value)}
+                            />
+                            <span className="search-icon">🔍</span>
+                        </div>
+                    </div>
+
+                    <div className="filter-bar">
+                        {showUserFilter && (
+                            <button
+                                className={`filter-chip ${showFilters.user ? 'active' : ''}`}
+                                onClick={() => setShowFilters(f => ({ ...f, user: !f.user }))}
+                            >
+                                本地图标 {showFilters.user ? '✓' : ''}
+                            </button>
+                        )}
+                        <button
+                            className={`filter-chip ${showFilters.builtin ? 'active' : ''}`}
+                            onClick={() => setShowFilters(f => ({ ...f, builtin: !f.builtin }))}
+                        >
+                            HD-Icons {showFilters.builtin ? '✓' : ''}
+                        </button>
+                        <button
+                            className={`filter-chip ${showFilters.mac ? 'active' : ''}`}
+                            onClick={() => setShowFilters(f => ({ ...f, mac: !f.mac }))}
+                        >
+                            MacIcon {showFilters.mac ? '✓' : ''}
+                        </button>
+                    </div>
+
+                    <div className="content-area">
+                        {loading ? (
+                            <div className="loading">加载中...</div>
+                        ) : currentIcons.length === 0 ? (
+                            <div className="no-results">
+                                <p>未找到匹配的图标</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="icon-grid">
+                                    {currentIcons.map((icon, index) => (
+                                        <div
+                                            key={startIndex + index}
+                                            className="icon-card"
+                                            onClick={() => setPreviewIndex(startIndex + index)}
+                                        >
+                                            <div className="icon-image-wrapper">
+                                                <img
+                                                    className="icon-image"
+                                                    src={getIconSrc(icon)}
+                                                    alt={icon.name}
+                                                    onError={(e) => handleImageError(e, icon)}
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                            <div className="icon-name">
+                                                <span>{getIconEmoji(icon)}</span> {icon.name.replace(/\.(png|svg)$/i, '')}
+                                            </div>
+                                            <div className="icon-actions">
+                                                <button
+                                                    className="icon-action-btn"
+                                                    onClick={(e) => downloadIcon(icon, e)}
+                                                    title="下载"
+                                                >
+                                                    💾
+                                                </button>
+                                                <button
+                                                    className="icon-action-btn"
+                                                    onClick={(e) => copyUrl(icon, e)}
+                                                    title="复制链接"
+                                                >
+                                                    📋
+                                                </button>
+                                                {icon.isUploaded && isLoggedIn && (
+                                                    <>
+                                                        <button
+                                                            className="icon-action-btn"
+                                                            onClick={(e) => { e.stopPropagation(); renameIcon(icon); }}
+                                                            title="重命名"
+                                                        >
+                                                            ✏️
+                                                        </button>
+                                                        <button
+                                                            className="icon-action-btn delete-btn"
+                                                            onClick={(e) => { e.stopPropagation(); deleteIcon(icon); }}
+                                                            title="删除"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                {renderPagination()}
+                            </>
+                        )}
+                    </div>
+
+                    {previewIndex !== null && (
+                        <div
+                            className="preview-overlay"
+                            onTouchStart={(e) => touchStartX.current = e.touches[0].clientX}
+                            onTouchEnd={handlePreviewSwipe}
+                            onClick={() => setPreviewIndex(null)}
+                        >
+                            <button className="preview-close" onClick={() => setPreviewIndex(null)}>✕</button>
+                            <button
+                                className="preview-nav prev"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewIndex(prev => prev > 0 ? prev - 1 : filteredIcons.length - 1);
+                                }}
+                            >
+                                ‹
+                            </button>
+                            <img
+                                className="preview-main"
+                                src={getIconSrc(filteredIcons[previewIndex])}
+                                alt={filteredIcons[previewIndex].name}
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <button
+                                className="preview-nav next"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewIndex(prev => prev < filteredIcons.length - 1 ? prev + 1 : 0);
+                                }}
+                            >
+                                ›
+                            </button>
+                            <div className="preview-actions" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                    className="preview-action-btn"
+                                    onClick={() => downloadIcon(filteredIcons[previewIndex], { stopPropagation: () => {} })}
+                                >
+                                    💾 下载
+                                </button>
+                                <button
+                                    className="preview-action-btn"
+                                    onClick={() => copyUrl(filteredIcons[previewIndex], { stopPropagation: () => {} })}
+                                >
+                                    📋 复制
+                                </button>
+                            </div>
+                            <div className="preview-counter">
+                                {previewIndex + 1} / {filteredIcons.length}
+                            </div>
+                        </div>
+                    )}
+
+                    {toast && <div className="toast">{toast}</div>}
+                </>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

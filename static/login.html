@@ -167,6 +167,70 @@
             font-size: 0.9rem;
         }
 
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            border-radius: 8px;
+            background: rgba(20, 30, 60, 0.6);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .checkbox-group input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .checkbox-group input[type="checkbox"]:checked::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .checkbox-group input[type="checkbox"]:checked {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        .checkbox-group input[type="checkbox"]:hover {
+            border-color: rgba(0, 240, 255, 0.8);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .checkbox-group label {
+            color: var(--primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .checkbox-group label:hover {
+            color: #8b5cf6;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        }
+
         .form-group input {
             width: 100%;
             padding: 14px 18px;
@@ -405,6 +469,10 @@
                     <label for="confirmPassword">确认密码</label>
                     <input type="password" id="confirmPassword" placeholder="请再次输入密码">
                 </div>
+                <div class="checkbox-group" id="openCheckboxGroup" style="display: none;">
+                    <input type="checkbox" id="openCheckbox" checked>
+                    <label for="openCheckbox">允许游客访问本地图标</label>
+                </div>
                 <button type="submit" class="login-btn" id="submitBtn">登 录</button>
             </form>
 
@@ -463,8 +531,23 @@
                 const data = await res.json();
                 isInit = !data.initialized;
                 updateForm();
+                if (!isInit) {
+                    loadOpenStatus();
+                }
             } catch (e) {
                 showMessage('检查初始化状态失败', 'error');
+            }
+        }
+
+        async function loadOpenStatus() {
+            try {
+                const res = await fetch('/api/get-open');
+                const data = await res.json();
+                const checkbox = document.getElementById('openCheckbox');
+                checkbox.checked = data.open;
+                document.getElementById('openCheckboxGroup').style.display = 'flex';
+            } catch (e) {
+                console.error('加载 open 状态失败', e);
             }
         }
 
@@ -475,6 +558,7 @@
                 initHint.style.display = 'block';
                 confirmGroup.style.display = 'block';
                 passwordLabel.textContent = '设置密码';
+                document.getElementById('openCheckboxGroup').style.display = 'flex';
             } else {
                 formTitle.textContent = '管理员登录';
                 submitBtn.textContent = '登 录';
@@ -495,6 +579,7 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const password = document.getElementById('password').value;
+            const open = document.getElementById('openCheckbox').checked;
 
             if (isInit) {
                 const confirmPassword = document.getElementById('confirmPassword').value;
@@ -511,7 +596,7 @@
                     const res = await fetch('/api/init-password', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password })
+                        body: JSON.stringify({ password, open })
                     });
                     const data = await res.json();
                     if (data.success) {
@@ -535,7 +620,7 @@
                     const res = await fetch('/api/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password })
+                        body: JSON.stringify({ password, open })
                     });
                     const data = await res.json();
                     if (data.success) {
