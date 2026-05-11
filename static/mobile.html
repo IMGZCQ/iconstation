@@ -7,7 +7,6 @@
     <title>图标空间站 移动版</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -733,8 +732,9 @@
     <div class="dynamic-bg"></div>
     <div id="root"></div>
 
-    <script type="text/babel">
+    <script>
         const { useState, useEffect, useCallback, useRef } = React;
+        const { createElement: h, Fragment } = React;
 
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
@@ -775,30 +775,30 @@
             useEffect(() => {
                 const handleKeydown = (e) => {
                     if (e.target.tagName === 'INPUT') return;
+                    const tp = Math.ceil(filteredIcons.length / iconsPerPage);
                     if (e.key === 'ArrowLeft' && currentPage > 1) {
                         setCurrentPage(p => p - 1);
-                    } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+                    } else if (e.key === 'ArrowRight' && currentPage < tp) {
                         setCurrentPage(p => p + 1);
                     }
                 };
                 document.addEventListener('keydown', handleKeydown);
                 return () => document.removeEventListener('keydown', handleKeydown);
-            }, [currentPage, totalPages]);
+            }, [currentPage, filteredIcons.length, iconsPerPage]);
 
             const loadIcons = async () => {
                 try {
                     let uploadedIcons = [];
+                    let isValid = false;
+                    let token = '';
                     try {
-                        // 检查是否登录
                         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
                         const loginTimestamp = localStorage.getItem('loginTimestamp');
                         const currentTime = new Date().getTime();
                         const thirtyMinutes = 30 * 60 * 1000;
-                        const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
-                        const token = localStorage.getItem('authToken');
+                        isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+                        token = localStorage.getItem('authToken');
                         
-                        // 判断是否应该显示用户图标
-                        // 规则：open=0 且未登录 → 不显示；其他情况都显示
                         let shouldShowUserIcons = true;
                         if (!isValid) {
                             try {
@@ -812,7 +812,6 @@
                             }
                         }
                         
-                        // 显示用户图标
                         if (shouldShowUserIcons) {
                             let uploadUrl = '/api/list-upload-icons';
                             if (isValid && token) {
@@ -1198,259 +1197,195 @@
                 const startIcon = (currentPage - 1) * iconsPerPage + 1;
                 const endIcon = Math.min(currentPage * iconsPerPage, filteredIcons.length);
 
-                return (
-                    <div className="pagination-container">
-                        {totalPages > 1 && (
-                            <>
-                                <button
-                                    className="page-btn"
-                                    disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(1)}
-                                    title="首页"
-                                >
-                                    «
-                                </button>
-                                <button
-                                    className="page-btn"
-                                    disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(p => p - 1)}
-                                >
-                                    ‹
-                                </button>
-                            </>
-                        )}
-                        <span className="page-info">
-                            {currentPage} / {totalPages || 1}
-                        </span>
-                        {totalPages > 1 && (
-                            <>
-                                <button
-                                    className="page-btn"
-                                    disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(p => p + 1)}
-                                >
-                                    ›
-                                </button>
-                                <button
-                                    className="page-btn"
-                                    disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(totalPages)}
-                                    title="末页"
-                                >
-                                    »
-                                </button>
-                            </>
-                        )}
-                        <select
-                            className="page-size-select"
-                            value={iconsPerPage}
-                            onChange={(e) => {
-                                setIconsPerPage(parseInt(e.target.value));
-                                localStorage.setItem('mobileIconsPerPage', e.target.value);
-                                setCurrentPage(1);
-                            }}
-                        >
-                            <option value="12">12/页</option>
-                            <option value="24">24/页</option>
-                            <option value="36">36/页</option>
-                            <option value="48">48/页</option>
-                        </select>
-                        <div className="page-stats">
-                            共 {filteredIcons.length} 个图标，显示 {startIcon}-{endIcon}
-                        </div>
-                    </div>
+                return h('div', { className: 'pagination-container' },
+                    totalPages > 1 && h(Fragment, null,
+                        h('button', {
+                            className: 'page-btn',
+                            disabled: currentPage === 1,
+                            onClick: () => setCurrentPage(1),
+                            title: '首页'
+                        }, '«'),
+                        h('button', {
+                            className: 'page-btn',
+                            disabled: currentPage === 1,
+                            onClick: () => setCurrentPage(p => p - 1)
+                        }, '‹')
+                    ),
+                    h('span', { className: 'page-info' }, `${currentPage} / ${totalPages || 1}`),
+                    totalPages > 1 && h(Fragment, null,
+                        h('button', {
+                            className: 'page-btn',
+                            disabled: currentPage === totalPages,
+                            onClick: () => setCurrentPage(p => p + 1)
+                        }, '›'),
+                        h('button', {
+                            className: 'page-btn',
+                            disabled: currentPage === totalPages,
+                            onClick: () => setCurrentPage(totalPages),
+                            title: '末页'
+                        }, '»')
+                    ),
+                    h('select', {
+                        className: 'page-size-select',
+                        value: iconsPerPage,
+                        onChange: (e) => {
+                            setIconsPerPage(parseInt(e.target.value));
+                            localStorage.setItem('mobileIconsPerPage', e.target.value);
+                            setCurrentPage(1);
+                        }
+                    },
+                        h('option', { value: '12' }, '12/页'),
+                        h('option', { value: '24' }, '24/页'),
+                        h('option', { value: '36' }, '36/页'),
+                        h('option', { value: '48' }, '48/页')
+                    ),
+                    h('div', { className: 'page-stats' }, `共 ${filteredIcons.length} 个图标，显示 ${startIcon}-${endIcon}`)
                 );
             };
 
-            return (
-                <>
-                    <header className="mobile-header">
-                        <div className="header-content">
-                            <div className="header-left">
-                                <img src="icon.png" className="header-icon" alt="Logo" />
-                                <div className="header-title">
-                                    <div className="header-title-main">图标空间站</div>
-                                    <div className="header-title-sub">Icon Station v0.1.7</div>
-                                </div>
-                            </div>
-                            <div className="header-actions">
-                                <button className="icon-btn-header" onClick={handleUpload} title="上传图标">
-                                    📤
-                                </button>
-                                <button className="icon-btn-header" onClick={cycleTheme} title={getThemeTitle()}>
-                                    {getThemeIcon()}
-                                </button>
-                                <button className="icon-btn-header" onClick={handleAuth} title={isLoggedIn ? '退出登录' : '登录'}>
-                                    <span>{isLoggedIn ? '🚪' : '🔑'}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </header>
-
-                    <div className="mobile-search">
-                        <div className="search-wrapper">
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="搜索图标..."
-                                value={searchKeyword}
-                                onChange={(e) => setSearchKeyword(e.target.value)}
-                            />
-                            <span className="search-icon">🔍</span>
-                        </div>
-                    </div>
-
-                    <div className="filter-bar">
-                        {showUserFilter && (
-                            <button
-                                className={`filter-chip ${showFilters.user ? 'active' : ''}`}
-                                onClick={() => setShowFilters(f => ({ ...f, user: !f.user }))}
-                            >
-                                本地图标 {showFilters.user ? '✓' : ''}
-                            </button>
-                        )}
-                        <button
-                            className={`filter-chip ${showFilters.builtin ? 'active' : ''}`}
-                            onClick={() => setShowFilters(f => ({ ...f, builtin: !f.builtin }))}
-                        >
-                            HD-Icons {showFilters.builtin ? '✓' : ''}
-                        </button>
-                        <button
-                            className={`filter-chip ${showFilters.mac ? 'active' : ''}`}
-                            onClick={() => setShowFilters(f => ({ ...f, mac: !f.mac }))}
-                        >
-                            MacIcon {showFilters.mac ? '✓' : ''}
-                        </button>
-                    </div>
-
-                    <div className="content-area">
-                        {loading ? (
-                            <div className="loading">加载中...</div>
-                        ) : currentIcons.length === 0 ? (
-                            <div className="no-results">
-                                <p>未找到匹配的图标</p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="icon-grid">
-                                    {currentIcons.map((icon, index) => (
-                                        <div
-                                            key={startIndex + index}
-                                            className="icon-card"
-                                            onClick={() => setPreviewIndex(startIndex + index)}
-                                        >
-                                            <div className="icon-image-wrapper">
-                                                <img
-                                                    className="icon-image"
-                                                    src={getIconSrc(icon)}
-                                                    alt={icon.name}
-                                                    onError={(e) => handleImageError(e, icon)}
-                                                    loading="lazy"
-                                                />
-                                            </div>
-                                            <div className="icon-name">
-                                                <span>{getIconEmoji(icon)}</span> {icon.name.replace(/\.(png|svg)$/i, '')}
-                                            </div>
-                                            <div className="icon-actions">
-                                                <button
-                                                    className="icon-action-btn"
-                                                    onClick={(e) => downloadIcon(icon, e)}
-                                                    title="下载"
-                                                >
-                                                    💾
-                                                </button>
-                                                <button
-                                                    className="icon-action-btn"
-                                                    onClick={(e) => copyUrl(icon, e)}
-                                                    title="复制链接"
-                                                >
-                                                    📋
-                                                </button>
-                                                {icon.isUploaded && isLoggedIn && (
-                                                    <>
-                                                        <button
-                                                            className="icon-action-btn"
-                                                            onClick={(e) => { e.stopPropagation(); renameIcon(icon); }}
-                                                            title="重命名"
-                                                        >
-                                                            ✏️
-                                                        </button>
-                                                        <button
-                                                            className="icon-action-btn delete-btn"
-                                                            onClick={(e) => { e.stopPropagation(); deleteIcon(icon); }}
-                                                            title="删除"
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {renderPagination()}
-                            </>
-                        )}
-                    </div>
-
-                    {previewIndex !== null && (
-                        <div
-                            className="preview-overlay"
-                            onTouchStart={(e) => touchStartX.current = e.touches[0].clientX}
-                            onTouchEnd={handlePreviewSwipe}
-                            onClick={() => setPreviewIndex(null)}
-                        >
-                            <button className="preview-close" onClick={() => setPreviewIndex(null)}>✕</button>
-                            <button
-                                className="preview-nav prev"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPreviewIndex(prev => prev > 0 ? prev - 1 : filteredIcons.length - 1);
-                                }}
-                            >
-                                ‹
-                            </button>
-                            <img
-                                className="preview-main"
-                                src={getIconSrc(filteredIcons[previewIndex])}
-                                alt={filteredIcons[previewIndex].name}
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                            <button
-                                className="preview-nav next"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPreviewIndex(prev => prev < filteredIcons.length - 1 ? prev + 1 : 0);
-                                }}
-                            >
-                                ›
-                            </button>
-                            <div className="preview-actions" onClick={(e) => e.stopPropagation()}>
-                                <button
-                                    className="preview-action-btn"
-                                    onClick={() => downloadIcon(filteredIcons[previewIndex], { stopPropagation: () => {} })}
-                                >
-                                    💾 下载
-                                </button>
-                                <button
-                                    className="preview-action-btn"
-                                    onClick={() => copyUrl(filteredIcons[previewIndex], { stopPropagation: () => {} })}
-                                >
-                                    📋 复制
-                                </button>
-                            </div>
-                            <div className="preview-counter">
-                                {previewIndex + 1} / {filteredIcons.length}
-                            </div>
-                        </div>
-                    )}
-
-                    {toast && <div className="toast">{toast}</div>}
-                </>
+            return h(Fragment, null,
+                h('header', { className: 'mobile-header' },
+                    h('div', { className: 'header-content' },
+                        h('div', { className: 'header-left' },
+                            h('img', { src: 'icon.png', className: 'header-icon', alt: 'Logo' }),
+                            h('div', { className: 'header-title' },
+                                h('div', { className: 'header-title-main' }, '图标空间站'),
+                                h('div', { className: 'header-title-sub' }, 'Icon Station v0.1.8')
+                            )
+                        ),
+                        h('div', { className: 'header-actions' },
+                            h('button', { className: 'icon-btn-header', onClick: handleUpload, title: '上传图标' }, '📤'),
+                            h('button', { className: 'icon-btn-header', onClick: cycleTheme, title: getThemeTitle() }, getThemeIcon()),
+                            h('button', { className: 'icon-btn-header', onClick: handleAuth, title: isLoggedIn ? '退出登录' : '登录' },
+                                h('span', null, isLoggedIn ? '🚪' : '🔑')
+                            )
+                        )
+                    )
+                ),
+                h('div', { className: 'mobile-search' },
+                    h('div', { className: 'search-wrapper' },
+                        h('input', {
+                            type: 'text',
+                            className: 'search-input',
+                            placeholder: '搜索图标...',
+                            value: searchKeyword,
+                            onChange: (e) => setSearchKeyword(e.target.value)
+                        }),
+                        h('span', { className: 'search-icon' }, '🔍')
+                    )
+                ),
+                h('div', { className: 'filter-bar' },
+                    showUserFilter && h('button', {
+                        className: `filter-chip ${showFilters.user ? 'active' : ''}`,
+                        onClick: () => setShowFilters(f => ({ ...f, user: !f.user }))
+                    }, `本地图标 ${showFilters.user ? '✓' : ''}`),
+                    h('button', {
+                        className: `filter-chip ${showFilters.builtin ? 'active' : ''}`,
+                        onClick: () => setShowFilters(f => ({ ...f, builtin: !f.builtin }))
+                    }, `HD-Icons ${showFilters.builtin ? '✓' : ''}`),
+                    h('button', {
+                        className: `filter-chip ${showFilters.mac ? 'active' : ''}`,
+                        onClick: () => setShowFilters(f => ({ ...f, mac: !f.mac }))
+                    }, `MacIcon ${showFilters.mac ? '✓' : ''}`)
+                ),
+                h('div', { className: 'content-area' },
+                    loading ? h('div', { className: 'loading' }, '加载中...') :
+                    currentIcons.length === 0 ? h('div', { className: 'no-results' },
+                        h('p', null, '未找到匹配的图标')
+                    ) : h(Fragment, null,
+                        h('div', { className: 'icon-grid' },
+                            currentIcons.map((icon, index) => h('div', {
+                                key: startIndex + index,
+                                className: 'icon-card',
+                                onClick: () => setPreviewIndex(startIndex + index)
+                            },
+                                h('div', { className: 'icon-image-wrapper' },
+                                    h('img', {
+                                        className: 'icon-image',
+                                        src: getIconSrc(icon),
+                                        alt: icon.name,
+                                        onError: (e) => handleImageError(e, icon),
+                                        loading: 'lazy'
+                                    })
+                                ),
+                                h('div', { className: 'icon-name' },
+                                    h('span', null, getIconEmoji(icon)),
+                                    ' ',
+                                    icon.name.replace(/\.(png|svg)$/i, '')
+                                ),
+                                h('div', { className: 'icon-actions' },
+                                    h('button', {
+                                        className: 'icon-action-btn',
+                                        onClick: (e) => downloadIcon(icon, e),
+                                        title: '下载'
+                                    }, '💾'),
+                                    h('button', {
+                                        className: 'icon-action-btn',
+                                        onClick: (e) => copyUrl(icon, e),
+                                        title: '复制链接'
+                                    }, '📋'),
+                                    icon.isUploaded && isLoggedIn && h(Fragment, null,
+                                        h('button', {
+                                            className: 'icon-action-btn',
+                                            onClick: (e) => { e.stopPropagation(); renameIcon(icon); },
+                                            title: '重命名'
+                                        }, '✏️'),
+                                        h('button', {
+                                            className: 'icon-action-btn delete-btn',
+                                            onClick: (e) => { e.stopPropagation(); deleteIcon(icon); },
+                                            title: '删除'
+                                        }, '🗑️')
+                                    )
+                                )
+                            ))
+                        ),
+                        renderPagination()
+                    )
+                ),
+                previewIndex !== null && h('div', {
+                    className: 'preview-overlay',
+                    onTouchStart: (e) => touchStartX.current = e.touches[0].clientX,
+                    onTouchEnd: handlePreviewSwipe,
+                    onClick: () => setPreviewIndex(null)
+                },
+                    h('button', { className: 'preview-close', onClick: () => setPreviewIndex(null) }, '✕'),
+                    h('button', {
+                        className: 'preview-nav prev',
+                        onClick: (e) => {
+                            e.stopPropagation();
+                            setPreviewIndex(prev => prev > 0 ? prev - 1 : filteredIcons.length - 1);
+                        }
+                    }, '‹'),
+                    h('img', {
+                        className: 'preview-main',
+                        src: getIconSrc(filteredIcons[previewIndex]),
+                        alt: filteredIcons[previewIndex].name,
+                        onClick: (e) => e.stopPropagation()
+                    }),
+                    h('button', {
+                        className: 'preview-nav next',
+                        onClick: (e) => {
+                            e.stopPropagation();
+                            setPreviewIndex(prev => prev < filteredIcons.length - 1 ? prev + 1 : 0);
+                        }
+                    }, '›'),
+                    h('div', { className: 'preview-actions', onClick: (e) => e.stopPropagation() },
+                        h('button', {
+                            className: 'preview-action-btn',
+                            onClick: () => downloadIcon(filteredIcons[previewIndex], { stopPropagation: () => {} })
+                        }, '💾 下载'),
+                        h('button', {
+                            className: 'preview-action-btn',
+                            onClick: () => copyUrl(filteredIcons[previewIndex], { stopPropagation: () => {} })
+                        }, '📋 复制')
+                    ),
+                    h('div', { className: 'preview-counter' }, `${previewIndex + 1} / ${filteredIcons.length}`)
+                ),
+                toast && h('div', { className: 'toast' }, toast)
             );
         }
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(h(App));
     </script>
 </body>
 </html>
