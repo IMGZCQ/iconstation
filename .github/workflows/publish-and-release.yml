@@ -6,14 +6,24 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'docker_and_release'
+        type: choice
+        options:
+          - docker_and_release
+          - docker
+          - release
       tag_name:
-        description: 'Tag name (e.g., v1.0.0)'
+        description: 'Tag name (e.g., 1.0.0)'
         required: true
-        default: 'v1.0.0'
+        default: '1.0.0'
       push_latest:
-        description: 'Also push Docker image as latest? (true/false)'
-        required: true
-        default: 'true'
+        description: 'Also push Docker image as latest?'
+        required: false
+        default: true
+        type: boolean
 
 env:
   DOCKERHUB_REGISTRY: docker.io
@@ -23,6 +33,7 @@ env:
 jobs:
   docker:
     name: Build and Push Docker
+    if: ${{ github.event_name == 'push' || inputs.build_type == 'docker' || inputs.build_type == 'docker_and_release' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -54,14 +65,15 @@ jobs:
           push: true
           tags: |
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ inputs.tag_name || github.ref_name }}
-            ${{ inputs.push_latest == 'true' && format('{0}/{1}:latest', env.DOCKERHUB_REGISTRY, env.DOCKERHUB_IMAGE_NAME) || '' }}
+            ${{ inputs.push_latest && format('{0}/{1}:latest', env.DOCKERHUB_REGISTRY, env.DOCKERHUB_IMAGE_NAME) || '' }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   release:
     name: Build Binaries and Create Release
-    needs: docker
+    needs: ${{ github.event_name == 'push' || inputs.build_type == 'docker_and_release' && 'docker' || '' }}
+    if: ${{ github.event_name == 'push' || inputs.build_type == 'release' || inputs.build_type == 'docker_and_release' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
