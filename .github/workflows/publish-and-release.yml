@@ -33,7 +33,9 @@ env:
 jobs:
   docker:
     name: Build and Push Docker
-    if: ${{ github.event_name == 'push' || inputs.build_type == 'docker' || inputs.build_type == 'docker_and_release' }}
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.build_type == 'docker' || inputs.build_type == 'docker_and_release'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,8 +74,10 @@ jobs:
 
   release:
     name: Build Binaries and Create Release
-    needs: ${{ github.event_name == 'push' || inputs.build_type == 'docker_and_release' && 'docker' || '' }}
-    if: ${{ github.event_name == 'push' || inputs.build_type == 'release' || inputs.build_type == 'docker_and_release' }}
+    needs: docker  # 固定写，不能用表达式
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.build_type == 'release' || inputs.build_type == 'docker_and_release'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -107,19 +111,10 @@ jobs:
         run: |
           VERSION=${{ steps.get_tag.outputs.release_tag }}
           
-          # Linux x86_64
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o iconstation-linux-amd64 main.go
-          
-          # Linux ARM64
           GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o iconstation-linux-arm64 main.go
-          
-          # Windows x64
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o iconstation-windows-amd64.exe main.go
-          
-          # macOS x64
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o iconstation-darwin-amd64 main.go
-          
-          # macOS ARM64
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o iconstation-darwin-arm64 main.go
 
       - name: Generate checksums
