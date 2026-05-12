@@ -1215,7 +1215,46 @@
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
-        .cyberpunk-checkbox-label {
+        .cyberpunk-radio {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            border-radius: 50%;
+            background: rgba(20, 30, 60, 0.5);
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            position: relative;
+            margin-right: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyberpunk-radio:before {
+            content: "";
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+        }
+
+        .cyberpunk-radio:checked:before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .cyberpunk-radio:checked {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyberpunk-checkbox-label, .cyberpunk-radio-label {
             font-size: 0.85rem;
             color: var(--text-secondary);
             cursor: pointer;
@@ -1224,9 +1263,10 @@
             align-items: center;
             transition: color 0.3s;
             font-weight: 500;
+            margin-bottom: 0.3rem;
         }
 
-        .cyberpunk-checkbox-label:hover {
+        .cyberpunk-checkbox-label:hover, .cyberpunk-radio-label:hover {
             color: var(--primary);
         }
 
@@ -1473,6 +1513,16 @@
             border-color: rgba(56, 189, 248, 0.3);
         }
 
+        :root[data-theme="light"] .cyberpunk-radio {
+            background: rgba(241, 245, 249, 0.8);
+            border-color: rgba(30, 64, 175, 0.3);
+        }
+
+        :root[data-theme="dark"] .cyberpunk-radio {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
         :root[data-theme="light"] .cyberpunk-checkbox-label {
             color: var(--text-primary);
         }
@@ -1560,6 +1610,30 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .category-item {
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            background: rgba(20, 30, 60, 0.5);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--primary);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .category-item:hover {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.15);
+        }
+
+        .category-item.selected {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
         }
 
         .dialog-message {
@@ -1743,27 +1817,41 @@
                     <div class="tooltip">也可以在此目录直接管理：<br>【 UserData/icons 】</div>
                 </div>
                 <div class="checkbox-wrapper">
-                    <button class="toggle-btn" id="toggleFilterBtn">
-                        <span>📚</span> 图标库源
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 9l6 6 6-6"/>
-                        </svg>
-                    </button>
-                    <div class="checkbox-content" id="checkboxContent">
-                        <label class="cyberpunk-checkbox-label">
-                            <input type="checkbox" class="cyberpunk-checkbox" id="checkUserIcons" checked>
-                            本地图标
-                        </label>
-                        <label class="cyberpunk-checkbox-label">
-                            <input type="checkbox" class="cyberpunk-checkbox" id="checkBuiltinIcons" checked>
-                            HD-Icons
-                        </label>
-                        <label class="cyberpunk-checkbox-label">
-                            <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
-                            MacIcon
-                        </label>
+                        <button class="toggle-btn" id="toggleFilterBtn">
+                            <span>📚</span> 图标库源
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div class="checkbox-content" id="checkboxContent">
+                            <label class="cyberpunk-checkbox-label">
+                                <input type="checkbox" class="cyberpunk-checkbox" id="checkUserIcons" checked>
+                                本地图标
+                            </label>
+                            <label class="cyberpunk-checkbox-label">
+                                <input type="checkbox" class="cyberpunk-checkbox" id="checkBuiltinIcons" checked>
+                                HD-Icons
+                            </label>
+                            <label class="cyberpunk-checkbox-label">
+                                <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
+                                MacIcon
+                            </label>
+                        </div>
                     </div>
-                </div>
+                    <div class="checkbox-wrapper" id="categorySection" style="display: none;">
+                        <button class="toggle-btn" id="toggleCategoryBtn">
+                            <span>📁</span> 分类
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div class="checkbox-content" id="categoryContent">
+                            <label class="cyberpunk-radio-label">
+                                <input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="">
+                                全部分类
+                            </label>
+                        </div>
+                    </div>
                 <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="搜索图标名称...">
@@ -1811,7 +1899,22 @@
         </div>
     </div>
 
-    <script src="common.js"></script>
+    <div id="categoryDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box" style="max-width: 400px; max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="dialog-title" id="categoryDialogTitle">📁 选择上传分类</div>
+            <div id="categoryList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;"></div>
+            <div id="newCategoryInputWrapper" style="display: none; margin-bottom: 1rem;">
+                <input type="text" class="dialog-input" id="newCategoryInput" placeholder="输入新分类名称...">
+            </div>
+            <button id="createCategoryBtn" class="upload-btn" style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel-btn" id="categoryCancelBtn">取消</button>
+                <button class="dialog-btn confirm-btn" id="categoryConfirmBtn">选择文件</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
     <script>
         if (typeof __webpack_require__ !== 'undefined') {
             __webpack_require__.p = '';
@@ -1828,6 +1931,7 @@
         async function loadIcons(keepPage = false) {
             try {
                 let uploadedIcons = [];
+                let shouldShowUserIcons = true;
                 try {
                     // 检查是否登录
                     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -1839,7 +1943,7 @@
                     
                     // 判断是否应该显示用户图标
                     // 规则：open=0 且未登录 → 不显示；其他情况都显示
-                    let shouldShowUserIcons = true;
+                    shouldShowUserIcons = true;
                     if (!isValid) {
                         try {
                             const openRes = await fetch('/api/get-open');
@@ -1862,12 +1966,15 @@
                         if (uploadRes.ok) {
                             const uploadData = await uploadRes.json();
                             if (uploadData.files && Array.isArray(uploadData.files)) {
-                                uploadedIcons = uploadData.files.map(file => {
-                                    const url = `/deskdata/user_icon/${encodeURIComponent(file)}`;
+                                uploadedIcons = uploadData.files.map(item => {
+                                    const fileName = typeof item === 'string' ? item : item.name;
+                                    const category = typeof item === 'string' ? '' : (item.category || '');
+                                    const url = `/deskdata/user_icon/${encodeURIComponent(fileName)}`;
                                     return {
-                                        name: file,
+                                        name: fileName,
                                         download_url: isValid && token ? `${url}?token=${encodeURIComponent(token)}` : url,
-                                        isUploaded: true
+                                        isUploaded: true,
+                                        category: category
                                     };
                                 });
                             }
@@ -1877,7 +1984,7 @@
                     console.warn('加载上传图标失败', e);
                 }
 
-                const response = await fetch('HDiconsV2.json');
+                const response = await fetch('json/HDiconsV2.json');
                 if (!response.ok) throw new Error('文件加载失败');
                 const raw = await response.json();
                 const jsonIcons = Array.isArray(raw)
@@ -1894,7 +2001,7 @@
 
                 let macIcons = [];
                 try {
-                    const macResponse = await fetch('MacIcons.json');
+                    const macResponse = await fetch('json/MacIcons.json');
                     if (macResponse.ok) {
                         const macRaw = await macResponse.json();
                         macIcons = Array.isArray(macRaw.icons)
@@ -1913,7 +2020,13 @@
                 }
 
                 iconsData = [...uploadedIcons, ...jsonIcons, ...macIcons];
+                updateCategories();
                 applyFilters(!keepPage);
+                
+                const categorySection = document.getElementById('categorySection');
+                if (categorySection) {
+                    categorySection.style.display = shouldShowUserIcons ? 'block' : 'none';
+                }
             } catch (error) {
                 console.error('加载错误:', error);
                 document.getElementById('iconGrid').innerHTML = 
@@ -2129,12 +2242,30 @@
             const showBuiltin = checkBuiltinIcons ? checkBuiltinIcons.checked : true;
             const showMac = checkMacIcons ? checkMacIcons.checked : true;
 
+            const radioAllCategories = document.getElementById('radioAllCategories');
+            const showAllCategories = radioAllCategories ? radioAllCategories.checked : true;
+            let selectedCategory = '';
+            if (!showAllCategories) {
+                const categoryContent = document.getElementById('categoryContent');
+                if (categoryContent) {
+                    const selectedRadio = categoryContent.querySelector('.cyberpunk-radio:checked');
+                    if (selectedRadio && selectedRadio.id !== 'radioAllCategories') {
+                        selectedCategory = selectedRadio.value;
+                    }
+                }
+            }
+
             filteredIcons = iconsData.filter(icon => {
                 const isUser = !!icon.isUploaded;
                 const isMac = !!icon.isMacIcon;
                 if (isUser && !showUser) return false;
                 if (!isUser && !isMac && !showBuiltin) return false;
                 if (isMac && !showMac) return false;
+
+                if (!showAllCategories) {
+                    const iconCategory = icon.category || '';
+                    if (iconCategory !== selectedCategory) return false;
+                }
 
                 return icon.name.toLowerCase().includes(keyword);
             });
@@ -2149,6 +2280,36 @@
             }
             updateStats();
             renderIcons();
+        }
+
+        function updateCategories() {
+            const userIcons = iconsData.filter(icon => icon.isUploaded);
+            const categories = [...new Set(userIcons.map(icon => icon.category || ''))];
+            const categoryContent = document.getElementById('categoryContent');
+            
+            if (!categoryContent) return;
+
+            let html = '<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="">全部分类</label>';
+            
+            if (categories.length > 1 || (categories.length === 1 && categories[0] !== '')) {
+                categories.sort((a, b) => {
+                    if (a === '') return -1;
+                    if (b === '') return 1;
+                    return a.localeCompare(b);
+                }).forEach(cat => {
+                    const displayName = cat || '未分类';
+                    html += `<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" value="${cat}">${displayName}</label>`;
+                });
+            }
+            
+            categoryContent.innerHTML = html;
+
+            const radios = categoryContent.querySelectorAll('.cyberpunk-radio');
+            radios.forEach(r => {
+                r.addEventListener('change', function() {
+                    applyFilters();
+                });
+            });
         }
 
         document.getElementById('searchInput').addEventListener('input', applyFilters);
@@ -2183,7 +2344,15 @@
         const checkUserIcons = document.getElementById('checkUserIcons');
         const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
         const checkMacIcons = document.getElementById('checkMacIcons');
-        if (checkUserIcons) checkUserIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        const categorySection = document.getElementById('categorySection');
+        
+        if (checkUserIcons) checkUserIcons.addEventListener('change', () => { 
+            saveCheckboxState(); 
+            applyFilters();
+            if (categorySection) {
+                categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
+            }
+        });
         if (checkBuiltinIcons) checkBuiltinIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkMacIcons) checkMacIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
 
@@ -2204,6 +2373,24 @@
                 checkboxContent.classList.remove('expanded');
             }
         });
+
+        const toggleCategoryBtn = document.getElementById('toggleCategoryBtn');
+        const categoryContent = document.getElementById('categoryContent');
+        
+        if (toggleCategoryBtn && categoryContent) {
+            toggleCategoryBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleCategoryBtn.classList.toggle('expanded');
+                categoryContent.classList.toggle('expanded');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!categoryContent.contains(e.target) && !toggleCategoryBtn.contains(e.target)) {
+                    toggleCategoryBtn.classList.remove('expanded');
+                    categoryContent.classList.remove('expanded');
+                }
+            });
+        }
 
         function showToast(message) {
             const toast = document.createElement('div');
@@ -2385,10 +2572,119 @@
             });
         }
 
+        let uploadTargetCategory = '';
+        let availableCategories = [];
+
         document.getElementById('uploadBtn').addEventListener('click', () => {
             if (typeof window.checkLoginStatus === 'function') {
                 if (!window.checkLoginStatus()) return;
             }
+            showCategoryDialog();
+        });
+
+        function showCategoryDialog() {
+            uploadTargetCategory = '';
+            document.getElementById('newCategoryInputWrapper').style.display = 'none';
+            document.getElementById('newCategoryInput').value = '';
+            document.getElementById('createCategoryBtn').style.display = 'block';
+            loadAvailableCategories().then(() => {
+                renderCategoryList();
+            });
+            document.getElementById('categoryDialog').style.display = 'flex';
+        }
+
+        async function loadAvailableCategories() {
+            try {
+                const authToken = localStorage.getItem('authToken') || '';
+                const response = await fetch('/api/list-categories', {
+                    headers: authToken ? { 'X-Auth-Token': authToken } : {}
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    availableCategories = data.categories || [];
+                }
+            } catch (e) {
+                console.warn('获取分类列表失败', e);
+                availableCategories = [];
+            }
+        }
+
+        function renderCategoryList() {
+            const categoryList = document.getElementById('categoryList');
+            const userIcons = iconsData.filter(icon => icon.isUploaded);
+            const categoriesFromIcons = [...new Set(userIcons.map(icon => icon.category || ''))];
+            const allCategories = [...new Set([...availableCategories, ...categoriesFromIcons])];
+            
+            let html = `<div class="category-item ${uploadTargetCategory === '' ? 'selected' : ''}" onclick="selectCategory('')">📂 未分类</div>`;
+            allCategories.filter(c => c !== '').sort((a, b) => a.localeCompare(b)).forEach(cat => {
+                html += `<div class="category-item ${uploadTargetCategory === cat ? 'selected' : ''}" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">${cat}</div>`;
+            });
+            
+            categoryList.innerHTML = html;
+        }
+
+        function selectCategory(category) {
+            uploadTargetCategory = category;
+            renderCategoryList();
+        }
+
+        document.getElementById('createCategoryBtn').addEventListener('click', () => {
+            document.getElementById('newCategoryInputWrapper').style.display = 'block';
+            document.getElementById('createCategoryBtn').style.display = 'none';
+            document.getElementById('newCategoryInput').focus();
+        });
+
+        document.getElementById('newCategoryInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                confirmNewCategory();
+            }
+        });
+
+        async function confirmNewCategory() {
+            const name = document.getElementById('newCategoryInput').value.trim();
+            if (!name) {
+                showToast('请输入分类名称');
+                return;
+            }
+            try {
+                const authToken = localStorage.getItem('authToken') || '';
+                const response = await fetch('/api/create-category', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Auth-Token': authToken
+                    },
+                    body: JSON.stringify({ name })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    uploadTargetCategory = name;
+                    if (!availableCategories.includes(name)) {
+                        availableCategories.push(name);
+                    }
+                    document.getElementById('newCategoryInputWrapper').style.display = 'none';
+                    document.getElementById('createCategoryBtn').style.display = 'block';
+                    document.getElementById('newCategoryInput').value = '';
+                    renderCategoryList();
+                    showToast('✓ 分类创建成功');
+                } else {
+                    showToast('✗ 创建失败: ' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                showToast('✗ 创建失败: ' + error.message);
+            }
+        }
+
+        document.getElementById('categoryCancelBtn').addEventListener('click', () => {
+            document.getElementById('categoryDialog').style.display = 'none';
+        });
+
+        document.getElementById('categoryConfirmBtn').addEventListener('click', () => {
+            if (!uploadTargetCategory) {
+                showToast('请选择或创建一个分类');
+                return;
+            }
+            document.getElementById('categoryDialog').style.display = 'none';
             document.getElementById('fileInput').click();
         });
 
@@ -2403,8 +2699,9 @@
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
+                const fileName = uploadTargetCategory ? uploadTargetCategory + '/' + file.name : file.name;
                 try {
-                    const result = await uploadFileChunked(file);
+                    const result = await uploadFileChunked(file, fileName);
                     if (result.success) {
                         successCount++;
                         if (result.renamed) {
@@ -2434,11 +2731,10 @@
             e.target.value = '';
         });
 
-        async function uploadFileChunked(file) {
+        async function uploadFileChunked(file, fileName = file.name) {
             const CHUNK_SIZE = 1 * 1024 * 1024;
             const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
             const uploadId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            const fileName = file.name;
 
             try {
                 const authToken = localStorage.getItem('authToken') || '';
@@ -2723,9 +3019,16 @@
             const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
 
             if (isValid) {
+                const token = localStorage.getItem('authToken');
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('loginTimestamp');
+                if (token) {
+                    fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'X-Auth-Token': token }
+                    }).catch(() => {});
+                }
                 updateAuthButton();
                 showToast('已退出登录');
             } else {

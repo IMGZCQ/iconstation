@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="icon.png" type="image/png">
     <title>图标空间站 移动版</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="js/react.production.min.js" crossorigin></script>
+    <script src="js/react-dom.production.min.js" crossorigin></script>
     <style>
         * {
             margin: 0;
@@ -681,6 +681,132 @@
             to { transform: translateY(0); }
         }
 
+        .category-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10001;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .category-sheet {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            animation: slideUp 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .category-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-item {
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            background: rgba(20, 30, 60, 0.5);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .category-item:hover,
+        .category-item:active {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.15);
+        }
+
+        .category-item.selected {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .new-category-btn {
+            padding: 0.75rem;
+            border: 2px dashed rgba(0, 240, 255, 0.4);
+            background: rgba(0, 240, 255, 0.05);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .new-category-btn:hover,
+        .new-category-btn:active {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .new-category-input-wrapper {
+            margin-bottom: 1rem;
+        }
+
+        .new-category-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(20, 30, 60, 0.6);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .new-category-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .category-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-action-btn.cancel {
+            background: rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: var(--text-secondary);
+        }
+
+        .category-action-btn.confirm {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #0f172a;
+            border: none;
+        }
+
         .theme-title {
             font-size: 1rem;
             font-weight: 700;
@@ -747,12 +873,28 @@
             const [iconsPerPage, setIconsPerPage] = useState(parseInt(localStorage.getItem('mobileIconsPerPage')) || 24);
             const [theme, setTheme] = useState(localStorage.getItem('iconStationTheme') || 'default');
             const [urlMode, setUrlMode] = useState('ghfast');
-            const [showFilters, setShowFilters] = useState({
-                user: true,
-                builtin: true,
-                mac: true
-            });
+            const getInitialFilters = () => {
+                const saved = localStorage.getItem('iconSourceState');
+                if (saved) {
+                    try {
+                        const state = JSON.parse(saved);
+                        return {
+                            user: state.user !== undefined ? state.user : true,
+                            builtin: state.builtin !== undefined ? state.builtin : true,
+                            mac: state.mac !== undefined ? state.mac : true
+                        };
+                    } catch (e) {}
+                }
+                return { user: true, builtin: true, mac: true };
+            };
+            const [showFilters, setShowFilters] = useState(getInitialFilters);
             const [showUserFilter, setShowUserFilter] = useState(false);
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            const [categories, setCategories] = useState([]);
+            const [showCategoryModal, setShowCategoryModal] = useState(false);
+            const [uploadTargetCategory, setUploadTargetCategory] = useState('');
+            const [newCategoryName, setNewCategoryName] = useState('');
+            const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
             const [previewIndex, setPreviewIndex] = useState(null);
             const [toast, setToast] = useState(null);
             const [loading, setLoading] = useState(true);
@@ -770,7 +912,7 @@
 
             useEffect(() => {
                 applyFilters();
-            }, [searchKeyword, showFilters, icons]);
+            }, [searchKeyword, showFilters, icons, selectedCategory]);
 
             useEffect(() => {
                 const handleKeydown = (e) => {
@@ -821,12 +963,15 @@
                             if (uploadRes.ok) {
                                 const uploadData = await uploadRes.json();
                                 if (uploadData.files && Array.isArray(uploadData.files)) {
-                                    uploadedIcons = uploadData.files.map(file => {
-                                        const url = `/deskdata/user_icon/${encodeURIComponent(file)}`;
+                                    uploadedIcons = uploadData.files.map(item => {
+                                        const fileName = typeof item === 'string' ? item : item.name;
+                                        const category = typeof item === 'string' ? '' : (item.category || '');
+                                        const url = `/deskdata/user_icon/${encodeURIComponent(fileName)}`;
                                         return {
-                                            name: file,
+                                            name: fileName,
                                             download_url: isValid && token ? `${url}?token=${encodeURIComponent(token)}` : url,
-                                            isUploaded: true
+                                            isUploaded: true,
+                                            category: category
                                         };
                                     });
                                 }
@@ -836,7 +981,7 @@
                         console.warn('加载上传图标失败', e);
                     }
 
-                    const response = await fetch('HDiconsV2.json');
+                    const response = await fetch('json/HDiconsV2.json');
                     if (!response.ok) throw new Error('文件加载失败');
                     const raw = await response.json();
                     const jsonIcons = Array.isArray(raw)
@@ -853,7 +998,7 @@
 
                     let macIcons = [];
                     try {
-                        const macResponse = await fetch('MacIcons.json');
+                        const macResponse = await fetch('json/MacIcons.json');
                         if (macResponse.ok) {
                             const macRaw = await macResponse.json();
                             macIcons = Array.isArray(macRaw.icons)
@@ -871,7 +1016,30 @@
                         console.warn('加载MacIcons失败', e);
                     }
 
-                    setIcons([...uploadedIcons, ...jsonIcons, ...macIcons]);
+                    const allIcons = [...uploadedIcons, ...jsonIcons, ...macIcons];
+                    setIcons(allIcons);
+                    
+                    const userIcons = allIcons.filter(icon => icon.isUploaded);
+                    const iconCategories = [...new Set(userIcons.map(icon => icon.category || ''))];
+                    
+                    let allCategories = iconCategories;
+                    if (isValid && token) {
+                        try {
+                            const categoriesRes = await fetch('/api/list-categories', {
+                                headers: { 'X-Auth-Token': token }
+                            });
+                            if (categoriesRes.ok) {
+                                const categoriesData = await categoriesRes.json();
+                                const serverCategories = categoriesData.categories || [];
+                                allCategories = [...new Set([...iconCategories, ...serverCategories])];
+                            }
+                        } catch (e) {
+                            console.warn('获取分类列表失败', e);
+                        }
+                    }
+                    
+                    setCategories(allCategories);
+                    setSelectedCategory('all');
                     
                     if (!isValid) {
                         try {
@@ -902,6 +1070,12 @@
                     if (isUser && !showFilters.user) return false;
                     if (!isUser && !isMac && !showFilters.builtin) return false;
                     if (isMac && !showFilters.mac) return false;
+                    
+                    if (selectedCategory !== 'all') {
+                        const iconCategory = icon.category || '';
+                        if (iconCategory !== selectedCategory) return false;
+                    }
+                    
                     return icon.name.toLowerCase().includes(keyword);
                 });
                 setFilteredIcons(filtered);
@@ -937,9 +1111,16 @@
 
             const handleAuth = () => {
                 if (isLoggedIn) {
+                    const token = localStorage.getItem('authToken');
                     localStorage.removeItem('isLoggedIn');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('loginTimestamp');
+                    if (token) {
+                        fetch('/api/logout', {
+                            method: 'POST',
+                            headers: { 'X-Auth-Token': token }
+                        }).catch(() => {});
+                    }
                     setIsLoggedIn(false);
                     showToast('已退出登录');
                 } else {
@@ -953,6 +1134,60 @@
                     setTimeout(() => window.location.href = '/login.html', 1000);
                     return;
                 }
+                setShowCategoryModal(true);
+                setUploadTargetCategory('');
+                setShowNewCategoryInput(false);
+                setNewCategoryName('');
+            };
+
+            const selectCategoryForUpload = (category) => {
+                setUploadTargetCategory(category);
+            };
+
+            const handleCreateNewCategory = () => {
+                setShowNewCategoryInput(true);
+            };
+
+            const confirmNewCategory = async () => {
+                const name = newCategoryName.trim();
+                if (!name) {
+                    showToast('请输入分类名称');
+                    return;
+                }
+                try {
+                    const authToken = localStorage.getItem('authToken') || '';
+                    const response = await fetch('/api/create-category', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': authToken
+                        },
+                        body: JSON.stringify({ name })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        setUploadTargetCategory(name);
+                        if (!categories.includes(name)) {
+                            setCategories([...categories, name]);
+                        }
+                        setShowNewCategoryInput(false);
+                        setNewCategoryName('');
+                        showToast('✓ 分类创建成功');
+                    } else {
+                        showToast('✗ 创建失败: ' + (result.message || '未知错误'));
+                    }
+                } catch (error) {
+                    showToast('✗ 创建失败: ' + error.message);
+                }
+            };
+
+            const startFileUpload = () => {
+                if (!uploadTargetCategory && !showNewCategoryInput) {
+                    showToast('请选择或创建一个分类');
+                    return;
+                }
+                setShowCategoryModal(false);
+                
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = 'image/*';
@@ -962,20 +1197,21 @@
                     if (!files || files.length === 0) return;
                     showToast(`上传中...`);
                     for (let i = 0; i < files.length; i++) {
-                        await uploadFile(files[i]);
+                        await uploadFile(files[i], uploadTargetCategory);
                     }
                     loadIcons();
                 };
                 input.click();
             };
 
-            const uploadFile = async (file) => {
+            const uploadFile = async (file, category = '') => {
                 const CHUNK_SIZE = 1 * 1024 * 1024;
                 const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
                 const uploadId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
                 try {
                     const authToken = localStorage.getItem('authToken') || '';
+                    const fileName = category ? category + '/' + file.name : file.name;
                     await fetch('/api/upload/user_icon/init', {
                         method: 'POST',
                         headers: {
@@ -983,7 +1219,7 @@
                             'X-Auth-Token': authToken
                         },
                         body: JSON.stringify({
-                            fileName: file.name,
+                            fileName: fileName,
                             fileSize: file.size,
                             totalChunks,
                             fileType: 'user_icon',
@@ -1234,10 +1470,10 @@
                             setCurrentPage(1);
                         }
                     },
+                        h('option', { value: '9' }, '9/页'),    
                         h('option', { value: '12' }, '12/页'),
-                        h('option', { value: '24' }, '24/页'),
-                        h('option', { value: '36' }, '36/页'),
-                        h('option', { value: '48' }, '48/页')
+                        h('option', { value: '15' }, '15/页'),
+                        h('option', { value: '18' }, '18/页')
                     ),
                     h('div', { className: 'page-stats' }, `共 ${filteredIcons.length} 个图标，显示 ${startIcon}-${endIcon}`)
                 );
@@ -1277,16 +1513,42 @@
                 h('div', { className: 'filter-bar' },
                     showUserFilter && h('button', {
                         className: `filter-chip ${showFilters.user ? 'active' : ''}`,
-                        onClick: () => setShowFilters(f => ({ ...f, user: !f.user }))
+                        onClick: () => setShowFilters(f => {
+                            const newFilters = { ...f, user: !f.user };
+                            localStorage.setItem('iconSourceState', JSON.stringify(newFilters));
+                            return newFilters;
+                        })
                     }, `本地图标 ${showFilters.user ? '✓' : ''}`),
                     h('button', {
                         className: `filter-chip ${showFilters.builtin ? 'active' : ''}`,
-                        onClick: () => setShowFilters(f => ({ ...f, builtin: !f.builtin }))
+                        onClick: () => setShowFilters(f => {
+                            const newFilters = { ...f, builtin: !f.builtin };
+                            localStorage.setItem('iconSourceState', JSON.stringify(newFilters));
+                            return newFilters;
+                        })
                     }, `HD-Icons ${showFilters.builtin ? '✓' : ''}`),
                     h('button', {
                         className: `filter-chip ${showFilters.mac ? 'active' : ''}`,
-                        onClick: () => setShowFilters(f => ({ ...f, mac: !f.mac }))
+                        onClick: () => setShowFilters(f => {
+                            const newFilters = { ...f, mac: !f.mac };
+                            localStorage.setItem('iconSourceState', JSON.stringify(newFilters));
+                            return newFilters;
+                        })
                     }, `MacIcon ${showFilters.mac ? '✓' : ''}`)
+                ),
+                showUserFilter && showFilters.user && categories.length > 1 && h('div', { className: 'filter-bar' },
+                    h('button', {
+                        className: `filter-chip ${selectedCategory === 'all' ? 'active' : ''}`,
+                        onClick: () => { setSelectedCategory('all'); setCurrentPage(1); }
+                    }, '全部分类'),
+                    ...categories.filter(c => c !== '').map(cat => h('button', {
+                        className: `filter-chip ${selectedCategory === cat ? 'active' : ''}`,
+                        onClick: () => { setSelectedCategory(cat); setCurrentPage(1); }
+                    }, cat || '未分类')),
+                    categories.includes('') && h('button', {
+                        className: `filter-chip ${selectedCategory === '' ? 'active' : ''}`,
+                        onClick: () => { setSelectedCategory(''); setCurrentPage(1); }
+                    }, '未分类')
                 ),
                 h('div', { className: 'content-area' },
                     loading ? h('div', { className: 'loading' }, '加载中...') :
@@ -1380,6 +1642,43 @@
                         }, '📋 复制')
                     ),
                     h('div', { className: 'preview-counter' }, `${previewIndex + 1} / ${filteredIcons.length}`)
+                ),
+                showCategoryModal && showUserFilter && h('div', { className: 'category-modal', onClick: () => setShowCategoryModal(false) },
+                    h('div', { className: 'category-sheet', onClick: (e) => e.stopPropagation() },
+                        h('div', { className: 'category-title' }, '📁 选择上传分类'),
+                        h('div', { className: 'category-list' },
+                            h('div', {
+                                className: `category-item ${uploadTargetCategory === '' ? 'selected' : ''}`,
+                                onClick: () => selectCategoryForUpload('')
+                            }, '📂 未分类'),
+                            ...categories.filter(c => c !== '').map(cat => h('div', {
+                                className: `category-item ${uploadTargetCategory === cat ? 'selected' : ''}`,
+                                onClick: () => selectCategoryForUpload(cat)
+                            }, cat))
+                        ),
+                        showNewCategoryInput ? h(Fragment, null,
+                            h('div', { className: 'new-category-input-wrapper' },
+                                h('input', {
+                                    type: 'text',
+                                    className: 'new-category-input',
+                                    placeholder: '输入新分类名称...',
+                                    value: newCategoryName,
+                                    onChange: (e) => setNewCategoryName(e.target.value),
+                                    autoFocus: true
+                                })
+                            ),
+                            h('div', { className: 'category-actions' },
+                                h('button', { className: 'category-action-btn cancel', onClick: () => { setShowNewCategoryInput(false); setNewCategoryName(''); } }, '取消'),
+                                h('button', { className: 'category-action-btn confirm', onClick: confirmNewCategory }, '创建')
+                            )
+                        ) : h(Fragment, null,
+                            h('div', { className: 'new-category-btn', onClick: handleCreateNewCategory }, '+ 新建分类'),
+                            h('div', { className: 'category-actions' },
+                                h('button', { className: 'category-action-btn cancel', onClick: () => setShowCategoryModal(false) }, '取消'),
+                                h('button', { className: 'category-action-btn confirm', onClick: startFileUpload }, '选择文件')
+                            )
+                        )
+                    )
                 ),
                 toast && h('div', { className: 'toast' }, toast)
             );
