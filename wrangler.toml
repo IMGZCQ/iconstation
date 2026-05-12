@@ -1,8 +1,0 @@
-name = "iconstation"
-compatibility_date = "2026-05-12"
-main = "main.go"
-workers = true
-
-[build]
-command = "tinygo build -o worker.wasm -target wasm ."
-watch_dirs = ["."]
