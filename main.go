@@ -15,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cardinfo-github/cfw"
 )
 
 //go:embed static
@@ -28,14 +30,12 @@ var (
 )
 
 func init() {
-	exePath, err := os.Executable()
-	if err != nil {
-		log.Fatal(err)
-	}
-	exeDir := filepath.Dir(exePath)
-	userDataRoot = filepath.Join(exeDir, "UserData")
+	userDataRoot = "./UserData"
 	userDataDir = filepath.Join(userDataRoot, "icons")
 	chunksDir = filepath.Join(userDataRoot, "chunks")
+
+	_ = os.MkdirAll(userDataDir, 0755)
+	_ = os.MkdirAll(chunksDir, 0755)
 }
 
 type PasswordData struct {
@@ -54,77 +54,7 @@ type InitPasswordRequest struct {
 	Open     bool   `json:"open"`
 }
 
-func main() {
-	_ = os.MkdirAll(userDataDir, 0755)
-	_ = os.MkdirAll(chunksDir, 0755)
-	_ = os.MkdirAll(userDataRoot, 0755)
-
-	staticSubFS, err := fs.Sub(staticFS, "static")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// 定时清理过期 token（10分钟一次）
-	go func() {
-		ticker := time.NewTicker(10 * time.Minute)
-		defer ticker.Stop()
-		for range ticker.C {
-			now := time.Now()
-			validTokens.Range(func(key, value interface{}) bool {
-				if exp, ok := value.(time.Time); ok && now.After(exp) {
-					validTokens.Delete(key)
-				}
-				return true
-			})
-		}
-	}()
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "max-age=86400")
-		if r.URL.Path == "/" {
-			http.ServeFileFS(w, r, staticSubFS, "index.html")
-			return
-		}
-		http.FileServer(http.FS(staticSubFS)).ServeHTTP(w, r)
-	})
-
-	http.HandleFunc("/api/check-init", checkInit)
-	http.HandleFunc("/api/init-password", initPassword)
-	http.HandleFunc("/api/login", login)
-	http.HandleFunc("/api/logout", logout)
-	http.HandleFunc("/api/get-open", getOpen)
-	http.HandleFunc("/api/list-upload-icons", listUploadIcons)
-	http.HandleFunc("/api/create-category", withAuth(createCategory))
-	http.HandleFunc("/api/list-categories", listCategories)
-	http.HandleFunc("/api/upload/user_icon/init", withAuth(uploadInit))
-	http.HandleFunc("/api/upload/user_icon/chunk", withAuth(uploadChunk))
-	http.HandleFunc("/api/upload/user_icon/merge", withAuth(uploadMerge))
-	http.HandleFunc("/api/rename/user_icon", withAuth(renameIcon))
-	http.HandleFunc("/api/delete/user_icon", withAuth(deleteIcon))
-
-	http.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
-		if !isUserIconAccessible(r) {
-			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
-			return
-		}
-
-		path := strings.TrimPrefix(r.URL.Path, "/deskdata/user_icon/")
-		path = filepath.Clean(path)
-		target := filepath.Join(userDataDir, path)
-
-		// 安全校验：禁止路径穿越
-		if !strings.HasPrefix(target, userDataDir+string(filepath.Separator)) && target != userDataDir {
-			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
-			return
-		}
-
-		http.ServeFile(w, r, target)
-	})
-
-	log.Println("Server started on :9168")
-	log.Fatal(http.ListenAndServe(":9168", nil))
-}
-
+// -------------------- 业务逻辑完全不变 --------------------
 func checkInit(w http.ResponseWriter, r *http.Request) {
 	pwFile := filepath.Join(userDataRoot, "pw.json")
 	_, err := os.Stat(pwFile)
@@ -140,7 +70,6 @@ func isUserIconAccessible(r *http.Request) bool {
 	if token == "" {
 		token = r.URL.Query().Get("token")
 	}
-
 	if token != "" {
 		exp, ok := validTokens.Load(token)
 		if ok && time.Now().Before(exp.(time.Time)) {
@@ -358,7 +287,6 @@ func uploadMerge(w http.ResponseWriter, r *http.Request) {
 	var req UploadMergeRequest
 	_ = json.NewDecoder(r.Body).Decode(&req)
 
-	// 安全路径校验
 	dstRel := filepath.Clean(req.FileName)
 	dst, err := safeJoinPath(userDataDir, dstRel)
 	if err != nil {
@@ -475,4 +403,54 @@ func createCategory(w http.ResponseWriter, r *http.Request) {
 func sendJSON(w http.ResponseWriter, data map[string]interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(data)
+}
+
+// -------------------- Workers 适配入口 --------------------
+func main() {
+	mux := http.NewServeMux()
+
+	staticSubFS, err := fs.Sub(staticFS, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "max-age=86400")
+		if r.URL.Path == "/" {
+			http.ServeFileFS(w, r, staticSubFS, "index.html")
+			return
+		}
+		http.FileServer(http.FS(staticSubFS)).ServeHTTP(w, r)
+	})
+
+	mux.HandleFunc("/api/check-init", checkInit)
+	mux.HandleFunc("/api/init-password", initPassword)
+	mux.HandleFunc("/api/login", login)
+	mux.HandleFunc("/api/logout", logout)
+	mux.HandleFunc("/api/get-open", getOpen)
+	mux.HandleFunc("/api/list-upload-icons", listUploadIcons)
+	mux.HandleFunc("/api/create-category", withAuth(createCategory))
+	mux.HandleFunc("/api/list-categories", listCategories)
+	mux.HandleFunc("/api/upload/user_icon/init", withAuth(uploadInit))
+	mux.HandleFunc("/api/upload/user_icon/chunk", withAuth(uploadChunk))
+	mux.HandleFunc("/api/upload/user_icon/merge", withAuth(uploadMerge))
+	mux.HandleFunc("/api/rename/user_icon", withAuth(renameIcon))
+	mux.HandleFunc("/api/delete/user_icon", withAuth(deleteIcon))
+
+	mux.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
+		if !isUserIconAccessible(r) {
+			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			return
+		}
+		path := strings.TrimPrefix(r.URL.Path, "/deskdata/user_icon/")
+		path = filepath.Clean(path)
+		target := filepath.Join(userDataDir, path)
+		if !strings.HasPrefix(target, userDataDir+string(filepath.Separator)) && target != userDataDir {
+			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			return
+		}
+		http.ServeFile(w, r, target)
+	})
+
+	cfw.Serve(mux)
 }
