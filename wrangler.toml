@@ -1,14 +1,3 @@
 name = "iconstation"
 compatibility_date = "2026-05-12"
 pages_build_output_dir = "/"
-
-[build]
-command = "go build -o app"
-output_directory = "."
-
-[build.environment]
-GO_VERSION = "1.22"
-
-[dev]
-command = "./app"
-port = 8080
