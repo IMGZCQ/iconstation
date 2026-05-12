@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'Build type'
+        description: '选择构建类型'
         required: true
         default: 'docker_and_release'
         type: choice
@@ -16,11 +16,11 @@ on:
           - docker
           - release
       tag_name:
-        description: 'Tag name (e.g., 1.0.0)'
+        description: '输入版本号(0.2.2)'
         required: true
-        default: '1.0.0'
+        default: '0.2.2'
       push_latest:
-        description: 'Also push Docker image as latest?'
+        description: '系咪同时推送latest标签?'
         required: false
         default: true
         type: boolean
