@@ -1762,7 +1762,7 @@
 
             const originalFetch = window.fetch;
             window.fetch = function(url, options = {}) {
-                if (url.includes('/api/') && !url.includes('/api/login')) {
+                if (url.includes('api/') && !url.includes('api/login')) {
                     const authToken = localStorage.getItem('authToken');
                     if (authToken) {
                         options.headers = options.headers || {};
@@ -1958,7 +1958,7 @@
                     
                     // 显示用户图标
                     if (shouldShowUserIcons) {
-                        let uploadUrl = '/api/list-upload-icons';
+                        let uploadUrl = 'api/list-upload-icons';
                         if (isValid && token) {
                             uploadUrl = `${uploadUrl}?token=${encodeURIComponent(token)}`;
                         }
@@ -2411,7 +2411,7 @@
             const img = card.querySelector('.icon-image');
             let actualUrl = img.src;
 
-            if (actualUrl.includes('/deskdata/user_icon/')) {
+            if (actualUrl.includes('deskdata/user_icon/')) {
                 actualUrl = decodeURIComponent(actualUrl);
             }
             

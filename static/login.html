@@ -605,7 +605,7 @@
                         localStorage.setItem('authToken', data.token);
                         localStorage.setItem('loginTimestamp', new Date().getTime().toString());
                         setTimeout(() => {
-                            const returnUrl = localStorage.getItem('returnUrl') || '/';
+                            const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
                             localStorage.removeItem('returnUrl');
                             window.location.href = returnUrl;
                         }, 1000);
@@ -629,7 +629,7 @@
                         localStorage.setItem('authToken', data.token);
                         localStorage.setItem('loginTimestamp', new Date().getTime().toString());
                         setTimeout(() => {
-                            const returnUrl = localStorage.getItem('returnUrl') || '/';
+                            const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
                             localStorage.removeItem('returnUrl');
                             window.location.href = returnUrl;
                         }, 1000);

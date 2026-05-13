@@ -955,7 +955,7 @@
                         }
                         
                         if (shouldShowUserIcons) {
-                            let uploadUrl = '/api/list-upload-icons';
+                            let uploadUrl = 'api/list-upload-icons';
                             if (isValid && token) {
                                 uploadUrl = `${uploadUrl}?token=${encodeURIComponent(token)}`;
                             }
@@ -1131,7 +1131,7 @@
             const handleUpload = () => {
                 if (!isLoggedIn) {
                     showToast('请先登录');
-                    setTimeout(() => window.location.href = '/login.html', 1000);
+                    setTimeout(() => window.location.href = 'login.html', 1000);
                     return;
                 }
                 setShowCategoryModal(true);
