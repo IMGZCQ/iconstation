@@ -477,7 +477,7 @@
             </form>
 
             <div class="form-links">
-                <a href="/" class="back-link">← 返回（浏览模式）</a>
+                <a href="index.html" class="back-link">← 返回（浏览模式）</a>
                 <span class="separator">|</span>
                 <a href="#" class="forgot-link" id="forgotBtn">忘记密码？</a>
             </div>
@@ -517,7 +517,7 @@
             const thirtyMinutes = 30 * 60 * 1000;
 
             if (isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes) {
-                window.location.href = '/';
+                window.location.href = 'index.html';
                 return true;
             }
             return false;
@@ -527,7 +527,7 @@
             if (await checkLoginStatus()) return;
 
             try {
-                const res = await fetch('/api/check-init');
+                const res = await fetch('api/check-init');
                 const data = await res.json();
                 isInit = !data.initialized;
                 updateForm();
@@ -541,7 +541,7 @@
 
         async function loadOpenStatus() {
             try {
-                const res = await fetch('/api/get-open');
+                const res = await fetch('api/get-open');
                 const data = await res.json();
                 const checkbox = document.getElementById('openCheckbox');
                 checkbox.checked = data.open;
@@ -593,7 +593,7 @@
                 }
 
                 try {
-                    const res = await fetch('/api/init-password', {
+                    const res = await fetch('api/init-password', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ password, open })
@@ -617,7 +617,7 @@
                 }
             } else {
                 try {
-                    const res = await fetch('/api/login', {
+                    const res = await fetch('api/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ password, open })

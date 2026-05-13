@@ -944,7 +944,7 @@
                         let shouldShowUserIcons = true;
                         if (!isValid) {
                             try {
-                                const openRes = await fetch('/api/get-open');
+                                const openRes = await fetch('api/get-open');
                                 if (openRes.ok) {
                                     const openData = await openRes.json();
                                     shouldShowUserIcons = openData.open;
@@ -966,7 +966,7 @@
                                     uploadedIcons = uploadData.files.map(item => {
                                         const fileName = typeof item === 'string' ? item : item.name;
                                         const category = typeof item === 'string' ? '' : (item.category || '');
-                                        const url = `/deskdata/user_icon/${encodeURIComponent(fileName)}`;
+                                        const url = `deskdata/user_icon/${encodeURIComponent(fileName)}`;
                                         return {
                                             name: fileName,
                                             download_url: isValid && token ? `${url}?token=${encodeURIComponent(token)}` : url,
@@ -1025,7 +1025,7 @@
                     let allCategories = iconCategories;
                     if (isValid && token) {
                         try {
-                            const categoriesRes = await fetch('/api/list-categories', {
+                            const categoriesRes = await fetch('api/list-categories', {
                                 headers: { 'X-Auth-Token': token }
                             });
                             if (categoriesRes.ok) {
@@ -1043,7 +1043,7 @@
                     
                     if (!isValid) {
                         try {
-                            const openRes = await fetch('/api/get-open');
+                            const openRes = await fetch('api/get-open');
                             if (openRes.ok) {
                                 const openData = await openRes.json();
                                 setShowUserFilter(openData.open);
@@ -1116,7 +1116,7 @@
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('loginTimestamp');
                     if (token) {
-                        fetch('/api/logout', {
+                        fetch('api/logout', {
                             method: 'POST',
                             headers: { 'X-Auth-Token': token }
                         }).catch(() => {});
@@ -1124,7 +1124,7 @@
                     setIsLoggedIn(false);
                     showToast('已退出登录');
                 } else {
-                    window.location.href = '/login.html';
+                    window.location.href = 'login.html';
                 }
             };
 
@@ -1156,7 +1156,7 @@
                 }
                 try {
                     const authToken = localStorage.getItem('authToken') || '';
-                    const response = await fetch('/api/create-category', {
+                    const response = await fetch('api/create-category', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1212,7 +1212,7 @@
                 try {
                     const authToken = localStorage.getItem('authToken') || '';
                     const fileName = category ? category + '/' + file.name : file.name;
-                    await fetch('/api/upload/user_icon/init', {
+                    await fetch('api/upload/user_icon/init', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1240,20 +1240,20 @@
                         formData.append('fieldName', 'file');
                         formData.append('file', chunk, file.name);
 
-                        await fetch('/api/upload/user_icon/chunk', {
+                        await fetch('api/upload/user_icon/chunk', {
                             method: 'POST',
                             headers: { 'X-Auth-Token': authToken },
                             body: formData
                         });
                     }
 
-                    await fetch('/api/upload/user_icon/merge', {
+                    await fetch('api/upload/user_icon/merge', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-Auth-Token': authToken
                         },
-                        body: JSON.stringify({ uploadId, fileName: file.name, fieldName: 'file' })
+                        body: JSON.stringify({ uploadId, fileName: fileName, fieldName: 'file' })
                     });
                     showToast(`✓ ${file.name} 上传成功`);
                 } catch (err) {
@@ -1275,7 +1275,7 @@
 
                 try {
                     showToast('重命名中...');
-                    const response = await fetch('/api/rename/user_icon', {
+                    const response = await fetch('api/rename/user_icon', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1304,7 +1304,7 @@
 
                 try {
                     showToast('删除中...');
-                    const response = await fetch('/api/delete/user_icon', {
+                    const response = await fetch('api/delete/user_icon', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

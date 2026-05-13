@@ -1734,7 +1734,7 @@
             if (isMobileDevice() && isSmallScreen() && !localStorage.getItem('forceDesktop')) {
                 var urlParams = new URLSearchParams(window.location.search);
                 if (!urlParams.has('desktop')) {
-                    window.location.href = '/mobile.html';
+                    window.location.href = 'mobile.html';
                     return;
                 }
             }
@@ -1752,7 +1752,7 @@
                     
                     localStorage.setItem('returnUrl', window.location.href);
                     
-                    window.location.href = '/login.html';
+                    window.location.href = 'login.html';
                     return false;
                 }
                 
@@ -1782,7 +1782,7 @@
                         localStorage.removeItem('authToken');
                         localStorage.removeItem('loginTimestamp');
                         localStorage.setItem('returnUrl', window.location.href);
-                        window.location.href = '/login.html';
+                        window.location.href = 'login.html';
                         return Promise.reject(new Error('未授权'));
                     }
                     return response;
@@ -1946,7 +1946,7 @@
                     shouldShowUserIcons = true;
                     if (!isValid) {
                         try {
-                            const openRes = await fetch('/api/get-open');
+                            const openRes = await fetch('api/get-open');
                             if (openRes.ok) {
                                 const openData = await openRes.json();
                                 shouldShowUserIcons = openData.open;
@@ -1969,7 +1969,7 @@
                                 uploadedIcons = uploadData.files.map(item => {
                                     const fileName = typeof item === 'string' ? item : item.name;
                                     const category = typeof item === 'string' ? '' : (item.category || '');
-                                    const url = `/deskdata/user_icon/${encodeURIComponent(fileName)}`;
+                                    const url = `deskdata/user_icon/${encodeURIComponent(fileName)}`;
                                     return {
                                         name: fileName,
                                         download_url: isValid && token ? `${url}?token=${encodeURIComponent(token)}` : url,
@@ -2596,7 +2596,7 @@
         async function loadAvailableCategories() {
             try {
                 const authToken = localStorage.getItem('authToken') || '';
-                const response = await fetch('/api/list-categories', {
+                const response = await fetch('api/list-categories', {
                     headers: authToken ? { 'X-Auth-Token': authToken } : {}
                 });
                 if (response.ok) {
@@ -2648,7 +2648,7 @@
             }
             try {
                 const authToken = localStorage.getItem('authToken') || '';
-                const response = await fetch('/api/create-category', {
+                const response = await fetch('api/create-category', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2738,7 +2738,7 @@
 
             try {
                 const authToken = localStorage.getItem('authToken') || '';
-                const initRes = await fetch('/api/upload/user_icon/init', {
+                const initRes = await fetch('api/upload/user_icon/init', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -2768,7 +2768,7 @@
                     formData.append('fieldName', 'file');
                     formData.append('file', chunk, fileName);
 
-                    const chunkRes = await fetch('/api/upload/user_icon/chunk', {
+                    const chunkRes = await fetch('api/upload/user_icon/chunk', {
                         method: 'POST',
                         headers: {
                             'X-Auth-Token': authToken
@@ -2782,7 +2782,7 @@
                     }
                 }
 
-                const mergeRes = await fetch('/api/upload/user_icon/merge', {
+                const mergeRes = await fetch('api/upload/user_icon/merge', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -2903,7 +2903,7 @@
             try {
                 showToast('⏳ 正在重命名...');
                 
-                const response = await fetch('/api/rename/user_icon', {
+                const response = await fetch('api/rename/user_icon', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -2949,7 +2949,7 @@
             try {
                 showToast('⏳ 正在删除...');
                 
-                const response = await fetch('/api/delete/user_icon', {
+                const response = await fetch('api/delete/user_icon', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -3024,7 +3024,7 @@
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('loginTimestamp');
                 if (token) {
-                    fetch('/api/logout', {
+                    fetch('api/logout', {
                         method: 'POST',
                         headers: { 'X-Auth-Token': token }
                     }).catch(() => {});
@@ -3032,7 +3032,7 @@
                 updateAuthButton();
                 showToast('已退出登录');
             } else {
-                window.location.href = '/login.html';
+                window.location.href = 'login.html';
             }
         }
 
@@ -3102,10 +3102,10 @@
 
         async function checkInitAndLoad() {
             try {
-                const res = await fetch('/api/check-init');
+                const res = await fetch('api/check-init');
                 const data = await res.json();
                 if (!data.initialized) {
-                    window.location.href = '/login.html';
+                    window.location.href = 'login.html';
                     return;
                 }
             } catch (e) {
@@ -3129,7 +3129,7 @@
                 if (!label) return;
 
                 if (!isValid) {
-                    const openRes = await fetch('/api/get-open');
+                    const openRes = await fetch('api/get-open');
                     if (openRes.ok) {
                         const openData = await openRes.json();
                         label.style.display = openData.open ? 'flex' : 'none';
