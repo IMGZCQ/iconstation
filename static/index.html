@@ -1905,6 +1905,7 @@
             <div id="categoryList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;"></div>
             <div id="newCategoryInputWrapper" style="display: none; margin-bottom: 1rem;">
                 <input type="text" class="dialog-input" id="newCategoryInput" placeholder="输入新分类名称...">
+                <button id="confirmNewCategoryBtn" class="dialog-btn confirm-btn" style="margin-top: 0.75rem; width: 100%;">创建分类</button>
             </div>
             <button id="createCategoryBtn" class="upload-btn" style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
             <div class="dialog-buttons">
@@ -2633,6 +2634,8 @@
             document.getElementById('createCategoryBtn').style.display = 'none';
             document.getElementById('newCategoryInput').focus();
         });
+
+        document.getElementById('confirmNewCategoryBtn').addEventListener('click', confirmNewCategory);
 
         document.getElementById('newCategoryInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {

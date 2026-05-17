@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -122,6 +123,30 @@ func main() {
 	})
 
 	log.Println("Server started on :9168")
+
+	go func() {
+		sockPath := "/target/iconstation.sock"
+		_ = os.Remove(sockPath)
+
+		listener, err := net.Listen("unix", sockPath)
+		if err != nil {
+			log.Fatalf("Failed to create unix socket listener: %v", err)
+		}
+		defer listener.Close()
+
+		_ = os.Chmod(sockPath, 0777)
+
+		sockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/app/iconstation/") {
+				r.URL.Path = strings.TrimPrefix(r.URL.Path, "/app/iconstation")
+			}
+			http.DefaultServeMux.ServeHTTP(w, r)
+		})
+
+		log.Printf("Unix socket server started on %s", sockPath)
+		log.Fatal(http.Serve(listener, sockHandler))
+	}()
+
 	log.Fatal(http.ListenAndServe(":9168", nil))
 }
 
