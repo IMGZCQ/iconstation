@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <defs>
+    <symbol id="icon-copy" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M6 6V2c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4v4a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2zm2 0h4a2 2 0 0 1 2 2v4h4V2H8zM2 8v10h10V8z"/>
+    </symbol>
+    <symbol id="icon-download" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M13 8V2H7v6H2l8 8l8-8zM0 18h20v2H0z"/>
+    </symbol>
+    <symbol id="icon-save" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M0 2C0 .9.9 0 2 0h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm14 12h4V2H2v12h4c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2M9 8V5h2v3h3l-4 4l-4-4z"/>
+    </symbol>
+    <symbol id="icon-rename" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M2 4v14h14v-6l2-2v10H0V2h10L8 4zm10.3-.3l4 4L8 16H4v-4zm1.4-1.4L16 0l4 4l-2.3 2.3z"/>
+    </symbol>
+    <symbol id="icon-delete" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="m6 2l2-2h4l2 2h4v2H2V2zM3 6h14l-1 14H4zm5 2v10h1V8zm3 0v10h1V8z"/>
+    </symbol>
+    <symbol id="icon-back" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M10 13h8V7h-8V2l-8 8l8 8z"/>
+    </symbol>
+    <symbol id="icon-upload" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1M11 11h3l-4-4l-4 4h3v3h2z"/>
+    </symbol>
+    <symbol id="icon-login" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M5 5a5 5 0 0 1 10 0v2A5 5 0 0 1 5 7zM0 16.68A19.9 19.9 0 0 1 10 14c3.64 0 7.06.97 10 2.68V20H0z"/>
+    </symbol>
+    <symbol id="icon-logout" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M2 12h18v6h-2v-2H2v2H0V2h2zm8-6h8a2 2 0 0 1 2 2v3H10zm-4 5a3 3 0 1 1 0-6a3 3 0 0 1 0 6"/>
+    </symbol>
+    <symbol id="icon-search" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33l-1.42 1.42l-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+    </symbol>
+    <symbol id="icon-library" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M18 9.87V20H2V9.87a4.25 4.25 0 0 0 3-.38V14h10V9.5a4.26 4.26 0 0 0 3 .37M3 0h4l-.67 6.03A3.43 3.43 0 0 1 3 9C1.34 9 .42 7.73.95 6.15zm5 0h4l.7 6.3c.17 1.5-.91 2.7-2.42 2.7h-.56A2.38 2.38 0 0 1 7.3 6.3zm5 0h4l2.05 6.15C19.58 7.73 18.65 9 17 9a3.42 3.42 0 0 1-3.33-2.97z"/>
+    </symbol>
+    <symbol id="icon-folder" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M0 4c0-1.1.9-2 2-2h7l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2 2v10h16V6z"/>
+    </symbol>
+    <symbol id="icon-more" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M1 4h2v2H1zm4 0h14v2H5zM1 9h2v2H1zm4 0h14v2H5zm-4 5h2v2H1zm4 0h14v2H5z"/>
+    </symbol>
+    <symbol id="icon-arrow-down" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M20 10a10 10 0 1 1-20 0a10 10 0 0 1 20 0M10 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m-.7 10.54L5.75 9l1.41-1.41L10 10.4l2.83-2.82L14.24 9L10 13.24z"/>
+    </symbol>
+  </defs>
+</svg>

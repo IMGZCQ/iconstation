@@ -6,6 +6,14 @@
     <link rel="icon" href="icon.png" type="image/png">
     <title>图标空间站</title>
     <style>
+        svg.icon {
+            width: 1em;
+            height: 1em;
+            fill: currentColor;
+            vertical-align: middle;
+        }
+    </style>
+    <style>
          * {
             margin: 0;
             padding: 0;
@@ -530,7 +538,7 @@
         .icon-btn {
             flex: 1;
             min-width: auto;
-            padding: 0.4rem 0.3rem;
+            padding: 0.5rem 0.3rem;
             border: 1px solid rgba(0, 240, 255, 0.4);
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             color: var(--primary);
@@ -542,6 +550,16 @@
             backdrop-filter: blur(10px);
             letter-spacing: 0.5px;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .icon-btn svg.icon {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
         }
 
         :root[data-theme="light"] .icon-btn {
@@ -1792,7 +1810,18 @@
     </script>
 </head>
 <body>
+    <div id="icons-container"></div>
     <div class="dynamic-bg"></div>
+    <script>
+        (function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'icons.svg', false);
+            xhr.send();
+            if (xhr.status === 200) {
+                document.getElementById('icons-container').innerHTML = xhr.responseText;
+            }
+        })();
+    </script>
     <div class="navbar">
         <div class="navbar-content">
             <div class="navbar-title">
@@ -1803,7 +1832,8 @@
                 </div>
             </div>
             <button id="authBtn" class="auth-btn" onclick="handleAuth()">
-                <span id="authBtnText">🔑 登录</span>
+                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-login"/></svg>
+                <span id="authBtnText">登录</span>
             </button>
         </div>
     </div>
@@ -1812,16 +1842,16 @@
             <div style="display: flex; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%;">
                 <div class="tooltip-container">
                     <button id="uploadBtn" class="upload-btn">
-                        <span>📤</span> 上传
+                        <svg class="icon" viewBox="0 0 20 20"><use href="#icon-upload"/></svg>
+                        <span>上传</span>
                     </button>
                     <div class="tooltip">也可以在此目录直接管理：<br>【 UserData/icons 】</div>
                 </div>
                 <div class="checkbox-wrapper">
                         <button class="toggle-btn" id="toggleFilterBtn">
-                            <span>📚</span> 图标库源
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 9l6 6 6-6"/>
-                            </svg>
+                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-library"/></svg>
+                            <span>图标库源</span>
+                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-down"/></svg>
                         </button>
                         <div class="checkbox-content" id="checkboxContent">
                             <label class="cyberpunk-checkbox-label">
@@ -1840,10 +1870,9 @@
                     </div>
                     <div class="checkbox-wrapper" id="categorySection" style="display: none;">
                         <button class="toggle-btn" id="toggleCategoryBtn">
-                            <span>📁</span> 分类
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 9l6 6 6-6"/>
-                            </svg>
+                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-folder"/></svg>
+                            <span>分类</span>
+                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-down"/></svg>
                         </button>
                         <div class="checkbox-content" id="categoryContent">
                             <label class="cyberpunk-radio-label">
@@ -1855,7 +1884,7 @@
                 <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="搜索图标名称...">
-                    <span class="search-icon">🔍</span>
+                    <svg class="search-icon icon" viewBox="0 0 20 20"><use href="#icon-search"/></svg>
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
@@ -1869,9 +1898,9 @@
                 <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
                     <span>主题</span>
                     <select id="themeSelect" class="theme-select">
-                        <option value="default" selected>🎨 默认</option>
-                        <option value="light">☀️ 浅色</option>
-                        <option value="dark">🌙 深色</option>
+                        <option value="default" selected>主题 默认</option>
+                        <option value="light">浅色</option>
+                        <option value="dark">深色</option>
                     </select>
                 </div>
             </div>
@@ -1901,10 +1930,11 @@
 
     <div id="categoryDialog" class="dialog-overlay" style="display: none;">
         <div class="dialog-box" style="max-width: 400px; max-height: 80vh; display: flex; flex-direction: column;">
-            <div class="dialog-title" id="categoryDialogTitle">📁 选择上传分类</div>
+            <div class="dialog-title" id="categoryDialogTitle">选择上传分类</div>
             <div id="categoryList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;"></div>
             <div id="newCategoryInputWrapper" style="display: none; margin-bottom: 1rem;">
                 <input type="text" class="dialog-input" id="newCategoryInput" placeholder="输入新分类名称...">
+                <button id="confirmNewCategoryBtn" class="dialog-btn confirm-btn" style="margin-top: 0.75rem; width: 100%;">创建分类</button>
             </div>
             <button id="createCategoryBtn" class="upload-btn" style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
             <div class="dialog-buttons">
@@ -1927,6 +1957,32 @@
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
         let urlMode = 'ghfast';
+
+        function getIconUrl(icon) {
+            const isMac = !!icon.isMacIcon;
+            const isUser = !!icon.isUploaded;
+            
+            if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
+                return icon.download_url;
+            }
+            
+            const url = icon.download_url || '';
+            if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                return url;
+            }
+            
+            const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
+            
+            if (!fileName) return url;
+            
+            if (urlMode === 'ghfast') {
+                return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
+            } else if (urlMode === 'cdn') {
+                return JSDELIVR_PREFIX + fileName;
+            } else {
+                return url;
+            }
+        }
 
         async function loadIcons(keepPage = false) {
             try {
@@ -2024,8 +2080,9 @@
                 applyFilters(!keepPage);
                 
                 const categorySection = document.getElementById('categorySection');
-                if (categorySection) {
-                    categorySection.style.display = shouldShowUserIcons ? 'block' : 'none';
+                const checkUserIcons = document.getElementById('checkUserIcons');
+                if (categorySection && checkUserIcons) {
+                    categorySection.style.display = shouldShowUserIcons && checkUserIcons.checked ? 'block' : 'none';
                 }
             } catch (error) {
                 console.error('加载错误:', error);
@@ -2045,8 +2102,13 @@
             const url = img.getAttribute('data-url');
             let index = parseInt(img.getAttribute('data-fallback-index') || '0');
             
+            let ghfastUrl = url;
+            if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
+            }
+            
             const fallbacks = [
-                { mode: 'ghfast', url: CDN_PREFIX + url, emoji: '🟦' },
+                { mode: 'ghfast', url: ghfastUrl, emoji: '🟦' },
                 { mode: 'cdn', url: JSDELIVR_PREFIX + name, emoji: '🟪' },
                 { mode: 'raw', url: url, emoji: '🟧' }
             ];
@@ -2097,8 +2159,8 @@
                 const nameWithoutExt = icon.name.replace(/\.png$/i, '');
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
-                const iconSrc = icon.download_url;
-                const iconEmoji = isMac ? '🍎' : (isUser ? '✅' : '🟦');
+                const iconSrc = getIconUrl(icon);
+                const iconEmoji = isMac ? '🍎' : (isUser ? '✅' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeUrl = (icon.download_url || '').replace(/"/g, '&quot;');
@@ -2117,9 +2179,18 @@
                              onerror="handleImageError(this)">
                         <div class="icon-name"><span>${iconEmoji}</span> ${nameWithoutExt}</div>
                         <div class="icon-buttons" data-name="${safeName}" data-uploaded="${icon.isUploaded}">
-                            <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">💾</button>
-                            <button class="icon-btn" onclick="copyUrl(event);" title="复制链接">📋</button>
-                            ${icon.isUploaded ? `<button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="更多功能">☰</button>` : ''}
+                            <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">
+                                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-download"/></svg>
+                            </button>
+                            <button class="icon-btn" onclick="copyUrl(event);" title="复制链接">
+                                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-copy"/></svg>
+                            </button>
+                            ${!icon.isUploaded ? `<button class="icon-btn" onclick="saveIconToLibrary(event);" title="转存入库">
+                                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-save"/></svg>
+                            </button>` : ''}
+                            ${icon.isUploaded ? `<button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="更多功能">
+                                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-more"/></svg>
+                            </button>` : ''}
                         </div>
                     </div>
                 `;
@@ -2286,8 +2357,14 @@
             const userIcons = iconsData.filter(icon => icon.isUploaded);
             const categories = [...new Set(userIcons.map(icon => icon.category || ''))];
             const categoryContent = document.getElementById('categoryContent');
+            const categorySection = document.getElementById('categorySection');
             
             if (!categoryContent) return;
+
+            if (userIcons.length === 0) {
+                categorySection.style.display = 'none';
+                return;
+            }
 
             let html = '<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="">全部分类</label>';
             
@@ -2334,9 +2411,13 @@
                     const checkUserIcons = document.getElementById('checkUserIcons');
                     const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
                     const checkMacIcons = document.getElementById('checkMacIcons');
+                    const categorySection = document.getElementById('categorySection');
                     if (checkUserIcons) checkUserIcons.checked = state.user;
                     if (checkBuiltinIcons) checkBuiltinIcons.checked = state.builtin;
                     if (checkMacIcons) checkMacIcons.checked = state.mac;
+                    if (categorySection && checkUserIcons) {
+                        categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
+                    }
                 } catch (e) {}
             }
         }
@@ -2409,7 +2490,10 @@
             const button = event.target;
             const card = button.closest('.icon-card');
             const img = card.querySelector('.icon-image');
-            let actualUrl = img.src;
+            const name = img.getAttribute('data-name');
+            const url = img.getAttribute('data-url');
+            
+            let actualUrl = getIconUrl({ name, download_url: url });
 
             if (actualUrl.includes('deskdata/user_icon/')) {
                 actualUrl = decodeURIComponent(actualUrl);
@@ -2446,6 +2530,46 @@
             document.body.removeChild(textArea);
         }
 
+        function saveIconToLibrary(event) {
+            if (event) event.stopPropagation();
+            event.preventDefault();
+            
+            if (typeof window.checkLoginStatus === 'function') {
+                if (!window.checkLoginStatus()) return;
+            }
+
+            const button = event.target;
+            const card = button.closest('.icon-card');
+            const img = card.querySelector('.icon-image');
+            const name = img.getAttribute('data-name');
+            const url = img.getAttribute('data-url');
+            const actualUrl = getIconUrl({ name, download_url: url });
+
+            showToast('⏳ 转存中...');
+
+            fetch(actualUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('获取图标失败');
+                    return response.blob();
+                })
+                .then(async blob => {
+                    const TARGET_CATEGORY = '转存本地';
+                    const fileName = name;
+                    
+                    const result = await uploadFileChunked(blob, TARGET_CATEGORY + '/' + fileName);
+                    if (result.success) {
+                        showToast('✓ 转存成功');
+                        loadIcons();
+                    } else {
+                        showToast('✗ 转存失败: ' + (result.message || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    console.error('转存失败:', error);
+                    showToast('✗ 转存失败: ' + error.message);
+                });
+        }
+
         function downloadIcon(event) {
             if (event) event.stopPropagation();
             event.preventDefault();
@@ -2453,7 +2577,9 @@
             const button = event.target;
             const card = button.closest('.icon-card');
             const img = card.querySelector('.icon-image');
-            const actualUrl = img.src;
+            const name = img.getAttribute('data-name');
+            const url = img.getAttribute('data-url');
+            const actualUrl = getIconUrl({ name, download_url: url });
             const iconNameElement = card.querySelector('.icon-name');
             const baseName = iconNameElement.textContent.replace(/^[^\w\u4e00-\u9fa5]+/, '').trim();
             
@@ -2634,6 +2760,8 @@
             document.getElementById('newCategoryInput').focus();
         });
 
+        document.getElementById('confirmNewCategoryBtn').addEventListener('click', confirmNewCategory);
+
         document.getElementById('newCategoryInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 confirmNewCategory();
@@ -2680,7 +2808,7 @@
         });
 
         document.getElementById('categoryConfirmBtn').addEventListener('click', () => {
-            if (!uploadTargetCategory) {
+            if (uploadTargetCategory === null) {
                 showToast('请选择或创建一个分类');
                 return;
             }
@@ -2862,18 +2990,30 @@
         function showDefaultButtons(container) {
             container.classList.remove('menu-active');
             container.innerHTML = `
-                <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">💾</button>
-                <button class="icon-btn" onclick="copyUrl(event);" title="复制链接">📋</button>
-                <button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="更多功能">☰</button>
+                <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-download"/></svg>
+                </button>
+                <button class="icon-btn" onclick="copyUrl(event);" title="复制链接">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-copy"/></svg>
+                </button>
+                <button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="更多功能">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-more"/></svg>
+                </button>
             `;
         }
 
         function showMenuButtons(container, iconName) {
             container.classList.add('menu-active');
             container.innerHTML = `
-                <button class="icon-btn" onclick="renameIcon('${iconName.replace(/'/g, "\\'")}');" title="重命名图标">✏️</button>
-                <button class="icon-btn delete-btn" onclick="deleteIcon('${iconName.replace(/'/g, "\\'")}');" title="删除图标">🗑️</button>
-                <button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="返回">←</button>
+                <button class="icon-btn" onclick="renameIcon('${iconName.replace(/'/g, "\\'")}');" title="重命名图标">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-rename"/></svg>
+                </button>
+                <button class="icon-btn delete-btn" onclick="deleteIcon('${iconName.replace(/'/g, "\\'")}');" title="删除图标">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-delete"/></svg>
+                </button>
+                <button class="icon-btn menu-btn" onclick="toggleMenu(event);" title="返回">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-back"/></svg>
+                </button>
             `;
         }
 
@@ -3005,9 +3145,11 @@
             const authBtn = document.getElementById('authBtn');
 
             if (isValid) {
-                authBtnText.textContent = '🚪 退出登录';
+                authBtnText.textContent = '退出登录';
+                authBtn.innerHTML = '<svg class="icon" viewBox="0 0 20 20"><use href="#icon-logout"/></svg><span id="authBtnText">退出登录</span>';
             } else {
-                authBtnText.textContent = '🔑 登录';
+                authBtnText.textContent = '登录';
+                authBtn.innerHTML = '<svg class="icon" viewBox="0 0 20 20"><use href="#icon-login"/></svg><span id="authBtnText">登录</span>';
             }
         }
 

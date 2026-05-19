@@ -366,14 +366,24 @@
 
         .icon-action-btn {
             flex: 1;
-            padding: 0.35rem 0.2rem;
+            padding: 0.5rem 0.2rem;
             border: 1px solid rgba(0, 240, 255, 0.3);
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             color: var(--primary);
             border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .icon-action-btn svg.icon {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
         }
 
         .icon-action-btn:active {
@@ -855,8 +865,20 @@
     </style>
 </head>
 <body>
+    <div id="icons-container"></div>
     <div class="dynamic-bg"></div>
     <div id="root"></div>
+
+    <script>
+        (function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'icons.svg', false);
+            xhr.send();
+            if (xhr.status === 200) {
+                document.getElementById('icons-container').innerHTML = xhr.responseText;
+            }
+        })();
+    </script>
 
     <script>
         const { useState, useEffect, useCallback, useRef } = React;
@@ -864,6 +886,15 @@
 
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
+
+        function Icon(props) {
+            const { name, className = '' } = props;
+            return h('svg', {
+                className: `icon ${className}`,
+                viewBox: '0 0 20 20',
+                style: { width: '1em', height: '1em', fill: 'currentColor', verticalAlign: 'middle' }
+            }, h('use', { href: `#icon-${name}` }));
+        }
 
         function App() {
             const [icons, setIcons] = useState([]);
@@ -1104,6 +1135,30 @@
                 }
             };
 
+            const cycleUrlMode = () => {
+                const modes = ['ghfast', 'cdn', 'raw'];
+                const currentIndex = modes.indexOf(urlMode);
+                const nextIndex = (currentIndex + 1) % modes.length;
+                setUrlMode(modes[nextIndex]);
+                showToast(getUrlModeTitle());
+            };
+
+            const getUrlModeIcon = () => {
+                switch (urlMode) {
+                    case 'ghfast': return '🟦';
+                    case 'cdn': return '🟪';
+                    default: return '🟧';
+                }
+            };
+
+            const getUrlModeTitle = () => {
+                switch (urlMode) {
+                    case 'ghfast': return 'Github加速';
+                    case 'cdn': return 'CDN加速';
+                    default: return 'Github原地址';
+                }
+            };
+
             const showToast = (message) => {
                 setToast(message);
                 setTimeout(() => setToast(null), 2000);
@@ -1182,7 +1237,7 @@
             };
 
             const startFileUpload = () => {
-                if (!uploadTargetCategory && !showNewCategoryInput) {
+                if (uploadTargetCategory === null && !showNewCategoryInput) {
                     showToast('请选择或创建一个分类');
                     return;
                 }
@@ -1204,14 +1259,15 @@
                 input.click();
             };
 
-            const uploadFile = async (file, category = '') => {
+            const uploadFile = async (file, category = '', customFileName = '') => {
                 const CHUNK_SIZE = 1 * 1024 * 1024;
                 const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
                 const uploadId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const baseFileName = customFileName || file.name || 'icon.png';
 
                 try {
                     const authToken = localStorage.getItem('authToken') || '';
-                    const fileName = category ? category + '/' + file.name : file.name;
+                    const fileName = category ? category + '/' + baseFileName : baseFileName;
                     await fetch('api/upload/user_icon/init', {
                         method: 'POST',
                         headers: {
@@ -1238,7 +1294,7 @@
                         formData.append('totalChunks', totalChunks.toString());
                         formData.append('uploadId', uploadId);
                         formData.append('fieldName', 'file');
-                        formData.append('file', chunk, file.name);
+                        formData.append('file', chunk, baseFileName);
 
                         await fetch('api/upload/user_icon/chunk', {
                             method: 'POST',
@@ -1255,9 +1311,9 @@
                         },
                         body: JSON.stringify({ uploadId, fileName: fileName, fieldName: 'file' })
                     });
-                    showToast(`✓ ${file.name} 上传成功`);
+                    showToast(`✓ ${baseFileName} 上传成功`);
                 } catch (err) {
-                    showToast(`✗ ${file.name} 上传失败`);
+                    showToast(`✗ ${baseFileName} 上传失败`);
                 }
             };
 
@@ -1327,20 +1383,49 @@
 
             const getIconSrc = (icon) => {
                 const isMac = !!icon.isMacIcon;
-                return icon.download_url;
+                const isUser = !!icon.isUploaded;
+                
+                if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
+                    return icon.download_url;
+                }
+                
+                const url = icon.download_url || '';
+                if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                    return url;
+                }
+                
+                const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
+                
+                if (!fileName) return url;
+                
+                if (urlMode === 'ghfast') {
+                    return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
+                } else if (urlMode === 'cdn') {
+                    return JSDELIVR_PREFIX + fileName;
+                } else {
+                    return url;
+                }
             };
 
             const getIconEmoji = (icon) => {
                 if (icon.isMacIcon) return '🍎';
                 if (icon.isUploaded) return '✅';
-                return '🟦';
+                return urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧';
             };
 
             const handleImageError = (e, icon) => {
+                const url = icon.download_url || '';
+                const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
+                
+                let ghfastUrl = url;
+                if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                    ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
+                }
+                
                 const fallbacks = [
-                    CDN_PREFIX + icon.download_url,
-                    JSDELIVR_PREFIX + icon.name,
-                    icon.download_url
+                    ghfastUrl,
+                    JSDELIVR_PREFIX + fileName,
+                    url
                 ];
                 const currentSrc = e.target.src;
                 const currentIndex = fallbacks.indexOf(currentSrc);
@@ -1392,6 +1477,37 @@
                     showToast('✓ 开始下载');
                 } catch (err) {
                     showToast('✗ 下载失败');
+                }
+            };
+
+            const saveToLibrary = async (icon, e) => {
+                e.stopPropagation();
+                
+                if (!isLoggedIn) {
+                    showToast('请先登录');
+                    setTimeout(() => window.location.href = 'login.html', 1000);
+                    return;
+                }
+
+                const url = getIconSrc(icon);
+                const nameWithoutExt = icon.name.replace(/\.(png|svg)$/i, '');
+                const ext = icon.name.match(/\.(png|svg)$/i)?.[1] || 'png';
+
+                try {
+                    showToast('⏳ 转存中...');
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('获取图标失败');
+                    const blob = await response.blob();
+
+                    const TARGET_CATEGORY = '转存本地';
+                    
+                    await uploadFile(blob, TARGET_CATEGORY, icon.name);
+                    
+                    showToast('✓ 转存成功');
+                    loadIcons();
+                } catch (err) {
+                    showToast('✗ 转存失败: ' + err.message);
                 }
             };
 
@@ -1490,10 +1606,11 @@
                             )
                         ),
                         h('div', { className: 'header-actions' },
-                            h('button', { className: 'icon-btn-header', onClick: handleUpload, title: '上传图标' }, '📤'),
+                            h('button', { className: 'icon-btn-header', onClick: handleUpload, title: '上传图标' }, h(Icon, { name: 'upload' })),
+                            h('button', { className: 'icon-btn-header', onClick: cycleUrlMode, title: getUrlModeTitle() }, getUrlModeIcon()),
                             h('button', { className: 'icon-btn-header', onClick: cycleTheme, title: getThemeTitle() }, getThemeIcon()),
                             h('button', { className: 'icon-btn-header', onClick: handleAuth, title: isLoggedIn ? '退出登录' : '登录' },
-                                h('span', null, isLoggedIn ? '🚪' : '🔑')
+                                h(Icon, { name: isLoggedIn ? 'logout' : 'login' })
                             )
                         )
                     )
@@ -1507,7 +1624,7 @@
                             value: searchKeyword,
                             onChange: (e) => setSearchKeyword(e.target.value)
                         }),
-                        h('span', { className: 'search-icon' }, '🔍')
+                        h(Icon, { name: 'search', className: 'search-icon' })
                     )
                 ),
                 h('div', { className: 'filter-bar' },
@@ -1580,23 +1697,28 @@
                                         className: 'icon-action-btn',
                                         onClick: (e) => downloadIcon(icon, e),
                                         title: '下载'
-                                    }, '💾'),
+                                    }, h(Icon, { name: 'download' })),
                                     h('button', {
                                         className: 'icon-action-btn',
                                         onClick: (e) => copyUrl(icon, e),
                                         title: '复制链接'
-                                    }, '📋'),
+                                    }, h(Icon, { name: 'copy' })),
+                                    !icon.isUploaded && h('button', {
+                                        className: 'icon-action-btn',
+                                        onClick: (e) => saveToLibrary(icon, e),
+                                        title: '转存入库'
+                                    }, h(Icon, { name: 'save' })),
                                     icon.isUploaded && isLoggedIn && h(Fragment, null,
                                         h('button', {
                                             className: 'icon-action-btn',
                                             onClick: (e) => { e.stopPropagation(); renameIcon(icon); },
                                             title: '重命名'
-                                        }, '✏️'),
+                                        }, h(Icon, { name: 'rename' })),
                                         h('button', {
                                             className: 'icon-action-btn delete-btn',
                                             onClick: (e) => { e.stopPropagation(); deleteIcon(icon); },
                                             title: '删除'
-                                        }, '🗑️')
+                                        }, h(Icon, { name: 'delete' }))
                                     )
                                 )
                             ))
@@ -1635,17 +1757,17 @@
                         h('button', {
                             className: 'preview-action-btn',
                             onClick: () => downloadIcon(filteredIcons[previewIndex], { stopPropagation: () => {} })
-                        }, '💾 下载'),
+                        }, h(Fragment, null, h(Icon, { name: 'download' }), ' 下载')),
                         h('button', {
                             className: 'preview-action-btn',
                             onClick: () => copyUrl(filteredIcons[previewIndex], { stopPropagation: () => {} })
-                        }, '📋 复制')
+                        }, h(Fragment, null, h(Icon, { name: 'copy' }), ' 复制'))
                     ),
                     h('div', { className: 'preview-counter' }, `${previewIndex + 1} / ${filteredIcons.length}`)
                 ),
                 showCategoryModal && showUserFilter && h('div', { className: 'category-modal', onClick: () => setShowCategoryModal(false) },
                     h('div', { className: 'category-sheet', onClick: (e) => e.stopPropagation() },
-                        h('div', { className: 'category-title' }, '📁 选择上传分类'),
+                        h('div', { className: 'category-title' }, h(Fragment, null, h(Icon, { name: 'folder' }), ' 选择上传分类')),
                         h('div', { className: 'category-list' },
                             h('div', {
                                 className: `category-item ${uploadTargetCategory === '' ? 'selected' : ''}`,
