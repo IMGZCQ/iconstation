@@ -95,12 +95,6 @@
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 50px 50px;
             z-index: 0;
-            animation: gridMove 20s linear infinite;
-        }
-
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
         }
 
         body::after {
@@ -114,14 +108,7 @@
                         radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 30%),
                         radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 40%);
             z-index: 0;
-            animation: glowMove 15s ease-in-out infinite;
             pointer-events: none;
-        }
-
-        @keyframes glowMove {
-            0%, 100% { transform: translate(0, 0); }
-            33% { transform: translate(5%, 5%); }
-            66% { transform: translate(-5%, 5%); }
         }
 
         .dynamic-bg {
@@ -428,24 +415,6 @@
             gap: 0.75rem;
         }
 
-        .icon-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(0, 240, 255, 0.03),
-                transparent
-            );
-            transform: rotate(45deg);
-            transition: all 0.6s;
-            opacity: 0;
-        }
-
         .icon-card:hover {
             transform: translateY(-8px) scale(1.02);
             border-color: var(--primary);
@@ -470,14 +439,7 @@
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
-        .icon-card:hover::before {
-            opacity: 1;
-            animation: shimmer 1.5s ease-in-out;
-        }
-         @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
+        
 
         .icon-image {
             width: 100%;
