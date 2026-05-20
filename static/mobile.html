@@ -1,10 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="icon.png" type="image/png">
-    <title>图标空间站 移动版</title>
+    <title>图标空间站</title>
+    <script>
+        (function () {
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('mobile')) {
+                return;
+            }
+
+            if (localStorage.getItem('forceMobile')) {
+                return;
+            }
+
+            if (window.innerWidth > 768) {
+                window.location.href = 'index.html';
+                return;
+            }
+        })();
+    </script>
     <script src="js/react.production.min.js" crossorigin></script>
     <script src="js/react-dom.production.min.js" crossorigin></script>
     <style>
@@ -85,8 +103,13 @@
             pointer-events: none;
         }
 
-        :root[data-theme="light"] .dynamic-bg { opacity: 0.1; }
-        :root[data-theme="dark"] .dynamic-bg { opacity: 0.3; }
+        :root[data-theme="light"] .dynamic-bg {
+            opacity: 0.1;
+        }
+
+        :root[data-theme="dark"] .dynamic-bg {
+            opacity: 0.3;
+        }
 
         #root {
             position: relative;
@@ -210,7 +233,7 @@
 
         .search-input {
             width: 100%;
-            padding: 10px 40px 10px 14px;
+            padding: 10px 45px 10px 40px;
             font-size: 14px;
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 12px;
@@ -242,11 +265,38 @@
 
         .search-icon {
             position: absolute;
-            right: 12px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 16px;
             filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.4));
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-btn:hover {
+            color: var(--primary);
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .clear-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
         .filter-bar {
@@ -526,6 +576,7 @@
                 opacity: 0;
                 transform: translateX(-50%) translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(-50%) translateY(0);
@@ -687,8 +738,13 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
         }
 
         .category-modal {
@@ -862,15 +918,97 @@
         .content-area {
             padding-bottom: 70px;
         }
+
+        .about-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .about-content {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .about-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .about-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .about-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-version {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .about-body {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .about-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .about-close-btn {
+            padding: 0.5rem 1.25rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .about-close-btn:hover,
+        .about-close-btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.3);
+        }
     </style>
 </head>
+
 <body>
     <div id="icons-container"></div>
     <div class="dynamic-bg"></div>
     <div id="root"></div>
 
     <script>
-        (function() {
+        (function () {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', 'icons.svg', false);
             xhr.send();
@@ -914,7 +1052,7 @@
                             builtin: state.builtin !== undefined ? state.builtin : true,
                             mac: state.mac !== undefined ? state.mac : true
                         };
-                    } catch (e) {}
+                    } catch (e) { }
                 }
                 return { user: true, builtin: true, mac: true };
             };
@@ -930,6 +1068,9 @@
             const [toast, setToast] = useState(null);
             const [loading, setLoading] = useState(true);
             const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+            const [showAboutModal, setShowAboutModal] = useState(false);
+            const [version, setVersion] = useState('未知版本');
+            const [aboutContent, setAboutContent] = useState('加载中...');
             const touchStartX = useRef(0);
 
             useEffect(() => {
@@ -939,7 +1080,39 @@
 
             useEffect(() => {
                 loadIcons();
+                fetchVersion();
+                fetchAboutContent();
             }, []);
+
+            const fetchVersion = async () => {
+                try {
+                    const res = await fetch('api/version');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.version) {
+                            setVersion('v' + data.version);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('获取版本号失败', e);
+                    setVersion('未知版本');
+                }
+            };
+
+            const fetchAboutContent = async () => {
+                try {
+                    const res = await fetch('api/about-content');
+                    if (res.ok) {
+                        const data = await res.json();
+                        setAboutContent(data.content || '暂无内容');
+                    } else {
+                        setAboutContent('加载失败');
+                    }
+                } catch (e) {
+                    console.warn('获取关于内容失败', e);
+                    setAboutContent('加载失败');
+                }
+            };
 
             useEffect(() => {
                 applyFilters();
@@ -971,7 +1144,7 @@
                         const thirtyMinutes = 30 * 60 * 1000;
                         isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
                         token = localStorage.getItem('authToken');
-                        
+
                         let shouldShowUserIcons = true;
                         if (!isValid) {
                             try {
@@ -984,7 +1157,7 @@
                                 console.warn('获取 open 状态失败', e);
                             }
                         }
-                        
+
                         if (shouldShowUserIcons) {
                             let uploadUrl = 'api/list-upload-icons';
                             if (isValid && token) {
@@ -1049,10 +1222,10 @@
 
                     const allIcons = [...uploadedIcons, ...jsonIcons, ...macIcons];
                     setIcons(allIcons);
-                    
+
                     const userIcons = allIcons.filter(icon => icon.isUploaded);
                     const iconCategories = [...new Set(userIcons.map(icon => icon.category || ''))];
-                    
+
                     let allCategories = iconCategories;
                     if (isValid && token) {
                         try {
@@ -1068,10 +1241,10 @@
                             console.warn('获取分类列表失败', e);
                         }
                     }
-                    
+
                     setCategories(allCategories);
                     setSelectedCategory('all');
-                    
+
                     if (!isValid) {
                         try {
                             const openRes = await fetch('api/get-open');
@@ -1085,7 +1258,7 @@
                     } else {
                         setShowUserFilter(true);
                     }
-                    
+
                     setLoading(false);
                 } catch (error) {
                     console.error('加载错误:', error);
@@ -1101,12 +1274,12 @@
                     if (isUser && !showFilters.user) return false;
                     if (!isUser && !isMac && !showFilters.builtin) return false;
                     if (isMac && !showFilters.mac) return false;
-                    
+
                     if (selectedCategory !== 'all') {
                         const iconCategory = icon.category || '';
                         if (iconCategory !== selectedCategory) return false;
                     }
-                    
+
                     return icon.name.toLowerCase().includes(keyword);
                 });
                 setFilteredIcons(filtered);
@@ -1121,9 +1294,12 @@
 
             const getThemeIcon = () => {
                 switch (theme) {
-                    case 'light': return '☀️';
-                    case 'dark': return '🌙';
-                    default: return '🎨';
+                    case 'light':
+                        return h(Icon, { name: 'theme-light' });
+                    case 'dark':
+                        return h(Icon, { name: 'theme-dark' });
+                    default:
+                        return h(Icon, { name: 'theme-default' });
                 }
             };
 
@@ -1174,7 +1350,7 @@
                         fetch('api/logout', {
                             method: 'POST',
                             headers: { 'X-Auth-Token': token }
-                        }).catch(() => {});
+                        }).catch(() => { });
                     }
                     setIsLoggedIn(false);
                     showToast('已退出登录');
@@ -1242,7 +1418,7 @@
                     return;
                 }
                 setShowCategoryModal(false);
-                
+
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = 'image/*';
@@ -1320,10 +1496,10 @@
             const renameIcon = async (icon) => {
                 const newName = prompt('请输入新的图标名称（不含扩展名）：', icon.name.replace(/\.(png|svg|jpg|jpeg|webp)$/i, ''));
                 if (!newName || newName.trim() === '') return;
-                
+
                 const ext = icon.name.match(/\.(png|svg|jpg|jpeg|webp)$/i);
                 const newFileName = newName.trim() + (ext ? ext[0] : '.png');
-                
+
                 if (newFileName === icon.name) {
                     showToast('名称未改变');
                     return;
@@ -1384,20 +1560,20 @@
             const getIconSrc = (icon) => {
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
-                
+
                 if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
                     return icon.download_url;
                 }
-                
+
                 const url = icon.download_url || '';
                 if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                     return url;
                 }
-                
+
                 const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
-                
+
                 if (!fileName) return url;
-                
+
                 if (urlMode === 'ghfast') {
                     return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
                 } else if (urlMode === 'cdn') {
@@ -1416,12 +1592,12 @@
             const handleImageError = (e, icon) => {
                 const url = icon.download_url || '';
                 const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
-                
+
                 let ghfastUrl = url;
                 if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                     ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
                 }
-                
+
                 const fallbacks = [
                     ghfastUrl,
                     JSDELIVR_PREFIX + fileName,
@@ -1482,7 +1658,7 @@
 
             const saveToLibrary = async (icon, e) => {
                 e.stopPropagation();
-                
+
                 if (!isLoggedIn) {
                     showToast('请先登录');
                     setTimeout(() => window.location.href = 'login.html', 1000);
@@ -1495,15 +1671,15 @@
 
                 try {
                     showToast('⏳ 转存中...');
-                    
+
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('获取图标失败');
                     const blob = await response.blob();
 
                     const TARGET_CATEGORY = '转存本地';
-                    
+
                     await uploadFile(blob, TARGET_CATEGORY, icon.name);
-                    
+
                     showToast('✓ 转存成功');
                     loadIcons();
                 } catch (err) {
@@ -1586,7 +1762,7 @@
                             setCurrentPage(1);
                         }
                     },
-                        h('option', { value: '9' }, '9/页'),    
+                        h('option', { value: '9' }, '9/页'),
                         h('option', { value: '12' }, '12/页'),
                         h('option', { value: '15' }, '15/页'),
                         h('option', { value: '18' }, '18/页')
@@ -1602,13 +1778,16 @@
                             h('img', { src: 'icon.png', className: 'header-icon', alt: 'Logo' }),
                             h('div', { className: 'header-title' },
                                 h('div', { className: 'header-title-main' }, '图标空间站'),
-                                h('div', { className: 'header-title-sub' }, 'Icon Station v0.2.2')
+                                h('div', { className: 'header-title-sub' }, 'Icon Station ' + version)
                             )
                         ),
                         h('div', { className: 'header-actions' },
                             h('button', { className: 'icon-btn-header', onClick: handleUpload, title: '上传图标' }, h(Icon, { name: 'upload' })),
                             h('button', { className: 'icon-btn-header', onClick: cycleUrlMode, title: getUrlModeTitle() }, getUrlModeIcon()),
                             h('button', { className: 'icon-btn-header', onClick: cycleTheme, title: getThemeTitle() }, getThemeIcon()),
+                            h('button', { className: 'icon-btn-header', onClick: () => setShowAboutModal(true), title: '关于' },
+                                h(Icon, { name: 'about' })
+                            ),
                             h('button', { className: 'icon-btn-header', onClick: handleAuth, title: isLoggedIn ? '退出登录' : '登录' },
                                 h(Icon, { name: isLoggedIn ? 'logout' : 'login' })
                             )
@@ -1624,7 +1803,12 @@
                             value: searchKeyword,
                             onChange: (e) => setSearchKeyword(e.target.value)
                         }),
-                        h(Icon, { name: 'search', className: 'search-icon' })
+                        h(Icon, { name: 'search', className: 'search-icon' }),
+                        searchKeyword && h('button', {
+                            className: 'clear-btn',
+                            onClick: () => setSearchKeyword(''),
+                            title: '清空搜索'
+                        }, h(Icon, { name: 'clear' }))
                     )
                 ),
                 h('div', { className: 'filter-bar' },
@@ -1669,62 +1853,62 @@
                 ),
                 h('div', { className: 'content-area' },
                     loading ? h('div', { className: 'loading' }, '加载中...') :
-                    currentIcons.length === 0 ? h('div', { className: 'no-results' },
-                        h('p', null, '未找到匹配的图标')
-                    ) : h(Fragment, null,
-                        h('div', { className: 'icon-grid' },
-                            currentIcons.map((icon, index) => h('div', {
-                                key: startIndex + index,
-                                className: 'icon-card',
-                                onClick: () => setPreviewIndex(startIndex + index)
-                            },
-                                h('div', { className: 'icon-image-wrapper' },
-                                    h('img', {
-                                        className: 'icon-image',
-                                        src: getIconSrc(icon),
-                                        alt: icon.name,
-                                        onError: (e) => handleImageError(e, icon),
-                                        loading: 'lazy'
-                                    })
-                                ),
-                                h('div', { className: 'icon-name' },
-                                    h('span', null, getIconEmoji(icon)),
-                                    ' ',
-                                    icon.name.replace(/\.(png|svg)$/i, '')
-                                ),
-                                h('div', { className: 'icon-actions' },
-                                    h('button', {
-                                        className: 'icon-action-btn',
-                                        onClick: (e) => downloadIcon(icon, e),
-                                        title: '下载'
-                                    }, h(Icon, { name: 'download' })),
-                                    h('button', {
-                                        className: 'icon-action-btn',
-                                        onClick: (e) => copyUrl(icon, e),
-                                        title: '复制链接'
-                                    }, h(Icon, { name: 'copy' })),
-                                    !icon.isUploaded && h('button', {
-                                        className: 'icon-action-btn',
-                                        onClick: (e) => saveToLibrary(icon, e),
-                                        title: '转存入库'
-                                    }, h(Icon, { name: 'save' })),
-                                    icon.isUploaded && isLoggedIn && h(Fragment, null,
+                        currentIcons.length === 0 ? h('div', { className: 'no-results' },
+                            h('p', null, '未找到匹配的图标')
+                        ) : h(Fragment, null,
+                            h('div', { className: 'icon-grid' },
+                                currentIcons.map((icon, index) => h('div', {
+                                    key: startIndex + index,
+                                    className: 'icon-card',
+                                    onClick: () => setPreviewIndex(startIndex + index)
+                                },
+                                    h('div', { className: 'icon-image-wrapper' },
+                                        h('img', {
+                                            className: 'icon-image',
+                                            src: getIconSrc(icon),
+                                            alt: icon.name,
+                                            onError: (e) => handleImageError(e, icon),
+                                            loading: 'lazy'
+                                        })
+                                    ),
+                                    h('div', { className: 'icon-name' },
+                                        h('span', null, getIconEmoji(icon)),
+                                        ' ',
+                                        icon.name.replace(/\.(png|svg)$/i, '')
+                                    ),
+                                    h('div', { className: 'icon-actions' },
                                         h('button', {
                                             className: 'icon-action-btn',
-                                            onClick: (e) => { e.stopPropagation(); renameIcon(icon); },
-                                            title: '重命名'
-                                        }, h(Icon, { name: 'rename' })),
+                                            onClick: (e) => downloadIcon(icon, e),
+                                            title: '下载'
+                                        }, h(Icon, { name: 'download' })),
                                         h('button', {
-                                            className: 'icon-action-btn delete-btn',
-                                            onClick: (e) => { e.stopPropagation(); deleteIcon(icon); },
-                                            title: '删除'
-                                        }, h(Icon, { name: 'delete' }))
+                                            className: 'icon-action-btn',
+                                            onClick: (e) => copyUrl(icon, e),
+                                            title: '复制链接'
+                                        }, h(Icon, { name: 'copy' })),
+                                        !icon.isUploaded && h('button', {
+                                            className: 'icon-action-btn',
+                                            onClick: (e) => saveToLibrary(icon, e),
+                                            title: '转存入库'
+                                        }, h(Icon, { name: 'save' })),
+                                        icon.isUploaded && isLoggedIn && h(Fragment, null,
+                                            h('button', {
+                                                className: 'icon-action-btn',
+                                                onClick: (e) => { e.stopPropagation(); renameIcon(icon); },
+                                                title: '重命名'
+                                            }, h(Icon, { name: 'rename' })),
+                                            h('button', {
+                                                className: 'icon-action-btn delete-btn',
+                                                onClick: (e) => { e.stopPropagation(); deleteIcon(icon); },
+                                                title: '删除'
+                                            }, h(Icon, { name: 'delete' }))
+                                        )
                                     )
-                                )
-                            ))
-                        ),
-                        renderPagination()
-                    )
+                                ))
+                            ),
+                            renderPagination()
+                        )
                 ),
                 previewIndex !== null && h('div', {
                     className: 'preview-overlay',
@@ -1756,11 +1940,11 @@
                     h('div', { className: 'preview-actions', onClick: (e) => e.stopPropagation() },
                         h('button', {
                             className: 'preview-action-btn',
-                            onClick: () => downloadIcon(filteredIcons[previewIndex], { stopPropagation: () => {} })
+                            onClick: () => downloadIcon(filteredIcons[previewIndex], { stopPropagation: () => { } })
                         }, h(Fragment, null, h(Icon, { name: 'download' }), ' 下载')),
                         h('button', {
                             className: 'preview-action-btn',
-                            onClick: () => copyUrl(filteredIcons[previewIndex], { stopPropagation: () => {} })
+                            onClick: () => copyUrl(filteredIcons[previewIndex], { stopPropagation: () => { } })
                         }, h(Fragment, null, h(Icon, { name: 'copy' }), ' 复制'))
                     ),
                     h('div', { className: 'preview-counter' }, `${previewIndex + 1} / ${filteredIcons.length}`)
@@ -1802,6 +1986,21 @@
                         )
                     )
                 ),
+                showAboutModal && h('div', { className: 'about-modal', onClick: () => setShowAboutModal(false) },
+                    h('div', { className: 'about-content', onClick: (e) => e.stopPropagation() },
+                        h('div', { className: 'about-header' },
+                            h('img', { src: 'icon.png', className: 'about-icon', alt: 'Logo' }),
+                            h('div', null,
+                                h('div', { className: 'about-title' }, '图标空间站'),
+                                h('div', { className: 'about-version' }, 'Icon Station ' + version)
+                            )
+                        ),
+                        h('div', { className: 'about-body', dangerouslySetInnerHTML: { __html: aboutContent } }),
+                        h('div', { className: 'about-footer' },
+                            h('button', { className: 'about-close-btn', onClick: () => setShowAboutModal(false) }, '关闭')
+                        )
+                    )
+                ),
                 toast && h('div', { className: 'toast' }, toast)
             );
         }
@@ -1809,4 +2008,5 @@
         ReactDOM.createRoot(document.getElementById('root')).render(h(App));
     </script>
 </body>
+
 </html>

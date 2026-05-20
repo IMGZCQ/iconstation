@@ -138,6 +138,7 @@ function showIconPreview(iconUrls, index = 0) {
 
     mainImg.onclick = function(e) {
         e.stopPropagation();
+        closePreview();
     };
 
     lightbox.style.display = 'flex';

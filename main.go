@@ -22,6 +22,8 @@ import (
 //go:embed static
 var staticFS embed.FS
 
+const Version = "0.2.3"
+
 var (
 	userDataDir  string
 	chunksDir    string
@@ -95,6 +97,8 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/get-open", getOpen)
+	http.HandleFunc("/api/version", getVersion)
+	http.HandleFunc("/api/about-content", getAboutContent)
 	http.HandleFunc("/api/list-upload-icons", listUploadIcons)
 	http.HandleFunc("/api/create-category", withAuth(createCategory))
 	http.HandleFunc("/api/list-categories", listCategories)
@@ -103,6 +107,7 @@ func main() {
 	http.HandleFunc("/api/upload/user_icon/merge", withAuth(uploadMerge))
 	http.HandleFunc("/api/rename/user_icon", withAuth(renameIcon))
 	http.HandleFunc("/api/delete/user_icon", withAuth(deleteIcon))
+	http.HandleFunc("/api/move/user_icon", withAuth(moveIcon))
 
 	http.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
 		if !isUserIconAccessible(r) {
@@ -154,6 +159,27 @@ func main() {
 	}
 
 	log.Fatal(http.ListenAndServe(":9168", nil))
+}
+
+func getVersion(w http.ResponseWriter, r *http.Request) {
+	sendJSON(w, map[string]interface{}{"version": Version})
+}
+
+func getAboutContent(w http.ResponseWriter, r *http.Request) {
+	resp, err := http.Get("https://fndesk.imcq.top/?url=iconstation_gg&ver=" + Version)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"content": "", "error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"content": "", "error": err.Error()})
+		return
+	}
+
+	sendJSON(w, map[string]interface{}{"content": string(body), "error": ""})
 }
 
 func checkInit(w http.ResponseWriter, r *http.Request) {
@@ -468,6 +494,61 @@ func deleteIcon(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_ = os.Remove(target)
+	sendJSON(w, map[string]interface{}{"success": true})
+}
+
+type MoveRequest struct {
+	FileName    string `json:"fileName"`
+	NewCategory string `json:"newCategory"`
+}
+
+func moveIcon(w http.ResponseWriter, r *http.Request) {
+	var req MoveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "参数解析失败"})
+		return
+	}
+
+	srcPath, err := safeJoinPath(userDataDir, req.FileName)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+
+	if _, err := os.Stat(srcPath); os.IsNotExist(err) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "文件不存在"})
+		return
+	}
+
+	var dstDir string
+	if req.NewCategory == "" {
+		dstDir = userDataDir
+	} else {
+		dstDir = filepath.Join(userDataDir, req.NewCategory)
+		if err := os.MkdirAll(dstDir, 0755); err != nil {
+			sendJSON(w, map[string]interface{}{"success": false, "message": "创建目录失败"})
+			return
+		}
+	}
+
+	fileName := filepath.Base(srcPath)
+	dstPath := filepath.Join(dstDir, fileName)
+
+	if srcPath == dstPath {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "目标位置相同"})
+		return
+	}
+
+	if _, err := os.Stat(dstPath); err == nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "目标已存在同名文件"})
+		return
+	}
+
+	if err := os.Rename(srcPath, dstPath); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "移动失败: " + err.Error()})
+		return
+	}
+
 	sendJSON(w, map[string]interface{}{"success": true})
 }
 

@@ -291,7 +291,7 @@
 
         .search-box input {
             width: 100%;
-            padding: 12px 45px 12px 16px;
+            padding: 12px 45px 12px 45px;
             font-size: 14px;
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 16px;
@@ -318,12 +318,34 @@
 
         .search-icon {
             position: absolute;
-            right: 16px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--primary);
             font-size: 18px;
             filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-btn:hover {
+            color: var(--primary);
+            background: rgba(0, 240, 255, 0.1);
         }
 
         .switch {
@@ -1351,7 +1373,7 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            min-width: 120px;
+            min-width: 60px;
             max-width: 100%;
             box-sizing: border-box;
             font-size: 0.85rem;
@@ -1544,6 +1566,142 @@
             font-size: 0.85rem;
         }
 
+        .multi-select-btn.active {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25) 0%, rgba(251, 191, 36, 0.25) 100%);
+            border-color: rgba(234, 179, 8, 0.6);
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+        }
+
+        .upload-btn.multi-select-btn.active {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25) 0%, rgba(251, 191, 36, 0.25) 100%);
+            border-color: rgba(234, 179, 8, 0.6);
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+        }
+
+        .upload-btn.delete-btn {
+            border-color: rgba(236, 72, 153, 0.4);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            color: #ec4899;
+        }
+
+        .upload-btn.delete-btn:hover {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+            border-color: rgba(236, 72, 153, 0.6);
+        }
+
+        .icon-card.multi-select-mode {
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+
+        .icon-checkbox {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            appearance: none;
+            border: 3px solid rgba(0, 240, 255, 0.5);
+            border-radius: 10px;
+            background: rgba(20, 30, 60, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .icon-checkbox:checked {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .icon-checkbox:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 5px;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .icon-checkbox:checked:before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .icon-label {
+            display: block;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .icon-label .icon-image {
+            width: 100%;
+        }
+
+        .results-dialog-box {
+            max-width: 500px;
+            max-height: 70vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-dialog-content {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        .result-item {
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-item.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .result-item.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .result-icon {
+            font-size: 1rem;
+        }
+
+        .result-filename {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .results-summary {
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--glass-border);
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
         .dialog-overlay {
             position: fixed;
             top: 0;
@@ -1699,6 +1857,102 @@
         .confirm-btn.danger:hover {
             box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
         } 
+
+        .dialog-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .about-dialog-box {
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.95) 0%, rgba(20, 30, 60, 0.95) 100%);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 16px 40px rgba(0, 240, 255, 0.2);
+            animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .about-dialog-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .about-dialog-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .about-dialog-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-dialog-version {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .about-dialog-body {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .about-dialog-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .about-dialog-close-btn {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .about-dialog-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        :root[data-theme="light"] .about-dialog-box {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="light"] .about-dialog-body {
+            color: var(--text-primary);
+        }
+
+        :root[data-theme="dark"] .about-dialog-box {
+            background: rgba(17, 24, 39, 0.98);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
     </style>
     <script>
         (function() {
@@ -1790,18 +2044,24 @@
                 <img src="icon.png" class="navbar-icon" alt="Icon">
                 <div class="navbar-title-text">
                     <div class="navbar-title-main">图标空间站</div>
-                    <div class="navbar-title-sub">Icon Station v0.2.2</div>
+                    <div class="navbar-title-sub" id="versionText">Icon Station 未知版本</div>
                 </div>
             </div>
-            <button id="authBtn" class="auth-btn" onclick="handleAuth()">
-                <svg class="icon" viewBox="0 0 20 20"><use href="#icon-login"/></svg>
-                <span id="authBtnText">登录</span>
-            </button>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <button id="aboutBtn" class="auth-btn" onclick="showAboutModal()">
+                    <svg class="icon" viewBox="0 0 12 12"><use href="#icon-about"/></svg>
+                    <span>关于</span>
+                </button>
+                <button id="authBtn" class="auth-btn" onclick="handleAuth()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-login"/></svg>
+                    <span id="authBtnText">登录</span>
+                </button>
+            </div>
         </div>
     </div>
     <div class="container">
         <div class="control-panel">
-            <div style="display: flex; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%;">
+            <div id="normalControls" style="display: flex; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%;">
                 <div class="tooltip-container">
                     <button id="uploadBtn" class="upload-btn">
                         <svg class="icon" viewBox="0 0 20 20"><use href="#icon-upload"/></svg>
@@ -1809,6 +2069,10 @@
                     </button>
                     <div class="tooltip">也可以在此目录直接管理：<br>【 UserData/icons 】</div>
                 </div>
+                <button id="multiSelectBtn" class="upload-btn multi-select-btn" style="display: none;">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-multi-select"/></svg>
+                    <span>多选</span>
+                </button>
                 <div class="checkbox-wrapper">
                         <button class="toggle-btn" id="toggleFilterBtn">
                             <svg class="icon" viewBox="0 0 20 20"><use href="#icon-library"/></svg>
@@ -1847,6 +2111,9 @@
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="搜索图标名称...">
                     <svg class="search-icon icon" viewBox="0 0 20 20"><use href="#icon-search"/></svg>
+                    <button id="clearSearchBtn" class="clear-btn" style="display: none;" title="清空搜索">
+                        <svg class="icon" viewBox="0 0 20 20"><use href="#icon-clear"/></svg>
+                    </button>
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
@@ -1854,13 +2121,13 @@
                     <select id="cdnMode" class="cdn-select">
                         <option value="ghfast" selected>🟦Github加速</option>
                         <option value="cdn">🟪CDN加速</option>                        
-                        <option value="raw">🟧Github原地址</option>
+                        <option value="raw">🟧Github原址</option>
                     </select>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
                     <span>主题</span>
                     <select id="themeSelect" class="theme-select">
-                        <option value="default" selected>主题 默认</option>
+                        <option value="default" selected>默认</option>
                         <option value="light">浅色</option>
                         <option value="dark">深色</option>
                     </select>
@@ -1868,6 +2135,39 @@
             </div>
             
             <div id="warning" class="warning-msg" style="display: none;">⚠️ 检测到本地文件模式，部分功能可能受限。请使用本地服务器运行此页面以获得最佳体验。</div>
+            <div id="multiSelectControls" style="display: none; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--glass-border);">
+                <button id="exitMultiSelectBtn" class="upload-btn multi-select-btn active" onclick="toggleMultiSelectMode()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-exit-multi"/></svg>
+                    <span>退出多选</span>
+                </button>
+                <div style="color: var(--primary); font-weight: 600;">
+                    已选择 <span id="selectedCount">0</span> 个图标
+                </div>
+                <button class="upload-btn" onclick="selectAllIcons()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-select-all"/></svg>
+                    <span>全选</span>
+                </button>
+                <button class="upload-btn" onclick="deselectAllIcons()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-deselect-all"/></svg>
+                    <span>取消全选</span>
+                </button>
+                <button class="upload-btn move-btn" onclick="handleMoveSelected()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-move"/></svg>
+                    <span>移动</span>
+                </button>
+                <button class="upload-btn delete-btn" onclick="handleDeleteSelected()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-delete"/></svg>
+                    <span>删除</span>
+                </button>
+                <button class="upload-btn" onclick="handleSaveSelected()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-save"/></svg>
+                    <span>转存</span>
+                </button>
+                <button class="upload-btn" onclick="handleDownloadSelected()">
+                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-download"/></svg>
+                    <span>下载</span>
+                </button>
+            </div>
         </div>
 
         <div class="content">
@@ -1906,8 +2206,114 @@
         </div>
     </div>
 
+    <div id="resultsDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box results-dialog-box">
+            <div class="dialog-title" id="resultsDialogTitle">操作结果</div>
+            <div class="results-dialog-content" id="resultsDialogContent"></div>
+            <div class="results-summary" id="resultsDialogSummary"></div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn confirm-btn" id="resultsDialogCloseBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="moveDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box" style="max-width: 400px; max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="dialog-title" id="moveDialogTitle">选择目标分类</div>
+            <div id="moveCategoryList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;"></div>
+            <div id="moveNewCategoryInputWrapper" style="display: none; margin-bottom: 1rem;">
+                <input type="text" class="dialog-input" id="moveNewCategoryInput" placeholder="输入新分类名称...">
+                <button id="moveConfirmNewCategoryBtn" class="dialog-btn confirm-btn" style="margin-top: 0.75rem; width: 100%;">创建分类</button>
+            </div>
+            <button id="moveCreateCategoryBtn" class="upload-btn" style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel-btn" id="moveCancelBtn">取消</button>
+                <button class="dialog-btn confirm-btn" id="moveConfirmBtn">确认移动</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="aboutDialog" class="dialog-overlay" style="display: none;">
+        <div class="about-dialog-box">
+            <div class="about-dialog-header">
+                <img src="icon.png" class="about-dialog-icon" alt="Logo">
+                <div>
+                    <div class="about-dialog-title">图标空间站</div>
+                    <div class="about-dialog-version" id="aboutVersionText">Icon Station 未知版本</div>
+                </div>
+            </div>
+            <div class="about-dialog-body" id="aboutDialogBody">
+                加载中...
+            </div>
+            <div class="about-dialog-footer">
+                <button class="about-dialog-close-btn" onclick="hideAboutModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/common.js"></script>
     <script>
+        function showAboutModal() {
+            document.getElementById('aboutDialog').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        async function fetchAboutContent() {
+            const body = document.getElementById('aboutDialogBody');
+            if (!body) return;
+            
+            try {
+                const res = await fetch('api/about-content');
+                if (res.ok) {
+                    const data = await res.json();
+                    body.innerHTML = data.content || '暂无内容';
+                } else {
+                    body.innerHTML = '加载失败';
+                }
+            } catch (e) {
+                console.warn('获取关于内容失败', e);
+                body.innerHTML = '加载失败';
+            }
+        }
+
+        function hideAboutModal() {
+            document.getElementById('aboutDialog').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('aboutDialog')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAboutModal();
+            }
+        });
+
+        async function fetchVersion() {
+            try {
+                const res = await fetch('api/version');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.version) {
+                        const versionStr = ' v' + data.version;
+                        const versionText = document.getElementById('versionText');
+                        const aboutVersionText = document.getElementById('aboutVersionText');
+                        if (versionText) versionText.textContent = 'Icon Station' + versionStr;
+                        if (aboutVersionText) aboutVersionText.textContent = 'Icon Station' + versionStr;
+                    }
+                }
+            } catch (e) {
+                console.warn('获取版本号失败', e);
+                const versionText = document.getElementById('versionText');
+                const aboutVersionText = document.getElementById('aboutVersionText');
+                if (versionText) versionText.textContent = 'Icon Station 未知版本';
+                if (aboutVersionText) aboutVersionText.textContent = 'Icon Station 未知版本';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchVersion();
+            fetchAboutContent();
+        });
+
         if (typeof __webpack_require__ !== 'undefined') {
             __webpack_require__.p = '';
         }
@@ -2113,7 +2519,9 @@
 
             if (pageIcons.length === 0) {
                 grid.innerHTML = '<div class="no-results">未找到匹配的图标</div>';
-                renderPagination();
+                if (!isMultiSelectMode) {
+                    renderPagination();
+                }
                 return;
             }
 
@@ -2126,6 +2534,31 @@
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeUrl = (icon.download_url || '').replace(/"/g, '&quot;');
+                const globalIndex = start + index;
+                
+                const isSelected = selectedIcons.some(i => `${i.name}-${i.download_url}` === `${icon.name}-${icon.download_url}`);
+
+                if (isMultiSelectMode) {
+                    return `
+                        <div class="icon-card multi-select-mode" title="${safeName}">
+                            <input type="checkbox" class="icon-checkbox" id="checkbox-${globalIndex}" data-icon-index="${globalIndex}" 
+                                   ${isSelected ? 'checked' : ''} 
+                                   onchange="toggleIconSelection(${globalIndex})">
+                            <label for="checkbox-${globalIndex}" class="icon-label">
+                                <img class="icon-image"
+                                     src="${iconSrc}"
+                                     alt="${nameWithoutExt}"
+                                     data-name="${safeName}"
+                                     data-url="${safeUrl}"
+                                     data-fallback-index="0"
+                                     data-global-index="${globalIndex}"
+                                     style="cursor: pointer;"
+                                     onerror="handleImageError(this)">
+                            </label>
+                            <div class="icon-name"><span>${iconEmoji}</span> ${nameWithoutExt}</div>
+                        </div>
+                    `;
+                }
 
                 return `
                     <div class="icon-card" title="${safeName}">
@@ -2135,7 +2568,7 @@
                              data-name="${safeName}"
                              data-url="${safeUrl}"
                              data-fallback-index="0"
-                             data-global-index="${start + index}"
+                             data-global-index="${globalIndex}"
                              onclick="previewIcon(event);"
                              style="cursor: pointer;"
                              onerror="handleImageError(this)">
@@ -2158,7 +2591,9 @@
                 `;
             }).join('');
 
-            renderPagination();
+            if (!isMultiSelectMode) {
+                renderPagination();
+            }
         }
 
         function previewIcon(event) {
@@ -2351,7 +2786,122 @@
             });
         }
 
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        
+        searchInput.addEventListener('input', function() {
+            applyFilters();
+            clearBtn.style.display = searchInput.value.trim() ? 'flex' : 'none';
+        });
+        
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            applyFilters();
+        });
+
+        let isMultiSelectMode = false;
+        let selectedIcons = [];
+
+        const multiSelectBtn = document.getElementById('multiSelectBtn');
+        const normalControls = document.getElementById('normalControls');
+        const multiSelectControls = document.getElementById('multiSelectControls');
+        const pagination = document.getElementById('pagination');
+
+        if (multiSelectBtn) {
+            multiSelectBtn.addEventListener('click', toggleMultiSelectMode);
+        }
+
+        function toggleMultiSelectMode() {
+            isMultiSelectMode = !isMultiSelectMode;
+            
+            if (isMultiSelectMode) {
+                enterMultiSelectMode();
+            } else {
+                exitMultiSelectMode();
+            }
+        }
+
+        function enterMultiSelectMode() {
+            isMultiSelectMode = true;
+            selectedIcons = [];
+            
+            multiSelectBtn.classList.add('active');
+            
+            normalControls.style.display = 'none';
+            multiSelectControls.style.display = 'flex';
+            pagination.style.display = 'none';
+            
+            renderIcons();
+        }
+
+        function exitMultiSelectMode() {
+            isMultiSelectMode = false;
+            selectedIcons = [];
+            
+            multiSelectBtn.classList.remove('active');
+            
+            normalControls.style.display = 'flex';
+            multiSelectControls.style.display = 'none';
+            pagination.style.display = 'block';
+            
+            renderIcons();
+        }
+
+        function toggleIconSelection(index) {
+            const icon = filteredIcons[index];
+            const iconId = `${icon.name}-${icon.download_url}`;
+            
+            const checkbox = document.querySelector(`input[type="checkbox"][data-icon-index="${index}"]`);
+            if (checkbox) {
+                if (checkbox.checked) {
+                    selectedIcons.push(icon);
+                } else {
+                    const idx = selectedIcons.findIndex(i => `${i.name}-${i.download_url}` === iconId);
+                    if (idx > -1) {
+                        selectedIcons.splice(idx, 1);
+                    }
+                }
+            }
+            
+            updateSelectedCount();
+        }
+
+        function selectAllIcons() {
+            const start = (currentPage - 1) * iconsPerPage;
+            const end = start + iconsPerPage;
+            const pageIcons = filteredIcons.slice(start, end);
+            
+            pageIcons.forEach(icon => {
+                const iconId = `${icon.name}-${icon.download_url}`;
+                if (!selectedIcons.find(i => `${i.name}-${i.download_url}` === iconId)) {
+                    selectedIcons.push(icon);
+                }
+            });
+            
+            document.querySelectorAll('.icon-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            updateSelectedCount();
+        }
+
+        function deselectAllIcons() {
+            selectedIcons = [];
+            
+            document.querySelectorAll('.icon-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const countSpan = document.getElementById('selectedCount');
+            if (countSpan) {
+                countSpan.textContent = selectedIcons.length;
+            }
+        }
 
         function saveCheckboxState() {
             const checkUserIcons = document.getElementById('checkUserIcons');
@@ -3134,6 +3684,10 @@
                     }).catch(() => {});
                 }
                 updateAuthButton();
+                const multiSelectBtn = document.getElementById('multiSelectBtn');
+                if (multiSelectBtn) {
+                    multiSelectBtn.style.display = 'none';
+                }
                 showToast('已退出登录');
             } else {
                 window.location.href = 'login.html';
@@ -3218,6 +3772,16 @@
             await loadIcons();
             updateAuthButton();
             await updateLocalIconsVisibility();
+            
+            const multiSelectBtn = document.getElementById('multiSelectBtn');
+            if (multiSelectBtn) {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                const loginTimestamp = localStorage.getItem('loginTimestamp');
+                const currentTime = new Date().getTime();
+                const thirtyMinutes = 30 * 60 * 1000;
+                const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+                multiSelectBtn.style.display = isValid ? 'flex' : 'none';
+            }
         }
 
         async function updateLocalIconsVisibility() {
@@ -3246,7 +3810,379 @@
             }
         }
 
+        let moveTargetCategory = '';
+
+        async function handleDeleteSelected() {
+            if (selectedIcons.length === 0) {
+                showToast('请先选择要删除的图标');
+                return;
+            }
+
+            const userIcons = selectedIcons.filter(i => i.isUploaded);
+            if (userIcons.length === 0) {
+                showToast('只能删除本地图标');
+                return;
+            }
+
+            const confirmed = await showDialog({
+                title: '确认删除',
+                message: `确定要删除选中的 ${userIcons.length} 个本地图标吗？此操作无法撤销。`,
+                confirmText: '删除',
+                danger: true
+            });
+
+            if (!confirmed) return;
+
+            const results = [];
+            const authToken = localStorage.getItem('authToken') || '';
+
+            for (const icon of userIcons) {
+                try {
+                    const response = await fetch('api/delete/user_icon', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': authToken
+                        },
+                        body: JSON.stringify({ fileName: icon.name })
+                    });
+                    const result = await response.json();
+                    results.push({
+                        name: icon.name,
+                        success: result.success,
+                        message: result.success ? '删除成功' : (result.message || '删除失败')
+                    });
+                } catch (error) {
+                    results.push({
+                        name: icon.name,
+                        success: false,
+                        message: error.message
+                    });
+                }
+            }
+
+            showResultsDialog('删除结果', results);
+            await loadIcons(false);
+            deselectAllIcons();
+        }
+
+        function handleMoveSelected() {
+            if (selectedIcons.length === 0) {
+                showToast('请先选择要移动的图标');
+                return;
+            }
+
+            const userIcons = selectedIcons.filter(i => i.isUploaded);
+            if (userIcons.length === 0) {
+                showToast('只能移动本地图标');
+                return;
+            }
+
+            moveTargetCategory = '';
+            document.getElementById('moveNewCategoryInputWrapper').style.display = 'none';
+            document.getElementById('moveNewCategoryInput').value = '';
+            document.getElementById('moveCreateCategoryBtn').style.display = 'block';
+            loadMoveCategories().then(() => {
+                renderMoveCategoryList();
+            });
+            document.getElementById('moveDialog').style.display = 'flex';
+        }
+
+        async function loadMoveCategories() {
+            try {
+                const authToken = localStorage.getItem('authToken') || '';
+                const response = await fetch('api/list-categories', {
+                    headers: authToken ? { 'X-Auth-Token': authToken } : {}
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    availableCategories = data.categories || [];
+                }
+            } catch (e) {
+                console.warn('获取分类列表失败', e);
+                availableCategories = [];
+            }
+        }
+
+        function renderMoveCategoryList() {
+            const categoryList = document.getElementById('moveCategoryList');
+            const userIcons = iconsData.filter(icon => icon.isUploaded);
+            const categoriesFromIcons = [...new Set(userIcons.map(icon => icon.category || ''))];
+            const allCategories = [...new Set([...availableCategories, ...categoriesFromIcons])];
+            
+            let html = `<div class="category-item ${moveTargetCategory === '' ? 'selected' : ''}" onclick="selectMoveCategory('')">📂 未分类</div>`;
+            allCategories.filter(c => c !== '').sort((a, b) => a.localeCompare(b)).forEach(cat => {
+                html += `<div class="category-item ${moveTargetCategory === cat ? 'selected' : ''}" onclick="selectMoveCategory('${cat.replace(/'/g, "\\'")}')">${cat}</div>`;
+            });
+            
+            categoryList.innerHTML = html;
+        }
+
+        function selectMoveCategory(category) {
+            moveTargetCategory = category;
+            renderMoveCategoryList();
+        }
+
+        document.getElementById('moveCreateCategoryBtn').addEventListener('click', () => {
+            document.getElementById('moveNewCategoryInputWrapper').style.display = 'block';
+            document.getElementById('moveCreateCategoryBtn').style.display = 'none';
+            document.getElementById('moveNewCategoryInput').focus();
+        });
+
+        document.getElementById('moveConfirmNewCategoryBtn').addEventListener('click', confirmMoveNewCategory);
+
+        document.getElementById('moveNewCategoryInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                confirmMoveNewCategory();
+            }
+        });
+
+        async function confirmMoveNewCategory() {
+            const name = document.getElementById('moveNewCategoryInput').value.trim();
+            if (!name) {
+                showToast('请输入分类名称');
+                return;
+            }
+            try {
+                const authToken = localStorage.getItem('authToken') || '';
+                const response = await fetch('api/create-category', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Auth-Token': authToken
+                    },
+                    body: JSON.stringify({ name })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    moveTargetCategory = name;
+                    if (!availableCategories.includes(name)) {
+                        availableCategories.push(name);
+                    }
+                    document.getElementById('moveNewCategoryInputWrapper').style.display = 'none';
+                    document.getElementById('moveCreateCategoryBtn').style.display = 'block';
+                    document.getElementById('moveNewCategoryInput').value = '';
+                    renderMoveCategoryList();
+                    showToast('✓ 分类创建成功');
+                } else {
+                    showToast('✗ 创建失败: ' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                showToast('✗ 创建失败: ' + error.message);
+            }
+        }
+
+        document.getElementById('moveCancelBtn').addEventListener('click', () => {
+            document.getElementById('moveDialog').style.display = 'none';
+        });
+
+        document.getElementById('moveConfirmBtn').addEventListener('click', async () => {
+            if (moveTargetCategory === null) {
+                showToast('请选择或创建一个分类');
+                return;
+            }
+
+            document.getElementById('moveDialog').style.display = 'none';
+
+            const userIcons = selectedIcons.filter(i => i.isUploaded);
+            const results = [];
+            const authToken = localStorage.getItem('authToken') || '';
+
+            for (const icon of userIcons) {
+                try {
+                    const response = await fetch('api/move/user_icon', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': authToken
+                        },
+                        body: JSON.stringify({ 
+                            fileName: icon.name,
+                            newCategory: moveTargetCategory
+                        })
+                    });
+                    const result = await response.json();
+                    results.push({
+                        name: icon.name,
+                        success: result.success,
+                        message: result.success ? '移动成功' : (result.message || '移动失败')
+                    });
+                } catch (error) {
+                    results.push({
+                        name: icon.name,
+                        success: false,
+                        message: error.message
+                    });
+                }
+            }
+
+            showResultsDialog('移动结果', results);
+            await loadIcons(false);
+            deselectAllIcons();
+        });
+
+        async function handleSaveSelected() {
+            if (selectedIcons.length === 0) {
+                showToast('请先选择要转存的图标');
+                return;
+            }
+
+            const nonUserIcons = selectedIcons.filter(i => !i.isUploaded);
+            if (nonUserIcons.length === 0) {
+                showToast('没有可转存的图标（只有非本地图标可转存）');
+                return;
+            }
+
+            if (typeof window.checkLoginStatus === 'function') {
+                if (!window.checkLoginStatus()) return;
+            }
+
+            showToast(`⏳ 正在转存 ${nonUserIcons.length} 个图标...`);
+
+            const results = [];
+            const TARGET_CATEGORY = '转存本地';
+
+            for (const icon of nonUserIcons) {
+                try {
+                    const actualUrl = getIconUrl(icon);
+                    const response = await fetch(actualUrl);
+                    if (!response.ok) throw new Error('获取图标失败');
+                    const blob = await response.blob();
+                    
+                    const result = await uploadFileChunked(blob, TARGET_CATEGORY + '/' + icon.name);
+                    results.push({
+                        name: icon.name,
+                        success: result.success,
+                        message: result.success ? '转存成功' : (result.message || '转存失败')
+                    });
+                } catch (error) {
+                    results.push({
+                        name: icon.name,
+                        success: false,
+                        message: error.message
+                    });
+                }
+            }
+
+            showResultsDialog('转存结果', results);
+            await loadIcons(false);
+            deselectAllIcons();
+        }
+
+        async function handleDownloadSelected() {
+            if (selectedIcons.length === 0) {
+                showToast('请先选择要下载的图标');
+                return;
+            }
+
+            showToast(`⏳ 正在下载 ${selectedIcons.length} 个图标...`);
+
+            const results = [];
+
+            for (const icon of selectedIcons) {
+                try {
+                    const actualUrl = getIconUrl(icon);
+                    const response = await fetch(actualUrl);
+                    if (!response.ok) throw new Error('网络响应错误');
+                    
+                    const blob = await response.blob();
+                    const type = response.headers.get('content-type') || blob.type || '';
+                    const mime = type.toLowerCase();
+                    
+                    const nameWithoutExt = icon.name.replace(/\.(png|svg|jpg|jpeg|webp)$/i, '');
+                    
+                    if (mime.includes('svg')) {
+                        try {
+                            await convertSvgBlobToPng(blob, nameWithoutExt + '.png');
+                            results.push({
+                                name: icon.name,
+                                success: true,
+                                message: '下载成功'
+                            });
+                        } catch (e) {
+                            const a = document.createElement('a');
+                            const blobUrl = URL.createObjectURL(blob);
+                            a.href = blobUrl;
+                            a.download = nameWithoutExt + '.svg';
+                            document.body.appendChild(a);
+                            a.click();
+                            setTimeout(() => {
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(blobUrl);
+                            }, 100);
+                            results.push({
+                                name: icon.name,
+                                success: true,
+                                message: '下载成功'
+                            });
+                        }
+                    } else {
+                        const ext = mime.includes('png') ? '.png' : (mime.includes('jpeg') ? '.jpg' : (mime.includes('webp') ? '.webp' : '.png'));
+                        const a = document.createElement('a');
+                        const blobUrl = URL.createObjectURL(blob);
+                        a.href = blobUrl;
+                        a.download = nameWithoutExt + ext;
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(blobUrl);
+                        }, 100);
+                        results.push({
+                            name: icon.name,
+                            success: true,
+                            message: '下载成功'
+                        });
+                    }
+                } catch (error) {
+                    results.push({
+                        name: icon.name,
+                        success: false,
+                        message: error.message
+                    });
+                }
+            }
+
+            showResultsDialog('下载结果', results);
+            deselectAllIcons();
+        }
+
+        function showResultsDialog(title, results) {
+            const dialog = document.getElementById('resultsDialog');
+            const titleElement = document.getElementById('resultsDialogTitle');
+            const contentElement = document.getElementById('resultsDialogContent');
+            const summaryElement = document.getElementById('resultsDialogSummary');
+
+            titleElement.textContent = title;
+
+            const successCount = results.filter(r => r.success).length;
+            const failCount = results.filter(r => !r.success).length;
+
+            contentElement.innerHTML = results.map(result => `
+                <div class="result-item ${result.success ? 'success' : 'error'}">
+                    <span class="result-icon">${result.success ? '✓' : '✗'}</span>
+                    <span class="result-filename">${result.name}</span>
+                    <span>${result.message}</span>
+                </div>
+            `).join('');
+
+            summaryElement.textContent = `成功: ${successCount} | 失败: ${failCount}`;
+
+            dialog.style.display = 'flex';
+        }
+
+        document.getElementById('resultsDialogCloseBtn').addEventListener('click', () => {
+            document.getElementById('resultsDialog').style.display = 'none';
+        });
+
+        document.getElementById('resultsDialog').addEventListener('click', (e) => {
+            if (e.target.id === 'resultsDialog') {
+                document.getElementById('resultsDialog').style.display = 'none';
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', checkInitAndLoad);
+
     </script>
 </body>
 </html>
