@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +8,14 @@
     <title>图标空间站</title>
     <style>
         svg.icon {
-            width: 1em;
-            height: 1em;
+            width: 1.5em;
+            height: 1.5em;
             fill: currentColor;
             vertical-align: middle;
         }
     </style>
     <style>
-         * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -90,7 +91,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 50px 50px;
@@ -105,8 +106,8 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle at 20% 20%, var(--glow-color) 0%, transparent 30%),
-                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 30%),
-                        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 40%);
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 40%);
             z-index: 0;
             pointer-events: none;
         }
@@ -152,7 +153,7 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         :root[data-theme="light"] .navbar {
@@ -184,7 +185,7 @@
         }
 
         .navbar-icon {
-            width: 44px;
+            width: 52px;
             border-radius: 0px;
             box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
             flex-shrink: 0;
@@ -210,7 +211,7 @@
         }
 
         .navbar-title-main {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
             background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 50%, #ec4899 100%);
             -webkit-background-clip: text;
@@ -222,7 +223,7 @@
         }
 
         .navbar-title-sub {
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             line-height: 1.5;
             white-space: nowrap;
@@ -250,7 +251,7 @@
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .auth-btn {
@@ -276,7 +277,7 @@
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
             transform: translateY(-3px);
             box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .search-box {
@@ -300,15 +301,15 @@
             color: white;
             backdrop-filter: blur(20px);
             box-shadow: 0 8px 32px rgba(0, 240, 255, 0.1),
-                        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .search-box input:focus {
             border-color: var(--primary);
             box-shadow: 0 8px 40px rgba(0, 240, 255, 0.25),
-                        0 0 0 4px rgba(0, 240, 255, 0.1),
-                        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+                0 0 0 4px rgba(0, 240, 255, 0.1),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
             background: rgba(20, 30, 60, 0.8);
         }
 
@@ -388,12 +389,12 @@
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
 
-        input:checked + .slider {
+        input:checked+.slider {
             background: rgba(0, 240, 255, 0.2);
             border-color: var(--primary);
         }
 
-        input:checked + .slider:before {
+        input:checked+.slider:before {
             transform: translateX(26px);
         }
 
@@ -429,7 +430,7 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
             display: flex;
@@ -441,8 +442,8 @@
             transform: translateY(-8px) scale(1.02);
             border-color: var(--primary);
             box-shadow: 0 20px 50px rgba(0, 240, 255, 0.15),
-                        0 0 30px rgba(0, 240, 255, 0.08),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+                0 0 30px rgba(0, 240, 255, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         :root[data-theme="light"] .icon-card {
@@ -461,7 +462,7 @@
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
-        
+
 
         .icon-image {
             width: 100%;
@@ -939,6 +940,7 @@
                 transform: translateX(100px);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -1021,11 +1023,11 @@
                 min-width: 140px;
                 max-width: 100%;
             }
-            
+
             .navbar-title-main {
                 font-size: 1rem;
             }
-            
+
             .auth-btn {
                 padding: 0.4rem 0.6rem;
                 font-size: 0.8rem;
@@ -1049,11 +1051,11 @@
                 padding: 0.75rem;
                 gap: 0.5rem;
             }
-            
+
             .icon-name {
                 font-size: 0.75rem;
             }
-            
+
             .icon-btn {
                 font-size: 0.9rem;
                 padding: 0.35rem 0.25rem;
@@ -1172,6 +1174,7 @@
                 opacity: 0;
                 transform: translateY(-5px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1256,7 +1259,8 @@
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
-        .cyberpunk-checkbox-label, .cyberpunk-radio-label {
+        .cyberpunk-checkbox-label,
+        .cyberpunk-radio-label {
             font-size: 0.85rem;
             color: var(--text-secondary);
             cursor: pointer;
@@ -1268,7 +1272,8 @@
             margin-bottom: 0.3rem;
         }
 
-        .cyberpunk-checkbox-label:hover, .cyberpunk-radio-label:hover {
+        .cyberpunk-checkbox-label:hover,
+        .cyberpunk-radio-label:hover {
             color: var(--primary);
         }
 
@@ -1320,7 +1325,7 @@
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
             transform: translateY(-3px);
             box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .cdn-select {
@@ -1733,6 +1738,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1802,7 +1808,7 @@
         .dialog-input:focus {
             border-color: var(--primary);
             box-shadow: 0 4px 25px rgba(0, 240, 255, 0.25),
-                        0 0 0 4px rgba(0, 240, 255, 0.1);
+                0 0 0 4px rgba(0, 240, 255, 0.1);
         }
 
         .dialog-input::placeholder {
@@ -1856,7 +1862,7 @@
 
         .confirm-btn.danger:hover {
             box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
-        } 
+        }
 
         .dialog-overlay {
             position: fixed;
@@ -1898,7 +1904,7 @@
         }
 
         .about-dialog-title {
-            font-size: 1.15rem;
+            font-size: 1.5rem;
             font-weight: 700;
             background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
             -webkit-background-clip: text;
@@ -1907,7 +1913,7 @@
         }
 
         .about-dialog-version {
-            font-size: 0.75rem;
+            font-size: 1rem;
             color: var(--text-secondary);
         }
 
@@ -1949,16 +1955,24 @@
             color: var(--text-primary);
         }
 
+        :root[data-theme="light"] .about-dialog-icon {
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.6);
+            border: 2px solid rgba(30, 64, 175, 0.7);
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
         :root[data-theme="dark"] .about-dialog-box {
             background: rgba(17, 24, 39, 0.98);
             border-color: rgba(255, 255, 255, 0.08);
         }
     </style>
     <script>
-        (function() {
+        (function () {
             function isMobileDevice() {
                 return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                       (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /Macintosh/i.test(navigator.userAgent));
+                    (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /Macintosh/i.test(navigator.userAgent));
             }
 
             function isSmallScreen() {
@@ -1973,7 +1987,7 @@
                 }
             }
 
-            window.checkLoginStatus = function() {
+            window.checkLoginStatus = function () {
                 const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
                 const loginTimestamp = localStorage.getItem('loginTimestamp');
                 const currentTime = new Date().getTime();
@@ -1983,19 +1997,19 @@
                     localStorage.removeItem('isLoggedIn');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('loginTimestamp');
-                    
+
                     localStorage.setItem('returnUrl', window.location.href);
-                    
+
                     window.location.href = 'login.html';
                     return false;
                 }
-                
+
                 localStorage.setItem('loginTimestamp', currentTime.toString());
                 return true;
             };
 
             const originalFetch = window.fetch;
-            window.fetch = function(url, options = {}) {
+            window.fetch = function (url, options = {}) {
                 if (url.includes('api/') && !url.includes('api/login')) {
                     const authToken = localStorage.getItem('authToken');
                     if (authToken) {
@@ -2025,11 +2039,12 @@
         })();
     </script>
 </head>
+
 <body>
     <div id="icons-container"></div>
     <div class="dynamic-bg"></div>
     <script>
-        (function() {
+        (function () {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', 'icons.svg', false);
             xhr.send();
@@ -2049,11 +2064,15 @@
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <button id="aboutBtn" class="auth-btn" onclick="showAboutModal()">
-                    <svg class="icon" viewBox="0 0 12 12"><use href="#icon-about"/></svg>
+                    <svg class="icon" viewBox="0 0 12 12">
+                        <use href="#icon-about" />
+                    </svg>
                     <span>关于</span>
                 </button>
                 <button id="authBtn" class="auth-btn" onclick="handleAuth()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-login"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-login" />
+                    </svg>
                     <span id="authBtnText">登录</span>
                 </button>
             </div>
@@ -2061,70 +2080,90 @@
     </div>
     <div class="container">
         <div class="control-panel">
-            <div id="normalControls" style="display: flex; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%;">
+            <div id="normalControls"
+                style="display: flex; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%;">
                 <div class="tooltip-container">
                     <button id="uploadBtn" class="upload-btn">
-                        <svg class="icon" viewBox="0 0 20 20"><use href="#icon-upload"/></svg>
+                        <svg class="icon" viewBox="0 0 20 20">
+                            <use href="#icon-upload" />
+                        </svg>
                         <span>上传</span>
                     </button>
                     <div class="tooltip">也可以在此目录直接管理：<br>【 UserData/icons 】</div>
                 </div>
                 <button id="multiSelectBtn" class="upload-btn multi-select-btn" style="display: none;">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-multi-select"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-multi-select" />
+                    </svg>
                     <span>多选</span>
                 </button>
                 <div class="checkbox-wrapper">
-                        <button class="toggle-btn" id="toggleFilterBtn">
-                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-library"/></svg>
-                            <span>图标库源</span>
-                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-down"/></svg>
-                        </button>
-                        <div class="checkbox-content" id="checkboxContent">
-                            <label class="cyberpunk-checkbox-label">
-                                <input type="checkbox" class="cyberpunk-checkbox" id="checkUserIcons" checked>
-                                本地图标
-                            </label>
-                            <label class="cyberpunk-checkbox-label">
-                                <input type="checkbox" class="cyberpunk-checkbox" id="checkBuiltinIcons" checked>
-                                HD-Icons
-                            </label>
-                            <label class="cyberpunk-checkbox-label">
-                                <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
-                                MacIcon
-                            </label>
-                        </div>
+                    <button class="toggle-btn" id="toggleFilterBtn">
+                        <svg class="icon" viewBox="0 0 20 20">
+                            <use href="#icon-library" />
+                        </svg>
+                        <span>图标库源</span>
+                        <svg class="icon" viewBox="0 0 20 20">
+                            <use href="#icon-arrow-down" />
+                        </svg>
+                    </button>
+                    <div class="checkbox-content" id="checkboxContent">
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkUserIcons" checked>
+                            本地图标
+                        </label>
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkBuiltinIcons" checked>
+                            HD-Icons
+                        </label>
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
+                            MacIcon
+                        </label>
                     </div>
-                    <div class="checkbox-wrapper" id="categorySection" style="display: none;">
-                        <button class="toggle-btn" id="toggleCategoryBtn">
-                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-folder"/></svg>
-                            <span>分类</span>
-                            <svg class="icon" viewBox="0 0 20 20"><use href="#icon-arrow-down"/></svg>
-                        </button>
-                        <div class="checkbox-content" id="categoryContent">
-                            <label class="cyberpunk-radio-label">
-                                <input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="">
-                                全部分类
-                            </label>
-                        </div>
+                </div>
+                <div class="checkbox-wrapper" id="categorySection" style="display: none;">
+                    <button class="toggle-btn" id="toggleCategoryBtn">
+                        <svg class="icon" viewBox="0 0 20 20">
+                            <use href="#icon-folder" />
+                        </svg>
+                        <span>分类</span>
+                        <svg class="icon" viewBox="0 0 20 20">
+                            <use href="#icon-arrow-down" />
+                        </svg>
+                    </button>
+                    <div class="checkbox-content" id="categoryContent">
+                        <label class="cyberpunk-radio-label">
+                            <input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories"
+                                checked value="">
+                            全部分类
+                        </label>
                     </div>
+                </div>
                 <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="搜索图标名称...">
-                    <svg class="search-icon icon" viewBox="0 0 20 20"><use href="#icon-search"/></svg>
+                    <svg class="search-icon icon" viewBox="0 0 20 20">
+                        <use href="#icon-search" />
+                    </svg>
                     <button id="clearSearchBtn" class="clear-btn" style="display: none;" title="清空搜索">
-                        <svg class="icon" viewBox="0 0 20 20"><use href="#icon-clear"/></svg>
+                        <svg class="icon" viewBox="0 0 20 20">
+                            <use href="#icon-clear" />
+                        </svg>
                     </button>
                 </div>
-                
-                <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+
+                <div
+                    style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
                     <span>模式</span>
                     <select id="cdnMode" class="cdn-select">
                         <option value="ghfast" selected>🟦Github加速</option>
-                        <option value="cdn">🟪CDN加速</option>                        
+                        <option value="cdn">🟪CDN加速</option>
                         <option value="raw">🟧Github原址</option>
                     </select>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+                <div
+                    style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
                     <span>主题</span>
                     <select id="themeSelect" class="theme-select">
                         <option value="default" selected>默认</option>
@@ -2133,38 +2172,58 @@
                     </select>
                 </div>
             </div>
-            
-            <div id="warning" class="warning-msg" style="display: none;">⚠️ 检测到本地文件模式，部分功能可能受限。请使用本地服务器运行此页面以获得最佳体验。</div>
-            <div id="multiSelectControls" style="display: none; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--glass-border);">
-                <button id="exitMultiSelectBtn" class="upload-btn multi-select-btn active" onclick="toggleMultiSelectMode()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-exit-multi"/></svg>
+
+            <div id="warning" class="warning-msg" style="display: none;">⚠️ 检测到本地文件模式，部分功能可能受限。请使用本地服务器运行此页面以获得最佳体验。
+            </div>
+            <div id="multiSelectControls"
+                style="display: none; align-items: center; gap: 1rem; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--glass-border);">
+                <button id="exitMultiSelectBtn" class="upload-btn multi-select-btn active"
+                    onclick="toggleMultiSelectMode()">
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-exit-multi" />
+                    </svg>
                     <span>退出多选</span>
                 </button>
                 <div style="color: var(--primary); font-weight: 600;">
                     已选择 <span id="selectedCount">0</span> 个图标
                 </div>
                 <button class="upload-btn" onclick="selectAllIcons()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-select-all"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-select-all" />
+                    </svg>
                     <span>全选</span>
                 </button>
                 <button class="upload-btn" onclick="deselectAllIcons()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-deselect-all"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-deselect-all" />
+                    </svg>
                     <span>取消全选</span>
                 </button>
+                <span style="color: var(--primary); font-weight: 900;">┃</span>
                 <button class="upload-btn move-btn" onclick="handleMoveSelected()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-move"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-move" />
+                    </svg>
                     <span>移动</span>
                 </button>
                 <button class="upload-btn delete-btn" onclick="handleDeleteSelected()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-delete"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-delete" />
+                    </svg>
                     <span>删除</span>
                 </button>
+                <span style="color: var(--primary); font-weight: 900;">┃</span>
                 <button class="upload-btn" onclick="handleSaveSelected()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-save"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-save" />
+                    </svg>
                     <span>转存</span>
                 </button>
+                <span style="color: var(--primary); font-weight: 900;">┃</span>
                 <button class="upload-btn" onclick="handleDownloadSelected()">
-                    <svg class="icon" viewBox="0 0 20 20"><use href="#icon-download"/></svg>
+                    <svg class="icon" viewBox="0 0 20 20">
+                        <use href="#icon-download" />
+                    </svg>
                     <span>下载</span>
                 </button>
             </div>
@@ -2196,9 +2255,11 @@
             <div id="categoryList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;"></div>
             <div id="newCategoryInputWrapper" style="display: none; margin-bottom: 1rem;">
                 <input type="text" class="dialog-input" id="newCategoryInput" placeholder="输入新分类名称...">
-                <button id="confirmNewCategoryBtn" class="dialog-btn confirm-btn" style="margin-top: 0.75rem; width: 100%;">创建分类</button>
+                <button id="confirmNewCategoryBtn" class="dialog-btn confirm-btn"
+                    style="margin-top: 0.75rem; width: 100%;">创建分类</button>
             </div>
-            <button id="createCategoryBtn" class="upload-btn" style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
+            <button id="createCategoryBtn" class="upload-btn"
+                style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
             <div class="dialog-buttons">
                 <button class="dialog-btn cancel-btn" id="categoryCancelBtn">取消</button>
                 <button class="dialog-btn confirm-btn" id="categoryConfirmBtn">选择文件</button>
@@ -2223,9 +2284,11 @@
             <div id="moveCategoryList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;"></div>
             <div id="moveNewCategoryInputWrapper" style="display: none; margin-bottom: 1rem;">
                 <input type="text" class="dialog-input" id="moveNewCategoryInput" placeholder="输入新分类名称...">
-                <button id="moveConfirmNewCategoryBtn" class="dialog-btn confirm-btn" style="margin-top: 0.75rem; width: 100%;">创建分类</button>
+                <button id="moveConfirmNewCategoryBtn" class="dialog-btn confirm-btn"
+                    style="margin-top: 0.75rem; width: 100%;">创建分类</button>
             </div>
-            <button id="moveCreateCategoryBtn" class="upload-btn" style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
+            <button id="moveCreateCategoryBtn" class="upload-btn"
+                style="width: 100%; margin-bottom: 1rem; display: block;">+ 新建分类</button>
             <div class="dialog-buttons">
                 <button class="dialog-btn cancel-btn" id="moveCancelBtn">取消</button>
                 <button class="dialog-btn confirm-btn" id="moveConfirmBtn">确认移动</button>
@@ -2261,7 +2324,7 @@
         async function fetchAboutContent() {
             const body = document.getElementById('aboutDialogBody');
             if (!body) return;
-            
+
             try {
                 const res = await fetch('api/about-content');
                 if (res.ok) {
@@ -2281,7 +2344,7 @@
             document.body.style.overflow = '';
         }
 
-        document.getElementById('aboutDialog')?.addEventListener('click', function(e) {
+        document.getElementById('aboutDialog')?.addEventListener('click', function (e) {
             if (e.target === this) {
                 hideAboutModal();
             }
@@ -2317,7 +2380,7 @@
         if (typeof __webpack_require__ !== 'undefined') {
             __webpack_require__.p = '';
         }
-        
+
         let iconsData = [];
         let filteredIcons = [];
         let currentPage = 1;
@@ -2329,20 +2392,20 @@
         function getIconUrl(icon) {
             const isMac = !!icon.isMacIcon;
             const isUser = !!icon.isUploaded;
-            
+
             if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
                 return icon.download_url;
             }
-            
+
             const url = icon.download_url || '';
             if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                 return url;
             }
-            
+
             const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
-            
+
             if (!fileName) return url;
-            
+
             if (urlMode === 'ghfast') {
                 return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
             } else if (urlMode === 'cdn') {
@@ -2364,7 +2427,7 @@
                     const thirtyMinutes = 30 * 60 * 1000;
                     const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
                     const token = localStorage.getItem('authToken');
-                    
+
                     // 判断是否应该显示用户图标
                     // 规则：open=0 且未登录 → 不显示；其他情况都显示
                     shouldShowUserIcons = true;
@@ -2379,7 +2442,7 @@
                             console.warn('获取 open 状态失败', e);
                         }
                     }
-                    
+
                     // 显示用户图标
                     if (shouldShowUserIcons) {
                         let uploadUrl = 'api/list-upload-icons';
@@ -2446,7 +2509,7 @@
                 iconsData = [...uploadedIcons, ...jsonIcons, ...macIcons];
                 updateCategories();
                 applyFilters(!keepPage);
-                
+
                 const categorySection = document.getElementById('categorySection');
                 const checkUserIcons = document.getElementById('checkUserIcons');
                 if (categorySection && checkUserIcons) {
@@ -2454,7 +2517,7 @@
                 }
             } catch (error) {
                 console.error('加载错误:', error);
-                document.getElementById('iconGrid').innerHTML = 
+                document.getElementById('iconGrid').innerHTML =
                     `<div class="no-results">
                         <p>⚠️ 加载失败</p>
                         <p style="font-size: 0.9rem; margin-top: 1rem;">暂时没有任何图标数据</p>
@@ -2469,23 +2532,23 @@
             const name = img.getAttribute('data-name');
             const url = img.getAttribute('data-url');
             let index = parseInt(img.getAttribute('data-fallback-index') || '0');
-            
+
             let ghfastUrl = url;
             if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                 ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
             }
-            
+
             const fallbacks = [
                 { mode: 'ghfast', url: ghfastUrl, emoji: '🟦' },
                 { mode: 'cdn', url: JSDELIVR_PREFIX + name, emoji: '🟪' },
                 { mode: 'raw', url: url, emoji: '🟧' }
             ];
-            
+
             const sortedFallbacks = [
                 ...fallbacks.filter(f => f.mode === urlMode),
                 ...fallbacks.filter(f => f.mode !== urlMode)
             ];
-            
+
             if (index < sortedFallbacks.length) {
                 const next = sortedFallbacks[index];
                 if (next.url && !next.url.endsWith('undefined') && !next.url.endsWith('null')) {
@@ -2535,7 +2598,7 @@
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeUrl = (icon.download_url || '').replace(/"/g, '&quot;');
                 const globalIndex = start + index;
-                
+
                 const isSelected = selectedIcons.some(i => `${i.name}-${i.download_url}` === `${icon.name}-${icon.download_url}`);
 
                 if (isMultiSelectMode) {
@@ -2599,16 +2662,16 @@
         function previewIcon(event) {
             const img = event.target;
             const globalIndex = parseInt(img.getAttribute('data-global-index'));
-            
+
             const iconUrls = filteredIcons.map(icon => icon.download_url);
-            
+
             showIconPreview(iconUrls, globalIndex);
         }
 
         function renderPagination() {
             const pagination = document.getElementById('pagination');
             const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
-            
+
             if (totalPages <= 1) {
                 const simpleContainerHtml = `
                     <div class="pagination-container">
@@ -2636,7 +2699,7 @@
                 pagination.innerHTML = simpleContainerHtml;
                 return;
             }
-            
+
             const containerHtml = `
                 <div class="pagination-container">
                     <div class="pagination-info">
@@ -2755,7 +2818,7 @@
             const categories = [...new Set(userIcons.map(icon => icon.category || ''))];
             const categoryContent = document.getElementById('categoryContent');
             const categorySection = document.getElementById('categorySection');
-            
+
             if (!categoryContent) return;
 
             if (userIcons.length === 0) {
@@ -2764,7 +2827,7 @@
             }
 
             let html = '<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="">全部分类</label>';
-            
+
             if (categories.length > 1 || (categories.length === 1 && categories[0] !== '')) {
                 categories.sort((a, b) => {
                     if (a === '') return -1;
@@ -2775,12 +2838,12 @@
                     html += `<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" value="${cat}">${displayName}</label>`;
                 });
             }
-            
+
             categoryContent.innerHTML = html;
 
             const radios = categoryContent.querySelectorAll('.cyberpunk-radio');
             radios.forEach(r => {
-                r.addEventListener('change', function() {
+                r.addEventListener('change', function () {
                     applyFilters();
                 });
             });
@@ -2788,13 +2851,13 @@
 
         const searchInput = document.getElementById('searchInput');
         const clearBtn = document.getElementById('clearSearchBtn');
-        
-        searchInput.addEventListener('input', function() {
+
+        searchInput.addEventListener('input', function () {
             applyFilters();
             clearBtn.style.display = searchInput.value.trim() ? 'flex' : 'none';
         });
-        
-        clearBtn.addEventListener('click', function() {
+
+        clearBtn.addEventListener('click', function () {
             searchInput.value = '';
             clearBtn.style.display = 'none';
             applyFilters();
@@ -2814,7 +2877,7 @@
 
         function toggleMultiSelectMode() {
             isMultiSelectMode = !isMultiSelectMode;
-            
+
             if (isMultiSelectMode) {
                 enterMultiSelectMode();
             } else {
@@ -2825,33 +2888,33 @@
         function enterMultiSelectMode() {
             isMultiSelectMode = true;
             selectedIcons = [];
-            
+
             multiSelectBtn.classList.add('active');
-            
+
             normalControls.style.display = 'none';
             multiSelectControls.style.display = 'flex';
             pagination.style.display = 'none';
-            
+
             renderIcons();
         }
 
         function exitMultiSelectMode() {
             isMultiSelectMode = false;
             selectedIcons = [];
-            
+
             multiSelectBtn.classList.remove('active');
-            
+
             normalControls.style.display = 'flex';
             multiSelectControls.style.display = 'none';
             pagination.style.display = 'block';
-            
+
             renderIcons();
         }
 
         function toggleIconSelection(index) {
             const icon = filteredIcons[index];
             const iconId = `${icon.name}-${icon.download_url}`;
-            
+
             const checkbox = document.querySelector(`input[type="checkbox"][data-icon-index="${index}"]`);
             if (checkbox) {
                 if (checkbox.checked) {
@@ -2863,7 +2926,7 @@
                     }
                 }
             }
-            
+
             updateSelectedCount();
         }
 
@@ -2871,28 +2934,28 @@
             const start = (currentPage - 1) * iconsPerPage;
             const end = start + iconsPerPage;
             const pageIcons = filteredIcons.slice(start, end);
-            
+
             pageIcons.forEach(icon => {
                 const iconId = `${icon.name}-${icon.download_url}`;
                 if (!selectedIcons.find(i => `${i.name}-${i.download_url}` === iconId)) {
                     selectedIcons.push(icon);
                 }
             });
-            
+
             document.querySelectorAll('.icon-checkbox').forEach(checkbox => {
                 checkbox.checked = true;
             });
-            
+
             updateSelectedCount();
         }
 
         function deselectAllIcons() {
             selectedIcons = [];
-            
+
             document.querySelectorAll('.icon-checkbox').forEach(checkbox => {
                 checkbox.checked = false;
             });
-            
+
             updateSelectedCount();
         }
 
@@ -2930,7 +2993,7 @@
                     if (categorySection && checkUserIcons) {
                         categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
         }
 
@@ -2938,9 +3001,9 @@
         const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
         const checkMacIcons = document.getElementById('checkMacIcons');
         const categorySection = document.getElementById('categorySection');
-        
-        if (checkUserIcons) checkUserIcons.addEventListener('change', () => { 
-            saveCheckboxState(); 
+
+        if (checkUserIcons) checkUserIcons.addEventListener('change', () => {
+            saveCheckboxState();
             applyFilters();
             if (categorySection) {
                 categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
@@ -2953,7 +3016,7 @@
 
         const toggleBtn = document.getElementById('toggleFilterBtn');
         const checkboxContent = document.getElementById('checkboxContent');
-        
+
         toggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleBtn.classList.toggle('expanded');
@@ -2969,7 +3032,7 @@
 
         const toggleCategoryBtn = document.getElementById('toggleCategoryBtn');
         const categoryContent = document.getElementById('categoryContent');
-        
+
         if (toggleCategoryBtn && categoryContent) {
             toggleCategoryBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -2998,19 +3061,19 @@
 
         function copyUrl(event) {
             if (event) event.stopPropagation();
-            
+
             const button = event.target;
             const card = button.closest('.icon-card');
             const img = card.querySelector('.icon-image');
             const name = img.getAttribute('data-name');
             const url = img.getAttribute('data-url');
-            
+
             let actualUrl = getIconUrl({ name, download_url: url });
 
             if (actualUrl.includes('deskdata/user_icon/')) {
                 actualUrl = decodeURIComponent(actualUrl);
             }
-            
+
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(actualUrl).then(() => {
                     showToast('✓ 链接已复制到剪贴板');
@@ -3045,7 +3108,7 @@
         function saveIconToLibrary(event) {
             if (event) event.stopPropagation();
             event.preventDefault();
-            
+
             if (typeof window.checkLoginStatus === 'function') {
                 if (!window.checkLoginStatus()) return;
             }
@@ -3067,7 +3130,7 @@
                 .then(async blob => {
                     const TARGET_CATEGORY = '转存本地';
                     const fileName = name;
-                    
+
                     const result = await uploadFileChunked(blob, TARGET_CATEGORY + '/' + fileName);
                     if (result.success) {
                         showToast('✓ 转存成功');
@@ -3085,7 +3148,7 @@
         function downloadIcon(event) {
             if (event) event.stopPropagation();
             event.preventDefault();
-            
+
             const button = event.target;
             const card = button.closest('.icon-card');
             const img = card.querySelector('.icon-image');
@@ -3094,7 +3157,7 @@
             const actualUrl = getIconUrl({ name, download_url: url });
             const iconNameElement = card.querySelector('.icon-name');
             const baseName = iconNameElement.textContent.replace(/^[^\w\u4e00-\u9fa5]+/, '').trim();
-            
+
             fetch(actualUrl)
                 .then(response => {
                     if (!response.ok) throw new Error('网络响应错误');
@@ -3139,7 +3202,7 @@
                     showToast('✗ 下载失败: ' + error.message);
                 });
         }
-        
+
         function convertSvgBlobToPng(svgBlob, filename) {
             return new Promise(async (resolve, reject) => {
                 try {
@@ -3252,12 +3315,12 @@
             const userIcons = iconsData.filter(icon => icon.isUploaded);
             const categoriesFromIcons = [...new Set(userIcons.map(icon => icon.category || ''))];
             const allCategories = [...new Set([...availableCategories, ...categoriesFromIcons])];
-            
+
             let html = `<div class="category-item ${uploadTargetCategory === '' ? 'selected' : ''}" onclick="selectCategory('')">📂 未分类</div>`;
             allCategories.filter(c => c !== '').sort((a, b) => a.localeCompare(b)).forEach(cat => {
                 html += `<div class="category-item ${uploadTargetCategory === cat ? 'selected' : ''}" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">${cat}</div>`;
             });
-            
+
             categoryList.innerHTML = html;
         }
 
@@ -3367,7 +3430,7 @@
             } else {
                 showToast(`✗ 上传失败 ${failCount} 个文件`);
             }
-            
+
             e.target.value = '';
         });
 
@@ -3380,7 +3443,7 @@
                 const authToken = localStorage.getItem('authToken') || '';
                 const initRes = await fetch('api/upload/user_icon/init', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'X-Auth-Token': authToken
                     },
@@ -3393,7 +3456,7 @@
                         fieldName: 'file'
                     })
                 });
-                
+
                 if (!initRes.ok) throw new Error('初始化上传失败');
 
                 for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
@@ -3424,7 +3487,7 @@
 
                 const mergeRes = await fetch('api/upload/user_icon/merge', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'X-Auth-Token': authToken
                     },
@@ -3476,7 +3539,7 @@
 
         function toggleMenu(event) {
             if (event) event.stopPropagation();
-            
+
             const target = event.target;
             const button = target.tagName === 'I' ? target.parentElement : target;
             const buttonsContainer = button.closest('.icon-buttons');
@@ -3493,7 +3556,7 @@
                 if (typeof window.checkLoginStatus === 'function') {
                     if (!window.checkLoginStatus()) return;
                 }
-                
+
                 const iconName = buttonsContainer.getAttribute('data-name').replace(/&quot;/g, '"');
                 showMenuButtons(buttonsContainer, iconName);
             }
@@ -3543,10 +3606,10 @@
             });
 
             if (newName === null || newName.trim() === '') return;
-            
+
             const ext = oldName.match(/\.(png|svg|jpg|jpeg|webp)$/i);
             const newFileName = newName.trim() + (ext ? ext[0] : '.png');
-            
+
             if (newFileName === oldName) {
                 showToast('名称未改变');
                 return;
@@ -3554,10 +3617,10 @@
 
             try {
                 showToast('⏳ 正在重命名...');
-                
+
                 const response = await fetch('api/rename/user_icon', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'X-Auth-Token': localStorage.getItem('authToken') || ''
                     },
@@ -3600,10 +3663,10 @@
 
             try {
                 showToast('⏳ 正在删除...');
-                
+
                 const response = await fetch('api/delete/user_icon', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'X-Auth-Token': localStorage.getItem('authToken') || ''
                     },
@@ -3631,7 +3694,7 @@
 
         document.addEventListener('keydown', (e) => {
             if (window.isPreviewActive) return;
-            
+
             const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
@@ -3681,7 +3744,7 @@
                     fetch('api/logout', {
                         method: 'POST',
                         headers: { 'X-Auth-Token': token }
-                    }).catch(() => {});
+                    }).catch(() => { });
                 }
                 updateAuthButton();
                 const multiSelectBtn = document.getElementById('multiSelectBtn');
@@ -3772,7 +3835,7 @@
             await loadIcons();
             updateAuthButton();
             await updateLocalIconsVisibility();
-            
+
             const multiSelectBtn = document.getElementById('multiSelectBtn');
             if (multiSelectBtn) {
                 const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -3840,7 +3903,7 @@
                 try {
                     const response = await fetch('api/delete/user_icon', {
                         method: 'POST',
-                        headers: { 
+                        headers: {
                             'Content-Type': 'application/json',
                             'X-Auth-Token': authToken
                         },
@@ -3909,12 +3972,12 @@
             const userIcons = iconsData.filter(icon => icon.isUploaded);
             const categoriesFromIcons = [...new Set(userIcons.map(icon => icon.category || ''))];
             const allCategories = [...new Set([...availableCategories, ...categoriesFromIcons])];
-            
+
             let html = `<div class="category-item ${moveTargetCategory === '' ? 'selected' : ''}" onclick="selectMoveCategory('')">📂 未分类</div>`;
             allCategories.filter(c => c !== '').sort((a, b) => a.localeCompare(b)).forEach(cat => {
                 html += `<div class="category-item ${moveTargetCategory === cat ? 'selected' : ''}" onclick="selectMoveCategory('${cat.replace(/'/g, "\\'")}')">${cat}</div>`;
             });
-            
+
             categoryList.innerHTML = html;
         }
 
@@ -3992,11 +4055,11 @@
                 try {
                     const response = await fetch('api/move/user_icon', {
                         method: 'POST',
-                        headers: { 
+                        headers: {
                             'Content-Type': 'application/json',
                             'X-Auth-Token': authToken
                         },
-                        body: JSON.stringify({ 
+                        body: JSON.stringify({
                             fileName: icon.name,
                             newCategory: moveTargetCategory
                         })
@@ -4048,7 +4111,7 @@
                     const response = await fetch(actualUrl);
                     if (!response.ok) throw new Error('获取图标失败');
                     const blob = await response.blob();
-                    
+
                     const result = await uploadFileChunked(blob, TARGET_CATEGORY + '/' + icon.name);
                     results.push({
                         name: icon.name,
@@ -4084,13 +4147,13 @@
                     const actualUrl = getIconUrl(icon);
                     const response = await fetch(actualUrl);
                     if (!response.ok) throw new Error('网络响应错误');
-                    
+
                     const blob = await response.blob();
                     const type = response.headers.get('content-type') || blob.type || '';
                     const mime = type.toLowerCase();
-                    
+
                     const nameWithoutExt = icon.name.replace(/\.(png|svg|jpg|jpeg|webp)$/i, '');
-                    
+
                     if (mime.includes('svg')) {
                         try {
                             await convertSvgBlobToPng(blob, nameWithoutExt + '.png');
@@ -4157,10 +4220,11 @@
 
             const successCount = results.filter(r => r.success).length;
             const failCount = results.filter(r => !r.success).length;
+            const failedResults = results.filter(r => !r.success);
 
-            contentElement.innerHTML = results.map(result => `
-                <div class="result-item ${result.success ? 'success' : 'error'}">
-                    <span class="result-icon">${result.success ? '✓' : '✗'}</span>
+            contentElement.innerHTML = failedResults.map(result => `
+                <div class="result-item error">
+                    <span class="result-icon">✗</span>
                     <span class="result-filename">${result.name}</span>
                     <span>${result.message}</span>
                 </div>
@@ -4185,4 +4249,5 @@
 
     </script>
 </body>
+
 </html>

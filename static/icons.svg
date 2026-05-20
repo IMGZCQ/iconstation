@@ -31,9 +31,12 @@
       <path fill="currentColor" d="M10 13h8V7h-8V2l-8 8l8 8z"/>
     </symbol>
     <!-- 上传图标 -->
-    <symbol id="icon-upload" viewBox="0 0 20 20">
-      <path d="M0 0h20v20H0z" fill="none"/>
-      <path fill="currentColor" d="M0 4c0-1.1.9-2 2-2h7l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2 2v10h16V6zm7 4V8h2v2h2v2h-2v2H9v-2H7v-2z"/>
+    <symbol id="icon-upload" viewBox="0 0 16 16">
+      <path d="M0 0h16v16H0z" fill="none"/>
+      <g fill="currentColor">
+        <path d="M7 4.174V11h2V4.174l2.608 2.236l1.302-1.518L8 .682l-4.91 4.21L4.392 6.41z"/>
+        <path d="M3 13v-3H1v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3h-2v3z"/>
+      </g>
     </symbol>
     <!-- 登录图标 -->
     <symbol id="icon-login" viewBox="0 0 20 20">
@@ -119,9 +122,9 @@
       <path fill="currentColor" fill-rule="evenodd" d="M12 6A6 6 0 1 1 0 6a6 6 0 0 1 12 0M6.75 3.75a.75.75 0 1 1-1.5 0a.75.75 0 0 1 1.5 0M6 5.25a.75.75 0 0 0-.75.75v2.25a.75.75 0 1 0 1.5 0V6A.75.75 0 0 0 6 5.25"/>
     </symbol>
     <!-- 多选图标 -->
-    <symbol id="icon-multi-select" viewBox="0 0 20 20">
-      <path d="M0 0h20v20H0z" fill="none"/>
-      <path fill="currentColor" d="M0 0h9v9H0zm2 2v5h5V2zm-2 9h9v9H0zm2 2v5h5v-5zm9-13h9v9h-9zm2 2v5h5V2zm-2 9h9v9h-9zm2 2v5h5v-5z"/>
+    <symbol id="icon-multi-select" viewBox="0 0 512 512">
+      <path d="M0 0h512v512H0z" fill="none"/>
+      <path fill="currentColor" fill-rule="evenodd" d="M234.667 85.334H64V256h170.667zm192 0h-128v127.999h128zM64 277.333h170.667V448H64zm432.911 45.004l-33.819-26.014l-92.829 120.655l-68.214-59.703l-28.096 32.11l102.435 89.631z" clip-rule="evenodd"/>
     </symbol>
   </defs>
 </svg>

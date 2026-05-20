@@ -172,7 +172,7 @@
         }
 
         .header-title-main {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
             -webkit-background-clip: text;
@@ -182,7 +182,7 @@
         }
 
         .header-title-sub {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             white-space: nowrap;
         }
@@ -194,8 +194,8 @@
         }
 
         .icon-btn-header {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border: 1px solid rgba(0, 240, 255, 0.3);
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             border-radius: 10px;
@@ -957,8 +957,16 @@
             flex-shrink: 0;
         }
 
+        :root[data-theme="light"] .about-icon {
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.6);
+            border: 2px solid rgba(30, 64, 175, 0.7);
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
         .about-title {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
             -webkit-background-clip: text;
@@ -967,7 +975,7 @@
         }
 
         .about-version {
-            font-size: 0.75rem;
+            font-size: 1rem;
             color: var(--text-secondary);
         }
 

@@ -22,7 +22,7 @@ import (
 //go:embed static
 var staticFS embed.FS
 
-const Version = "0.2.3"
+const Version = "0.2.4"
 
 var (
 	userDataDir  string
