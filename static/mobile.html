@@ -212,6 +212,12 @@
             transform: scale(0.95);
         }
 
+        .about-btn-update {
+            border-color: rgba(16, 185, 129, 0.8) !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%) !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+
         .mobile-search {
             padding: 0.5rem 0.75rem;
             background: rgba(20, 30, 60, 0.5);
@@ -945,7 +951,7 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.5rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--glass-border);
         }
@@ -1083,6 +1089,7 @@
             const [showAboutModal, setShowAboutModal] = useState(false);
             const [version, setVersion] = useState('未知版本');
             const [aboutContent, setAboutContent] = useState('加载中...');
+            const [aboutBlink, setAboutBlink] = useState(false);
             const touchStartX = useRef(0);
 
             useEffect(() => {
@@ -1125,6 +1132,22 @@
                     setAboutContent('加载失败');
                 }
             };
+
+            useEffect(() => {
+                if (version === '未知版本' || aboutContent === '加载中...' || !aboutContent) return;
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = aboutContent;
+                const versionSpan = tempDiv.querySelector('#version');
+                if (!versionSpan) return;
+
+                const aboutVersion = versionSpan.textContent.trim();
+                const apiVersion = version.replace(/^v/, '');
+
+                if (aboutVersion && aboutVersion !== apiVersion) {
+                    setAboutBlink(true);
+                }
+            }, [version, aboutContent]);
 
             useEffect(() => {
                 applyFilters(shouldResetPageRef.current);
@@ -1858,7 +1881,7 @@
                             h('button', { className: 'icon-btn-header', onClick: handleUpload, title: '上传图标' }, h(Icon, { name: 'upload' })),
                             h('button', { className: 'icon-btn-header', onClick: cycleUrlMode, title: getUrlModeTitle() }, getUrlModeIcon()),
                             h('button', { className: 'icon-btn-header', onClick: cycleTheme, title: getThemeTitle() }, getThemeIcon()),
-                            h('button', { className: 'icon-btn-header', onClick: () => setShowAboutModal(true), title: '关于' },
+                            h('button', { className: `icon-btn-header${aboutBlink ? ' about-btn-update' : ''}`, onClick: () => setShowAboutModal(true), title: '关于' },
                                 h(Icon, { name: 'about' })
                             ),
                             h('button', { className: 'icon-btn-header', onClick: handleAuth, title: isLoggedIn ? '退出登录' : '登录' },

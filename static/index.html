@@ -280,6 +280,14 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
+        .about-btn-update {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%) !important;
+            border-color: rgba(16, 185, 129, 0.8) !important;
+            color: #10b981 !important;
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4),
+                0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
         .search-box {
             position: relative;
             max-width: 600px;
@@ -1891,7 +1899,7 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.5rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--glass-border);
         }
@@ -2341,6 +2349,8 @@
                 console.warn('获取关于内容失败', e);
                 body.innerHTML = '加载失败';
             }
+
+            compareVersions();
         }
 
         function hideAboutModal() {
@@ -2354,6 +2364,8 @@
             }
         });
 
+        let cachedApiVersion = null;
+
         async function fetchVersion() {
             try {
                 const res = await fetch('api/version');
@@ -2365,6 +2377,9 @@
                         const aboutVersionText = document.getElementById('aboutVersionText');
                         if (versionText) versionText.textContent = 'Icon Station' + versionStr;
                         if (aboutVersionText) aboutVersionText.textContent = 'Icon Station' + versionStr;
+
+                        cachedApiVersion = data.version;
+                        compareVersions();
                     }
                 }
             } catch (e) {
@@ -2373,6 +2388,26 @@
                 const aboutVersionText = document.getElementById('aboutVersionText');
                 if (versionText) versionText.textContent = 'Icon Station 未知版本';
                 if (aboutVersionText) aboutVersionText.textContent = 'Icon Station 未知版本';
+            }
+        }
+
+        function compareVersions() {
+            if (!cachedApiVersion) return;
+
+            const aboutBody = document.getElementById('aboutDialogBody');
+            if (!aboutBody || aboutBody.textContent.trim() === '加载中...' || aboutBody.innerHTML.includes('加载中')) return;
+
+            const versionSpan = aboutBody.querySelector('#version');
+            if (!versionSpan) return;
+
+            const aboutVersion = versionSpan.textContent.trim();
+            if (aboutVersion && aboutVersion !== cachedApiVersion) {
+                const aboutBtn = document.getElementById('aboutBtn');
+                if (aboutBtn) {
+                    aboutBtn.classList.add('about-btn-update');
+                    const span = aboutBtn.querySelector('span');
+                    if (span) span.textContent = '有更新';
+                }
             }
         }
 
