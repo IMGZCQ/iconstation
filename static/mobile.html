@@ -1032,6 +1032,8 @@
 
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
+        const HOMARR_CDN_PREFIX = 'https://ghfast.top/';
+        const HOMARR_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/main/png/';
 
         function Icon(props) {
             const { name, className = '' } = props;
@@ -1048,6 +1050,7 @@
             const [searchKeyword, setSearchKeyword] = useState('');
             const [currentPage, setCurrentPage] = useState(1);
             const [iconsPerPage, setIconsPerPage] = useState(parseInt(localStorage.getItem('mobileIconsPerPage')) || 24);
+            const shouldResetPageRef = useRef(true);
             const [theme, setTheme] = useState(localStorage.getItem('iconStationTheme') || 'default');
             const [urlMode, setUrlMode] = useState('ghfast');
             const getInitialFilters = () => {
@@ -1058,11 +1061,12 @@
                         return {
                             user: state.user !== undefined ? state.user : true,
                             builtin: state.builtin !== undefined ? state.builtin : true,
-                            mac: state.mac !== undefined ? state.mac : true
+                            mac: state.mac !== undefined ? state.mac : true,
+                            homarr: state.homarr !== undefined ? state.homarr : true
                         };
                     } catch (e) { }
                 }
-                return { user: true, builtin: true, mac: true };
+                return { user: true, builtin: true, mac: true, homarr: true };
             };
             const [showFilters, setShowFilters] = useState(getInitialFilters);
             const [showUserFilter, setShowUserFilter] = useState(false);
@@ -1123,7 +1127,7 @@
             };
 
             useEffect(() => {
-                applyFilters();
+                applyFilters(shouldResetPageRef.current);
             }, [searchKeyword, showFilters, icons, selectedCategory]);
 
             useEffect(() => {
@@ -1140,7 +1144,8 @@
                 return () => document.removeEventListener('keydown', handleKeydown);
             }, [currentPage, filteredIcons.length, iconsPerPage]);
 
-            const loadIcons = async () => {
+            const loadIcons = async (keepPage = false) => {
+                shouldResetPageRef.current = !keepPage;
                 try {
                     let uploadedIcons = [];
                     let isValid = false;
@@ -1208,6 +1213,26 @@
                             }))
                             : []);
 
+                    let homarrIcons = [];
+                    try {
+                        const homarrResponse = await fetch('json/homarr.json');
+                        if (homarrResponse.ok) {
+                            const homarrRaw = await homarrResponse.json();
+                            homarrIcons = Array.isArray(homarrRaw.icons)
+                                ? homarrRaw.icons.map(i => ({
+                                    name: (() => {
+                                        const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                        return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                                    })(),
+                                    download_url: i.url,
+                                    isHomarrIcon: true
+                                }))
+                                : [];
+                        }
+                    } catch (e) {
+                        console.warn('加载homarr图标失败', e);
+                    }
+
                     let macIcons = [];
                     try {
                         const macResponse = await fetch('json/MacIcons.json');
@@ -1228,7 +1253,7 @@
                         console.warn('加载MacIcons失败', e);
                     }
 
-                    const allIcons = [...uploadedIcons, ...jsonIcons, ...macIcons];
+                    const allIcons = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons];
                     setIcons(allIcons);
 
                     const userIcons = allIcons.filter(icon => icon.isUploaded);
@@ -1251,7 +1276,9 @@
                     }
 
                     setCategories(allCategories);
-                    setSelectedCategory('all');
+                    if (!keepPage) {
+                        setSelectedCategory('all');
+                    }
 
                     if (!isValid) {
                         try {
@@ -1274,16 +1301,18 @@
                 }
             };
 
-            const applyFilters = () => {
+            const applyFilters = (resetPage = true) => {
                 const keyword = searchKeyword.toLowerCase();
                 const filtered = icons.filter(icon => {
                     const isUser = !!icon.isUploaded;
                     const isMac = !!icon.isMacIcon;
+                    const isHomarr = !!icon.isHomarrIcon;
                     if (isUser && !showFilters.user) return false;
-                    if (!isUser && !isMac && !showFilters.builtin) return false;
+                    if (!isUser && !isMac && !isHomarr && !showFilters.builtin) return false;
                     if (isMac && !showFilters.mac) return false;
+                    if (isHomarr && !showFilters.homarr) return false;
 
-                    if (selectedCategory !== 'all') {
+                    if (selectedCategory !== 'all' && isUser) {
                         const iconCategory = icon.category || '';
                         if (iconCategory !== selectedCategory) return false;
                     }
@@ -1291,6 +1320,14 @@
                     return icon.name.toLowerCase().includes(keyword);
                 });
                 setFilteredIcons(filtered);
+                if (resetPage) {
+                    setCurrentPage(1);
+                } else {
+                    setCurrentPage(prev => {
+                        const totalPages = Math.ceil(filtered.length / iconsPerPage);
+                        return prev > totalPages && totalPages > 0 ? totalPages : prev;
+                    });
+                }
             };
 
             const cycleTheme = () => {
@@ -1438,7 +1475,7 @@
                     for (let i = 0; i < files.length; i++) {
                         await uploadFile(files[i], uploadTargetCategory);
                     }
-                    loadIcons();
+                    loadIcons(true);
                 };
                 input.click();
             };
@@ -1515,6 +1552,8 @@
 
                 try {
                     showToast('重命名中...');
+                    const oldName = icon.name.replace(/\\/g, '/');
+                    const normalizedNewFileName = newFileName.replace(/\\/g, '/');
                     const response = await fetch('api/rename/user_icon', {
                         method: 'POST',
                         headers: {
@@ -1522,15 +1561,15 @@
                             'X-Auth-Token': localStorage.getItem('authToken') || ''
                         },
                         body: JSON.stringify({
-                            oldName: icon.name,
-                            newName: newFileName
+                            oldName: oldName,
+                            newName: normalizedNewFileName
                         })
                     });
 
                     const result = await response.json();
                     if (result.success) {
                         showToast(result.renamed ? result.message : '✓ 重命名成功');
-                        loadIcons();
+                        loadIcons(true);
                     } else {
                         showToast('✗ 重命名失败: ' + (result.message || '未知错误'));
                     }
@@ -1544,19 +1583,20 @@
 
                 try {
                     showToast('删除中...');
+                    const fileName = icon.name.replace(/\\/g, '/');
                     const response = await fetch('api/delete/user_icon', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-Auth-Token': localStorage.getItem('authToken') || ''
                         },
-                        body: JSON.stringify({ fileName: icon.name })
+                        body: JSON.stringify({ fileName: fileName })
                     });
 
                     const result = await response.json();
                     if (result.success) {
                         showToast('✓ 删除成功');
-                        loadIcons();
+                        loadIcons(true);
                     } else {
                         showToast('✗ 删除失败: ' + (result.message || '未知错误'));
                     }
@@ -1570,17 +1610,32 @@
                 const isUser = !!icon.isUploaded;
 
                 if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
-                    return icon.download_url;
+                    const url = icon.download_url;
+                    if (url.startsWith('http://') || url.startsWith('https://')) {
+                        return url;
+                    }
+                    return window.location.origin + '/' + url.replace(/^\//, '');
                 }
 
                 const url = icon.download_url || '';
-                if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/') &&
+                    !url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
                     return url;
                 }
 
                 const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
 
                 if (!fileName) return url;
+
+                if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                    if (urlMode === 'ghfast') {
+                        return HOMARR_CDN_PREFIX + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + fileName;
+                    } else if (urlMode === 'cdn') {
+                        return HOMARR_JSDELIVR_PREFIX + fileName;
+                    } else {
+                        return url;
+                    }
+                }
 
                 if (urlMode === 'ghfast') {
                     return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
@@ -1592,10 +1647,11 @@
             };
 
             const getIconEmoji = (icon) => {
-                if (icon.isMacIcon) return '🍎';
-                if (icon.isUploaded) return '✅';
-                return urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧';
-            };
+                    if (icon.isMacIcon) return '🍎';
+                    if (icon.isHomarrIcon) return '🏠';
+                    if (icon.isUploaded) return '✅';
+                    return urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧';
+                };
 
             const handleImageError = (e, icon) => {
                 const url = icon.download_url || '';
@@ -1604,11 +1660,20 @@
                 let ghfastUrl = url;
                 if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                     ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
+                } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                    ghfastUrl = HOMARR_CDN_PREFIX + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + fileName;
+                }
+
+                let jsdelivrUrl = url;
+                if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                    jsdelivrUrl = JSDELIVR_PREFIX + fileName;
+                } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                    jsdelivrUrl = HOMARR_JSDELIVR_PREFIX + fileName;
                 }
 
                 const fallbacks = [
                     ghfastUrl,
-                    JSDELIVR_PREFIX + fileName,
+                    jsdelivrUrl,
                     url
                 ];
                 const currentSrc = e.target.src;
@@ -1689,7 +1754,7 @@
                     await uploadFile(blob, TARGET_CATEGORY, icon.name);
 
                     showToast('✓ 转存成功');
-                    loadIcons();
+                    loadIcons(true);
                 } catch (err) {
                     showToast('✗ 转存失败: ' + err.message);
                 }
@@ -1836,6 +1901,14 @@
                             return newFilters;
                         })
                     }, `HD-Icons ${showFilters.builtin ? '✓' : ''}`),
+                    h('button', {
+                        className: `filter-chip ${showFilters.homarr ? 'active' : ''}`,
+                        onClick: () => setShowFilters(f => {
+                            const newFilters = { ...f, homarr: !f.homarr };
+                            localStorage.setItem('iconSourceState', JSON.stringify(newFilters));
+                            return newFilters;
+                        })
+                    }, `Homarr ${showFilters.homarr ? '✓' : ''}`),
                     h('button', {
                         className: `filter-chip ${showFilters.mac ? 'active' : ''}`,
                         onClick: () => setShowFilters(f => {

@@ -22,7 +22,7 @@ import (
 //go:embed static
 var staticFS embed.FS
 
-const Version = "0.2.4"
+const Version = "0.2.5"
 
 var (
 	userDataDir  string
@@ -337,6 +337,7 @@ func listUploadIcons(w http.ResponseWriter, r *http.Request) {
 			return nil
 		}
 		rel, _ := filepath.Rel(userDataDir, p)
+		rel = strings.ReplaceAll(rel, "\\", "/")
 		ext := strings.ToLower(filepath.Ext(rel))
 		allow := map[string]bool{".png": true, ".svg": true, ".jpg": true, ".jpeg": true, ".webp": true}
 		if allow[ext] {

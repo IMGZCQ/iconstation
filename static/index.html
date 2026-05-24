@@ -2117,6 +2117,10 @@
                             HD-Icons
                         </label>
                         <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkHomarrIcons" checked>
+                            Homarr
+                        </label>
+                        <label class="cyberpunk-checkbox-label">
                             <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
                             MacIcon
                         </label>
@@ -2387,6 +2391,8 @@
         let iconsPerPage = parseInt(localStorage.getItem('iconsPerPage')) || 32;
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
+        const HOMARR_CDN_PREFIX = 'https://ghfast.top/';
+        const HOMARR_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/main/png/';
         let urlMode = 'ghfast';
 
         function getIconUrl(icon) {
@@ -2394,17 +2400,32 @@
             const isUser = !!icon.isUploaded;
 
             if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
-                return icon.download_url;
+                const url = icon.download_url;
+                if (url.startsWith('http://') || url.startsWith('https://')) {
+                    return url;
+                }
+                return window.location.origin + '/' + url.replace(/^\//, '');
             }
 
             const url = icon.download_url || '';
-            if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+            if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/') &&
+                !url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
                 return url;
             }
 
             const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
 
             if (!fileName) return url;
+
+            if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                if (urlMode === 'ghfast') {
+                    return HOMARR_CDN_PREFIX + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + fileName;
+                } else if (urlMode === 'cdn') {
+                    return HOMARR_JSDELIVR_PREFIX + fileName;
+                } else {
+                    return url;
+                }
+            }
 
             if (urlMode === 'ghfast') {
                 return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
@@ -2486,6 +2507,26 @@
                         }))
                         : []);
 
+                let homarrIcons = [];
+                try {
+                    const homarrResponse = await fetch('json/homarr.json');
+                    if (homarrResponse.ok) {
+                        const homarrRaw = await homarrResponse.json();
+                        homarrIcons = Array.isArray(homarrRaw.icons)
+                            ? homarrRaw.icons.map(i => ({
+                                name: (() => {
+                                    const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                    return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                                })(),
+                                download_url: i.url,
+                                isHomarrIcon: true
+                            }))
+                            : [];
+                    }
+                } catch (e) {
+                    console.warn('加载homarr图标失败', e);
+                }
+
                 let macIcons = [];
                 try {
                     const macResponse = await fetch('json/MacIcons.json');
@@ -2506,7 +2547,7 @@
                     console.warn('加载MacIcons失败', e);
                 }
 
-                iconsData = [...uploadedIcons, ...jsonIcons, ...macIcons];
+                iconsData = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons];
                 updateCategories();
                 applyFilters(!keepPage);
 
@@ -2536,11 +2577,20 @@
             let ghfastUrl = url;
             if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                 ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
+            } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                ghfastUrl = HOMARR_CDN_PREFIX + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + name;
+            }
+
+            let jsdelivrUrl = url;
+            if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                jsdelivrUrl = JSDELIVR_PREFIX + name;
+            } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                jsdelivrUrl = HOMARR_JSDELIVR_PREFIX + name;
             }
 
             const fallbacks = [
                 { mode: 'ghfast', url: ghfastUrl, emoji: '🟦' },
-                { mode: 'cdn', url: JSDELIVR_PREFIX + name, emoji: '🟪' },
+                { mode: 'cdn', url: jsdelivrUrl, emoji: '🟪' },
                 { mode: 'raw', url: url, emoji: '🟧' }
             ];
 
@@ -2769,9 +2819,11 @@
             const checkUserIcons = document.getElementById('checkUserIcons');
             const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
             const checkMacIcons = document.getElementById('checkMacIcons');
+            const checkHomarrIcons = document.getElementById('checkHomarrIcons');
             const showUser = checkUserIcons ? checkUserIcons.checked : false;
             const showBuiltin = checkBuiltinIcons ? checkBuiltinIcons.checked : true;
             const showMac = checkMacIcons ? checkMacIcons.checked : true;
+            const showHomarr = checkHomarrIcons ? checkHomarrIcons.checked : true;
 
             const radioAllCategories = document.getElementById('radioAllCategories');
             const showAllCategories = radioAllCategories ? radioAllCategories.checked : true;
@@ -2789,11 +2841,13 @@
             filteredIcons = iconsData.filter(icon => {
                 const isUser = !!icon.isUploaded;
                 const isMac = !!icon.isMacIcon;
+                const isHomarr = !!icon.isHomarrIcon;
                 if (isUser && !showUser) return false;
-                if (!isUser && !isMac && !showBuiltin) return false;
+                if (!isUser && !isMac && !isHomarr && !showBuiltin) return false;
                 if (isMac && !showMac) return false;
+                if (isHomarr && !showHomarr) return false;
 
-                if (!showAllCategories) {
+                if (!showAllCategories && isUser) {
                     const iconCategory = icon.category || '';
                     if (iconCategory !== selectedCategory) return false;
                 }
@@ -2970,10 +3024,12 @@
             const checkUserIcons = document.getElementById('checkUserIcons');
             const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
             const checkMacIcons = document.getElementById('checkMacIcons');
+            const checkHomarrIcons = document.getElementById('checkHomarrIcons');
             const state = {
                 user: checkUserIcons ? checkUserIcons.checked : false,
                 builtin: checkBuiltinIcons ? checkBuiltinIcons.checked : true,
-                mac: checkMacIcons ? checkMacIcons.checked : true
+                mac: checkMacIcons ? checkMacIcons.checked : true,
+                homarr: checkHomarrIcons ? checkHomarrIcons.checked : true
             };
             localStorage.setItem('iconSourceState', JSON.stringify(state));
         }
@@ -2986,10 +3042,12 @@
                     const checkUserIcons = document.getElementById('checkUserIcons');
                     const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
                     const checkMacIcons = document.getElementById('checkMacIcons');
+                    const checkHomarrIcons = document.getElementById('checkHomarrIcons');
                     const categorySection = document.getElementById('categorySection');
                     if (checkUserIcons) checkUserIcons.checked = state.user;
                     if (checkBuiltinIcons) checkBuiltinIcons.checked = state.builtin;
                     if (checkMacIcons) checkMacIcons.checked = state.mac;
+                    if (checkHomarrIcons) checkHomarrIcons.checked = state.homarr;
                     if (categorySection && checkUserIcons) {
                         categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
                     }
@@ -3000,6 +3058,7 @@
         const checkUserIcons = document.getElementById('checkUserIcons');
         const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
         const checkMacIcons = document.getElementById('checkMacIcons');
+        const checkHomarrIcons = document.getElementById('checkHomarrIcons');
         const categorySection = document.getElementById('categorySection');
 
         if (checkUserIcons) checkUserIcons.addEventListener('change', () => {
@@ -3011,6 +3070,7 @@
         });
         if (checkBuiltinIcons) checkBuiltinIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkMacIcons) checkMacIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        if (checkHomarrIcons) checkHomarrIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
 
         loadCheckboxState();
 
@@ -3134,7 +3194,7 @@
                     const result = await uploadFileChunked(blob, TARGET_CATEGORY + '/' + fileName);
                     if (result.success) {
                         showToast('✓ 转存成功');
-                        loadIcons();
+                        loadIcons(true);
                     } else {
                         showToast('✗ 转存失败: ' + (result.message || '未知错误'));
                     }
@@ -3426,7 +3486,7 @@
                 } else {
                     showToast(`✓ 成功上传 ${successCount} 个文件`);
                 }
-                loadIcons();
+                loadIcons(true);
             } else {
                 showToast(`✗ 上传失败 ${failCount} 个文件`);
             }
@@ -3637,7 +3697,7 @@
                     } else {
                         showToast('✓ 重命名成功');
                     }
-                    loadIcons(false);
+                    loadIcons(true);
                 } else {
                     showToast('✗ 重命名失败: ' + (result.message || '未知错误'));
                 }
@@ -3664,6 +3724,7 @@
             try {
                 showToast('⏳ 正在删除...');
 
+                const normalizedName = iconName.replace(/\\/g, '/');
                 const response = await fetch('api/delete/user_icon', {
                     method: 'POST',
                     headers: {
@@ -3671,14 +3732,14 @@
                         'X-Auth-Token': localStorage.getItem('authToken') || ''
                     },
                     body: JSON.stringify({
-                        fileName: iconName
+                        fileName: normalizedName
                     })
                 });
 
                 const result = await response.json();
                 if (result.success) {
                     showToast('✓ 删除成功');
-                    loadIcons(false);
+                    loadIcons(true);
                 } else {
                     showToast('✗ 删除失败: ' + (result.message || '未知错误'));
                 }
@@ -3925,7 +3986,7 @@
             }
 
             showResultsDialog('删除结果', results);
-            await loadIcons(false);
+            await loadIcons(true);
             deselectAllIcons();
         }
 
@@ -4080,7 +4141,7 @@
             }
 
             showResultsDialog('移动结果', results);
-            await loadIcons(false);
+            await loadIcons(true);
             deselectAllIcons();
         });
 
@@ -4128,7 +4189,7 @@
             }
 
             showResultsDialog('转存结果', results);
-            await loadIcons(false);
+            await loadIcons(true);
             deselectAllIcons();
         }
 
