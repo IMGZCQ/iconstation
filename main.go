@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -130,33 +129,31 @@ func main() {
 
 	log.Println("内部运行端口:9168(请使用外部映射端口访问)")
 
-	if runtime.GOOS != "windows" {
-		go func() {
-			sockPath := "/target/iconstation.sock"
-			_ = os.Remove(sockPath)
+	go func() {
+		sockPath := "/target/iconstation.sock"
+		_ = os.Remove(sockPath)
 
-			listener, err := net.Listen("unix", sockPath)
-			if err != nil {
-				log.Printf("Failed to create unix socket listener: %v", err)
-				return
+		listener, err := net.Listen("unix", sockPath)
+		if err != nil {
+			log.Printf("Failed to create unix socket listener: %v", err)
+			return
+		}
+		defer listener.Close()
+
+		_ = os.Chmod(sockPath, 0777)
+
+		sockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/app/iconstation" {
+				r.URL.Path = "/"
+			} else if strings.HasPrefix(r.URL.Path, "/app/iconstation/") {
+				r.URL.Path = strings.TrimPrefix(r.URL.Path, "/app/iconstation")
 			}
-			defer listener.Close()
+			http.DefaultServeMux.ServeHTTP(w, r)
+		})
 
-			_ = os.Chmod(sockPath, 0777)
-
-			sockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == "/app/iconstation" {
-					r.URL.Path = "/"
-				} else if strings.HasPrefix(r.URL.Path, "/app/iconstation/") {
-					r.URL.Path = strings.TrimPrefix(r.URL.Path, "/app/iconstation")
-				}
-				http.DefaultServeMux.ServeHTTP(w, r)
-			})
-
-			log.Println("统一网关已连接,使用 /app/iconstation 访问")
-			log.Fatal(http.Serve(listener, sockHandler))
-		}()
-	}
+		log.Println("统一网关已连接,使用 /app/iconstation 访问")
+		log.Fatal(http.Serve(listener, sockHandler))
+	}()
 
 	log.Fatal(http.ListenAndServe(":9168", nil))
 }
