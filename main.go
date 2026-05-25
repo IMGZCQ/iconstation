@@ -144,7 +144,8 @@ func main() {
 
 		sockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/app/iconstation" {
-				r.URL.Path = "/"
+				http.Redirect(w, r, "/app/iconstation/", http.StatusPermanentRedirect)
+				return
 			} else if strings.HasPrefix(r.URL.Path, "/app/iconstation/") {
 				r.URL.Path = strings.TrimPrefix(r.URL.Path, "/app/iconstation")
 			}
