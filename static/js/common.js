@@ -224,3 +224,103 @@ document.addEventListener('keydown', function(e) {
         closePreview();
     }
 });
+
+function addParentWindowButtons() {
+    try {
+        if (window.self === window.top) {
+            console.log('不在 iframe 中运行，跳过添加按钮');
+            return;
+        }
+
+        const parentDoc = window.parent.document;
+
+        const currentIframe = parentDoc.querySelector(`iframe[src="${window.location.href}"]`) ||
+                             [...parentDoc.querySelectorAll('iframe')].find(iframe => {
+                                 try {
+                                     return iframe.contentWindow === window;
+                                 } catch (e) {
+                                     return false;
+                                 }
+                             });
+
+        if (!currentIframe) {
+            console.error('未找到当前 iframe 元素');
+            return;
+        }
+
+        const headerContainer = currentIframe.closest('.trim-ui__app-layout--header');
+        if (!headerContainer) {
+            console.error('未找到包含当前 iframe 的 header 容器');
+            return;
+        }
+
+        const buttonContainer = headerContainer.querySelector(':scope > div:last-child');
+        if (!buttonContainer || !buttonContainer.classList.contains('items-center')) {
+            console.error('未找到按钮容器');
+            return;
+        }
+
+        if (parentDoc.getElementById('iframe-refresh-btn')) {
+            console.log('按钮已存在，跳过重复添加');
+            return;
+        }
+
+        const refreshBtn = createButton(parentDoc, 'iframe-refresh-btn', '刷新页面',
+            `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>`,
+            () => { window.location.reload(); },
+            (el) => { el.style.transform = 'rotate(90deg)'; },
+            (el) => { el.style.transform = 'rotate(0deg)'; }
+        );
+
+        const openNewWindowBtn = createButton(parentDoc, 'iframe-open-new-window-btn', '新标签页打开',
+            `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4m-8-2l8-8m0 0v5m0-5h-5" />
+            </svg>`,
+            () => { window.open(window.location.href, '_blank', 'noopener'); },
+            (el) => { el.style.transform = 'scale(1.1)'; },
+            (el) => { el.style.transform = 'scale(1)'; }
+        );
+
+        buttonContainer.insertBefore(refreshBtn, buttonContainer.firstChild);
+        buttonContainer.insertBefore(openNewWindowBtn, refreshBtn.nextSibling);
+
+        console.log('✅ 已成功在父级窗口标题栏添加按钮（仅限当前 iframe 所在的窗口）');
+    } catch (error) {
+        if (error.message.includes('cross-origin') || error.message.includes('permission')) {
+            console.log('跨域限制：无法访问父级窗口（这是正常的安全行为）');
+        } else {
+            console.error('添加父级窗口按钮失败:', error);
+        }
+    }
+}
+
+function createButton(parentDoc, id, title, svgHTML, onClick, onEnter, onLeave) {
+    const btn = parentDoc.createElement('div');
+    btn.id = id;
+    btn.title = title;
+    btn.className = 'flex h-full w-base shrink-0 cursor-pointer items-center justify-center px-[15px] text-[var(--semi-color-text-0)] hover:bg-[var(--semi-color-fill-0)] active:bg-[var(--semi-color-fill-0)]';
+    btn.style.transition = 'all 0.2s ease';
+    btn.innerHTML = svgHTML;
+
+    btn.onmouseenter = function() {
+        this.style.backgroundColor = 'var(--semi-color-fill-0)';
+        onEnter(this);
+    };
+    btn.onmouseleave = function() {
+        this.style.backgroundColor = '';
+        onLeave(this);
+    };
+    btn.onclick = function(e) {
+        e.stopPropagation();
+        onClick();
+    };
+
+    return btn;
+}
+
+if (window.self !== window.top) {
+    addParentWindowButtons();
+}
