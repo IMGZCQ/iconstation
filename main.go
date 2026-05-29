@@ -21,7 +21,10 @@ import (
 //go:embed static
 var staticFS embed.FS
 
-const Version = "0.2.5"
+const (
+	Version     = "0.2.6"
+	maxLogLines = 100
+)
 
 var (
 	userDataDir  string
@@ -29,6 +32,30 @@ var (
 	userDataRoot string
 	validTokens  sync.Map
 )
+
+type limitedLogWriter struct {
+	file *os.File
+	mu   sync.Mutex
+}
+
+func (w *limitedLogWriter) Write(p []byte) (n int, err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	data, err := os.ReadFile(w.file.Name())
+	if err != nil {
+		return w.file.Write(p)
+	}
+	lines := strings.Split(string(data), "\n")
+	if len(lines) > maxLogLines {
+		trimmed := strings.Join(lines[len(lines)-maxLogLines:], "\n")
+		if trimmed != "" && !strings.HasSuffix(trimmed, "\n") {
+			trimmed += "\n"
+		}
+		os.WriteFile(w.file.Name(), []byte(trimmed), 0644)
+	}
+	return w.file.Write(p)
+}
 
 func init() {
 	exePath, err := os.Executable()
@@ -39,6 +66,13 @@ func init() {
 	userDataRoot = filepath.Join(exeDir, "UserData")
 	userDataDir = filepath.Join(userDataRoot, "icons")
 	chunksDir = filepath.Join(userDataRoot, "chunks")
+
+	logFile, err := os.OpenFile(filepath.Join(userDataRoot, "运行日志.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Printf("日志文件打开失败: %v", err)
+	} else {
+		log.SetOutput(io.MultiWriter(os.Stderr, &limitedLogWriter{file: logFile}))
+	}
 }
 
 type PasswordData struct {
@@ -469,7 +503,6 @@ func renameIcon(w http.ResponseWriter, r *http.Request) {
 	newBase := filepath.Base(new)
 	finalName, renamed := getUniqueFileName(newBase, newDir)
 	finalPath := filepath.Join(newDir, finalName)
-
 	_ = os.Rename(old, finalPath)
 	sendJSON(w, map[string]interface{}{"success": true, "renamed": renamed})
 }

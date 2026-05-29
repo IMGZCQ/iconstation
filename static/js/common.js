@@ -248,9 +248,23 @@ function addParentWindowButtons() {
             return;
         }
 
-        const headerContainer = currentIframe.closest('.trim-ui__app-layout--header');
+        let parentContainer = currentIframe.parentElement;
+        let headerContainer = null;
+        
+        while (parentContainer && !headerContainer) {
+            headerContainer = parentContainer.querySelector(':scope > .trim-ui__app-layout--header');
+            if (!headerContainer) {
+                parentContainer = parentContainer.parentElement;
+                if (parentContainer === parentDoc.body || parentContainer === parentDoc.documentElement) {
+                    break;
+                }
+            }
+        }
+
         if (!headerContainer) {
-            console.error('未找到包含当前 iframe 的 header 容器');
+            console.error('未找到与当前 iframe 关联的 header 容器');
+            // console.log('当前 iframe:', currentIframe);
+            // console.log('iframe 父级链:', getElementChain(currentIframe));
             return;
         }
 
@@ -260,10 +274,8 @@ function addParentWindowButtons() {
             return;
         }
 
-        if (parentDoc.getElementById('iframe-refresh-btn')) {
-            console.log('按钮已存在，跳过重复添加');
-            return;
-        }
+        parentDoc.getElementById('iframe-refresh-btn')?.remove();
+        parentDoc.getElementById('iframe-open-new-window-btn')?.remove();
 
         const refreshBtn = createButton(parentDoc, 'iframe-refresh-btn', '刷新页面',
             `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -280,21 +292,37 @@ function addParentWindowButtons() {
                 <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4m-8-2l8-8m0 0v5m0-5h-5" />
             </svg>`,
             () => { window.open(window.location.href, '_blank', 'noopener'); },
-            (el) => { el.style.transform = 'scale(1.1)'; },
+            (el) => { el.style.transform = 'scale(1.5)'; },
             (el) => { el.style.transform = 'scale(1)'; }
         );
 
         buttonContainer.insertBefore(refreshBtn, buttonContainer.firstChild);
         buttonContainer.insertBefore(openNewWindowBtn, refreshBtn.nextSibling);
 
-        console.log('✅ 已成功在父级窗口标题栏添加按钮（仅限当前 iframe 所在的窗口）');
+        // console.log('✅ 已成功在父级窗口标题栏添加按钮（仅限当前 iframe 所在的窗口）');
     } catch (error) {
         if (error.message.includes('cross-origin') || error.message.includes('permission')) {
-            console.log('跨域限制：无法访问父级窗口（这是正常的安全行为）');
+            // console.log('跨域限制：无法访问父级窗口（这是正常的安全行为）');
         } else {
-            console.error('添加父级窗口按钮失败:', error);
+            // console.error('添加父级窗口按钮失败:', error);
         }
     }
+}
+
+function getElementChain(element) {
+    const chain = [];
+    let el = element;
+    let depth = 0;
+    while (el && depth < 10) {
+        chain.push({
+            tag: el.tagName,
+            className: el.className?.toString()?.substring(0, 50) || '',
+            id: el.id
+        });
+        el = el.parentElement;
+        depth++;
+    }
+    return chain;
 }
 
 function createButton(parentDoc, id, title, svgHTML, onClick, onEnter, onLeave) {

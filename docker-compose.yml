@@ -1,7 +1,7 @@
 services:
   iconstation:
     container_name: iconstation         # 容器名称
-    image: imgzcq/iconstation:latest    # Docker镜像名称
+    image: imgzcq/iconstation:latest    # ⚠︎ 重构时请先删除本地镜像
     ports: [9168:9168]                  # 访问端口:内部端口
     volumes: [./UserData:/app/UserData] # 用户图标持久化目录
     restart: always                     # 开机自启
