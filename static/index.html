@@ -3918,28 +3918,42 @@
         });
 
         async function checkInitAndLoad() {
+            // 防重入：如果本页面加载周期内已经决定过跳转，不再重复判断
+            if (sessionStorage.getItem('_redirecting')) {
+                return;
+            }
+
+            // 先检查本地登录状态，已登录则信任本地状态（避免因服务端 IO 延迟导致误判）
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loginTimestamp = localStorage.getItem('loginTimestamp');
+            const currentTime = new Date().getTime();
+            const thirtyMinutes = 30 * 60 * 1000;
+            const locallyLoggedIn = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
+
             try {
                 const res = await fetch('api/check-init');
                 const data = await res.json();
-                if (!data.initialized) {
+
+                // 只有"未登录 且 未初始化"时才需要跳转到设置密码页
+                // 已登录用户即使检测到未初始化（如文件 IO 延迟），也先正常加载页面
+                if (!data.initialized && !locallyLoggedIn) {
+                    // 标记跳转原因，防止 login.html 立即根据 localStorage 旧值跳回（打破循环）
+                    sessionStorage.setItem('_redirecting', 'uninitialized');
                     window.location.href = 'login.html';
                     return;
                 }
             } catch (e) {
                 console.warn('检查初始化状态失败', e);
+                // API 不可达时不做拦截，允许页面以当前状态加载
             }
+
             await loadIcons();
             updateAuthButton();
             await updateLocalIconsVisibility();
 
             const multiSelectBtn = document.getElementById('multiSelectBtn');
             if (multiSelectBtn) {
-                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-                const loginTimestamp = localStorage.getItem('loginTimestamp');
-                const currentTime = new Date().getTime();
-                const thirtyMinutes = 30 * 60 * 1000;
-                const isValid = isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes;
-                multiSelectBtn.style.display = isValid ? 'flex' : 'none';
+                multiSelectBtn.style.display = locallyLoggedIn ? 'flex' : 'none';
             }
         }
 

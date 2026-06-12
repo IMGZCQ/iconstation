@@ -461,13 +461,14 @@
             <div id="initHint" class="init-hint" style="display: none;">首次登录请设置管理员密码</div>
 
             <form id="loginForm">
+                <input type="text" id="username" autocomplete="username" style="display: none;" aria-hidden="true" tabindex="-1">
                 <div class="form-group">
                     <label for="password" id="passwordLabel">密码</label>
-                    <input type="password" id="password" placeholder="请输入密码" required>
+                    <input type="password" id="password" placeholder="请输入密码" autocomplete="new-password" required>
                 </div>
                 <div class="form-group" id="confirmGroup" style="display: none;">
                     <label for="confirmPassword">确认密码</label>
-                    <input type="password" id="confirmPassword" placeholder="请再次输入密码">
+                    <input type="password" id="confirmPassword" placeholder="请再次输入密码" autocomplete="new-password">
                 </div>
                 <div class="checkbox-group" id="openCheckboxGroup" style="display: none;">
                     <input type="checkbox" id="openCheckbox" checked>
@@ -501,6 +502,12 @@
     </div>
 
     <script>
+        // 页面加载时清理可能残留的防重入标记（安全兜底）
+        // 正常流程中标记会在跳转前被正确清除，此处防止异常中断导致残留
+        if (sessionStorage.getItem('_redirecting')) {
+            sessionStorage.removeItem('_redirecting');
+        }
+
         const form = document.getElementById('loginForm');
         const message = document.getElementById('message');
         const initHint = document.getElementById('initHint');
@@ -517,6 +524,15 @@
             const thirtyMinutes = 30 * 60 * 1000;
 
             if (isLoggedIn && loginTimestamp && (currentTime - parseInt(loginTimestamp)) <= thirtyMinutes) {
+                // 防循环：如果是从 index.html 因"未初始化"跳转过来的，不要立即跳回去
+                // 这打破了 index.html(!initialized)→login.html(isLoggedIn)→index.html 的循环
+                const redirectReason = sessionStorage.getItem('_redirecting');
+                if (redirectReason === 'uninitialized') {
+                    // 清除标记，让用户留在本页面完成初始化/登录
+                    sessionStorage.removeItem('_redirecting');
+                    return false;
+                }
+
                 window.location.href = 'index.html';
                 return true;
             }
@@ -604,6 +620,8 @@
                         localStorage.setItem('isLoggedIn', 'true');
                         localStorage.setItem('authToken', data.token);
                         localStorage.setItem('loginTimestamp', new Date().getTime().toString());
+                        // 成功后清除防重入标记，确保跳转到 index.html 后不再被拦截
+                        sessionStorage.removeItem('_redirecting');
                         setTimeout(() => {
                             const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
                             localStorage.removeItem('returnUrl');
@@ -628,6 +646,8 @@
                         localStorage.setItem('isLoggedIn', 'true');
                         localStorage.setItem('authToken', data.token);
                         localStorage.setItem('loginTimestamp', new Date().getTime().toString());
+                        // 成功后清除防重入标记，确保跳转到 index.html 后不再被拦截
+                        sessionStorage.removeItem('_redirecting');
                         setTimeout(() => {
                             const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
                             localStorage.removeItem('returnUrl');
