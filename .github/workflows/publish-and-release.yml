@@ -68,7 +68,7 @@ jobs:
           tags: |
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE_NAME }}:${{ inputs.tag_name || github.ref_name }}
             ${{ inputs.push_latest && format('{0}/{1}:latest', env.DOCKERHUB_REGISTRY, env.DOCKERHUB_IMAGE_NAME) || '' }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
