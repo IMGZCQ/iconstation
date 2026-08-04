@@ -1365,6 +1365,56 @@
             color: white;
         }
 
+        .custom-url-input {
+            background: rgba(20, 30, 60, 0.6);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            color: white;
+            border-radius: 12px;
+            padding: 0.6rem 0.8rem;
+            backdrop-filter: blur(15px);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 260px;
+            box-sizing: border-box;
+        }
+
+        .custom-url-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
+            outline: none;
+        }
+
+        .custom-url-confirm {
+            background: rgba(0, 240, 255, 0.2);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            color: white;
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            backdrop-filter: blur(15px);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-url-confirm:hover {
+            border-color: var(--primary);
+            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
+        }
+
+        :root[data-theme="light"] .custom-url-input {
+            background: rgba(241, 245, 249, 0.9);
+            color: #1e293b;
+        }
+
+        :root[data-theme="light"] .custom-url-confirm {
+            background: rgba(0, 200, 220, 0.15);
+            color: #1e293b;
+        }
+
         :root[data-theme="light"] .cdn-select option {
             background: #f1f5f9;
             color: #1e293b;
@@ -2172,7 +2222,10 @@
                         <option value="ghfast" selected>🟦Github加速</option>
                         <option value="cdn">🟪CDN加速</option>
                         <option value="raw">🟧Github原址</option>
+                        <option value="custom">🔗自定义</option>
                     </select>
+                    <input type="text" id="customUrlInput" class="custom-url-input" placeholder="输入加速地址前缀，如 https://example.com/" style="display: none;">
+                    <button id="customUrlConfirm" class="custom-url-confirm" style="display: none;">确定</button>
                 </div>
                 <div
                     style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
@@ -2429,10 +2482,38 @@
         const HOMARR_CDN_PREFIX = 'https://ghfast.top/';
         const HOMARR_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/main/png/';
         let urlMode = 'ghfast';
+        let customPrefix = localStorage.getItem('customUrlPrefix') || '';
+
+        // 离线图标路径映射：source -> 本地目录
+        const OFFLINE_ICON_DIRS = {
+            'hdicons': 'deskdata/offline_icon/HDicons/',
+            'homarr': 'deskdata/offline_icon/Homarr/',
+            'macicons': 'deskdata/offline_icon/Macicon/'
+        };
+
+        // 获取离线图标本地路径
+        function getOfflineIconPath(icon) {
+            const filename = icon.name || icon.url?.match(/([^/]+)$/)?.[1];
+            if (!filename) return null;
+            
+            if (icon.isMacIcon) {
+                return OFFLINE_ICON_DIRS.macicons + filename;
+            } else if (icon.isHomarrIcon) {
+                return OFFLINE_ICON_DIRS.homarr + filename;
+            } else {
+                // HDicons 或其他图标源
+                return OFFLINE_ICON_DIRS.hdicons + filename;
+            }
+        }
 
         function getIconUrl(icon) {
             const isMac = !!icon.isMacIcon;
             const isUser = !!icon.isUploaded;
+
+            // 优先使用离线本地图标
+            if (icon.offline_url) {
+                return window.location.origin + '/' + icon.offline_url.replace(/^\//, '');
+            }
 
             if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
                 const url = icon.download_url;
@@ -2457,6 +2538,8 @@
                     return HOMARR_CDN_PREFIX + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + fileName;
                 } else if (urlMode === 'cdn') {
                     return HOMARR_JSDELIVR_PREFIX + fileName;
+                } else if (urlMode === 'custom' && customPrefix) {
+                    return customPrefix + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + fileName;
                 } else {
                     return url;
                 }
@@ -2466,6 +2549,8 @@
                 return CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
             } else if (urlMode === 'cdn') {
                 return JSDELIVR_PREFIX + fileName;
+            } else if (urlMode === 'custom' && customPrefix) {
+                return customPrefix + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
             } else {
                 return url;
             }
@@ -2533,13 +2618,19 @@
                 const jsonIcons = Array.isArray(raw)
                     ? raw
                     : (Array.isArray(raw.icons)
-                        ? raw.icons.map(i => ({
-                            name: (() => {
+                        ? raw.icons.map(i => {
+                            const name = (() => {
                                 const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
                                 return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
-                            })(),
-                            download_url: i.url
-                        }))
+                            })();
+                            // 从URL提取实际文件名（最后的文件名部分）
+                            const urlFilename = i.url ? i.url.split('/').pop().split('?')[0] : name;
+                            return {
+                                name: name,
+                                download_url: i.url,
+                                offline_url: OFFLINE_ICON_DIRS.hdicons + urlFilename
+                            };
+                        })
                         : []);
 
                 let homarrIcons = [];
@@ -2548,14 +2639,20 @@
                     if (homarrResponse.ok) {
                         const homarrRaw = await homarrResponse.json();
                         homarrIcons = Array.isArray(homarrRaw.icons)
-                            ? homarrRaw.icons.map(i => ({
-                                name: (() => {
+                            ? homarrRaw.icons.map(i => {
+                                const name = (() => {
                                     const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
                                     return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
-                                })(),
-                                download_url: i.url,
-                                isHomarrIcon: true
-                            }))
+                                })();
+                                // 从URL提取实际文件名
+                                const urlFilename = i.url ? i.url.split('/').pop().split('?')[0] : name;
+                                return {
+                                    name: name,
+                                    download_url: i.url,
+                                    isHomarrIcon: true,
+                                    offline_url: OFFLINE_ICON_DIRS.homarr + urlFilename
+                                };
+                            })
                             : [];
                     }
                 } catch (e) {
@@ -2568,14 +2665,20 @@
                     if (macResponse.ok) {
                         const macRaw = await macResponse.json();
                         macIcons = Array.isArray(macRaw.icons)
-                            ? macRaw.icons.map(i => ({
-                                name: (() => {
+                            ? macRaw.icons.map(i => {
+                                const name = (() => {
                                     const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
                                     return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
-                                })(),
-                                download_url: i.url,
-                                isMacIcon: true
-                            }))
+                                })();
+                                // 从URL提取实际文件名
+                                const urlFilename = i.url ? i.url.split('/').pop().split('?')[0] : name;
+                                return {
+                                    name: name,
+                                    download_url: i.url,
+                                    isMacIcon: true,
+                                    offline_url: OFFLINE_ICON_DIRS.macicons + urlFilename
+                                };
+                            })
                             : [];
                     }
                 } catch (e) {
@@ -2609,6 +2712,19 @@
             const url = img.getAttribute('data-url');
             let index = parseInt(img.getAttribute('data-fallback-index') || '0');
 
+            // 如果当前src是离线URL，先回退到原始在线URL
+            const currentSrc = img.src;
+            if (currentSrc.includes('deskdata/offline_icon/')) {
+                img.src = url;
+                img.setAttribute('data-fallback-index', '0');
+                const card = img.closest('.icon-card');
+                if (card) {
+                    const emojiSpan = card.querySelector('.icon-name span');
+                    if (emojiSpan) emojiSpan.textContent = '🟧';
+                }
+                return;
+            }
+
             let ghfastUrl = url;
             if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                 ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
@@ -2623,9 +2739,19 @@
                 jsdelivrUrl = HOMARR_JSDELIVR_PREFIX + name;
             }
 
+            let customUrl = url;
+            if (customPrefix) {
+                if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
+                    customUrl = customPrefix + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
+                } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
+                    customUrl = customPrefix + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + name;
+                }
+            }
+
             const fallbacks = [
                 { mode: 'ghfast', url: ghfastUrl, emoji: '🟦' },
                 { mode: 'cdn', url: jsdelivrUrl, emoji: '🟪' },
+                { mode: 'custom', url: customUrl, emoji: '🔗' },
                 { mode: 'raw', url: url, emoji: '🟧' }
             ];
 
@@ -2682,6 +2808,7 @@
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeUrl = (icon.download_url || '').replace(/"/g, '&quot;');
+                const offlineUrl = (icon.offline_url || '').replace(/"/g, '&quot;');
                 const globalIndex = start + index;
 
                 const isSelected = selectedIcons.some(i => `${i.name}-${i.download_url}` === `${icon.name}-${icon.download_url}`);
@@ -2698,6 +2825,7 @@
                                      alt="${nameWithoutExt}"
                                      data-name="${safeName}"
                                      data-url="${safeUrl}"
+                                     data-offline-url="${offlineUrl}"
                                      data-fallback-index="0"
                                      data-global-index="${globalIndex}"
                                      style="cursor: pointer;"
@@ -2715,6 +2843,7 @@
                              alt="${nameWithoutExt}"
                              data-name="${safeName}"
                              data-url="${safeUrl}"
+                             data-offline-url="${offlineUrl}"
                              data-fallback-index="0"
                              data-global-index="${globalIndex}"
                              onclick="previewIcon(event);"
@@ -3607,6 +3736,30 @@
 
         document.getElementById('cdnMode').addEventListener('change', (e) => {
             urlMode = e.target.value;
+            localStorage.setItem('iconStationUrlMode', urlMode);
+            const customInput = document.getElementById('customUrlInput');
+            const customBtn = document.getElementById('customUrlConfirm');
+            if (urlMode === 'custom') {
+                customInput.style.display = '';
+                customBtn.style.display = '';
+                customInput.value = customPrefix;
+            } else {
+                customInput.style.display = 'none';
+                customBtn.style.display = 'none';
+            }
+            renderIcons();
+        });
+
+        document.getElementById('customUrlConfirm').addEventListener('click', () => {
+            const input = document.getElementById('customUrlInput');
+            let val = input.value.trim();
+            if (!val) {
+                alert('请输入加速地址前缀');
+                return;
+            }
+            if (!val.endsWith('/')) val += '/';
+            customPrefix = val;
+            localStorage.setItem('customUrlPrefix', customPrefix);
             renderIcons();
         });
 
@@ -3631,6 +3784,20 @@
         });
 
         loadTheme();
+
+        function loadUrlMode() {
+            const savedMode = localStorage.getItem('iconStationUrlMode') || 'ghfast';
+            document.getElementById('cdnMode').value = savedMode;
+            urlMode = savedMode;
+            const customInput = document.getElementById('customUrlInput');
+            const customBtn = document.getElementById('customUrlConfirm');
+            if (urlMode === 'custom') {
+                customInput.style.display = '';
+                customBtn.style.display = '';
+                customInput.value = customPrefix;
+            }
+        }
+        loadUrlMode();
 
         function toggleMenu(event) {
             if (event) event.stopPropagation();

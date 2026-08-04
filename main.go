@@ -161,6 +161,22 @@ func main() {
 		http.ServeFile(w, r, target)
 	})
 
+	// 离线图标目录处理
+	http.HandleFunc("/deskdata/offline_icon/", func(w http.ResponseWriter, r *http.Request) {
+		path := strings.TrimPrefix(r.URL.Path, "/deskdata/offline_icon/")
+		path = filepath.Clean(path)
+		offlineDir := filepath.Join(userDataRoot, "offline_icon")
+		target := filepath.Join(offlineDir, path)
+
+		// 安全校验：禁止路径穿越
+		if !strings.HasPrefix(target, offlineDir+string(filepath.Separator)) && target != offlineDir {
+			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			return
+		}
+
+		http.ServeFile(w, r, target)
+	})
+
 	log.Println("内部运行端口:9168(请使用外部映射端口访问)")
 
 	go func() {

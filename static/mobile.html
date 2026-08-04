@@ -1041,6 +1041,13 @@
         const HOMARR_CDN_PREFIX = 'https://ghfast.top/';
         const HOMARR_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/main/png/';
 
+        // 离线图标路径映射：source -> 本地目录
+        const OFFLINE_ICON_DIRS = {
+            'hdicons': 'deskdata/offline_icon/HDicons/',
+            'homarr': 'deskdata/offline_icon/Homarr/',
+            'macicons': 'deskdata/offline_icon/Macicon/'
+        };
+
         function Icon(props) {
             const { name, className = '' } = props;
             return h('svg', {
@@ -1227,13 +1234,19 @@
                     const jsonIcons = Array.isArray(raw)
                         ? raw
                         : (Array.isArray(raw.icons)
-                            ? raw.icons.map(i => ({
-                                name: (() => {
+                            ? raw.icons.map(i => {
+                                const name = (() => {
                                     const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
                                     return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
-                                })(),
-                                download_url: i.url
-                            }))
+                                })();
+                                // 从URL提取实际文件名
+                                const urlFilename = i.url ? i.url.split('/').pop().split('?')[0] : name;
+                                return {
+                                    name: name,
+                                    download_url: i.url,
+                                    offline_url: OFFLINE_ICON_DIRS.hdicons + urlFilename
+                                };
+                            })
                             : []);
 
                     let homarrIcons = [];
@@ -1242,14 +1255,20 @@
                         if (homarrResponse.ok) {
                             const homarrRaw = await homarrResponse.json();
                             homarrIcons = Array.isArray(homarrRaw.icons)
-                                ? homarrRaw.icons.map(i => ({
-                                    name: (() => {
+                                ? homarrRaw.icons.map(i => {
+                                    const name = (() => {
                                         const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
                                         return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
-                                    })(),
-                                    download_url: i.url,
-                                    isHomarrIcon: true
-                                }))
+                                    })();
+                                    // 从URL提取实际文件名
+                                    const urlFilename = i.url ? i.url.split('/').pop().split('?')[0] : name;
+                                    return {
+                                        name: name,
+                                        download_url: i.url,
+                                        isHomarrIcon: true,
+                                        offline_url: OFFLINE_ICON_DIRS.homarr + urlFilename
+                                    };
+                                })
                                 : [];
                         }
                     } catch (e) {
@@ -1262,14 +1281,20 @@
                         if (macResponse.ok) {
                             const macRaw = await macResponse.json();
                             macIcons = Array.isArray(macRaw.icons)
-                                ? macRaw.icons.map(i => ({
-                                    name: (() => {
+                                ? macRaw.icons.map(i => {
+                                    const name = (() => {
                                         const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
                                         return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
-                                    })(),
-                                    download_url: i.url,
-                                    isMacIcon: true
-                                }))
+                                    })();
+                                    // 从URL提取实际文件名
+                                    const urlFilename = i.url ? i.url.split('/').pop().split('?')[0] : name;
+                                    return {
+                                        name: name,
+                                        download_url: i.url,
+                                        isMacIcon: true,
+                                        offline_url: OFFLINE_ICON_DIRS.macicons + urlFilename
+                                    };
+                                })
                                 : [];
                         }
                     } catch (e) {
@@ -1632,6 +1657,11 @@
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
 
+                // 优先使用离线本地图标
+                if (icon.offline_url) {
+                    return window.location.origin + '/' + icon.offline_url.replace(/^\//, '');
+                }
+
                 if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
                     const url = icon.download_url;
                     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -1680,6 +1710,13 @@
                 const url = icon.download_url || '';
                 const fileName = icon.name || (url.match(/([^/]+)$/)?.[1] || '');
 
+                // 如果当前src是离线URL，先回退到原始在线URL
+                const currentSrc = e.target.src;
+                if (currentSrc.includes('deskdata/offline_icon/')) {
+                    e.target.src = url;
+                    return;
+                }
+
                 let ghfastUrl = url;
                 if (url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/')) {
                     ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + fileName;
@@ -1694,15 +1731,33 @@
                     jsdelivrUrl = HOMARR_JSDELIVR_PREFIX + fileName;
                 }
 
+                // 构建回退链：当前模式优先
                 const fallbacks = [
-                    ghfastUrl,
-                    jsdelivrUrl,
-                    url
+                    { mode: 'ghfast', url: ghfastUrl },
+                    { mode: 'cdn', url: jsdelivrUrl },
+                    { mode: 'raw', url: url }
                 ];
-                const currentSrc = e.target.src;
-                const currentIndex = fallbacks.indexOf(currentSrc);
-                if (currentIndex < fallbacks.length - 1) {
-                    e.target.src = fallbacks[currentIndex + 1];
+                
+                // 按当前模式排序
+                const sortedFallbacks = [
+                    ...fallbacks.filter(f => f.mode === urlMode),
+                    ...fallbacks.filter(f => f.mode !== urlMode)
+                ];
+                
+                // 找到当前URL在回退链中的位置
+                let currentIndex = sortedFallbacks.findIndex(f => f.url === currentSrc);
+                if (currentIndex === -1) {
+                    // 如果当前URL不在回退链中（可能是离线URL回退后的在线URL），从头开始
+                    currentIndex = -1;
+                }
+                
+                if (currentIndex < sortedFallbacks.length - 1) {
+                    const next = sortedFallbacks[currentIndex + 1];
+                    if (next.url && !next.url.endsWith('undefined') && !next.url.endsWith('null')) {
+                        e.target.src = next.url;
+                    } else {
+                        e.target.style.display = 'none';
+                    }
                 } else {
                     e.target.style.display = 'none';
                 }
