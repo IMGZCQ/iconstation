@@ -1062,7 +1062,7 @@
             const [filteredIcons, setFilteredIcons] = useState([]);
             const [searchKeyword, setSearchKeyword] = useState('');
             const [currentPage, setCurrentPage] = useState(1);
-            const [iconsPerPage, setIconsPerPage] = useState(parseInt(localStorage.getItem('mobileIconsPerPage')) || 24);
+            const [iconsPerPage, setIconsPerPage] = useState(parseInt(localStorage.getItem('mobileIconsPerPage')) || 9);
             const shouldResetPageRef = useRef(true);
             const [theme, setTheme] = useState(localStorage.getItem('iconStationTheme') || 'default');
             const [urlMode, setUrlMode] = useState('ghfast');
@@ -2025,7 +2025,7 @@
                                         h('img', {
                                             className: 'icon-image',
                                             src: getIconSrc(icon),
-                                            alt: icon.name,
+                                            alt: icon.name.split(/[/\\]/).pop(),
                                             onError: (e) => handleImageError(e, icon),
                                             loading: 'lazy'
                                         })
@@ -2033,7 +2033,7 @@
                                     h('div', { className: 'icon-name' },
                                         h('span', null, getIconEmoji(icon)),
                                         ' ',
-                                        icon.name.replace(/\.(png|svg)$/i, '')
+                                        icon.name.split(/[/\\]/).pop().replace(/\.(png|svg)$/i, '')
                                     ),
                                     h('div', { className: 'icon-actions' },
                                         h('button', {
@@ -2086,7 +2086,7 @@
                     h('img', {
                         className: 'preview-main',
                         src: getIconSrc(filteredIcons[previewIndex]),
-                        alt: filteredIcons[previewIndex].name,
+                        alt: filteredIcons[previewIndex].name.split(/[/\\]/).pop(),
                         onClick: (e) => e.stopPropagation()
                     }),
                     h('button', {
