@@ -2,6 +2,93 @@ window.isPreviewActive = false;
 let currentIconUrls = [];
 let currentIconIndex = 0;
 
+function isVideoUrl(url) {
+    return /\.(mp4|webm)(\?|#|$)/i.test(url);
+}
+
+function createMediaElement(src, isMain) {
+    const isVideo = isVideoUrl(src);
+    if (isVideo) {
+        const video = document.createElement('video');
+        video.src = src;
+        if (isMain) {
+            video.style.cssText = `
+                max-width: 85vw;
+                max-height: 85vh;
+                min-width: 100px;
+                min-height: 100px;
+                flex-shrink: 1;
+                border-radius: 4px;
+            `;
+            video.controls = true;
+            video.autoplay = true;
+            video.loop = true;
+        } else {
+            video.style.cssText = `
+                width: 15vw;
+                height: 15vw;
+                max-height: 50vh;
+                min-width: 60px;
+                min-height: 60px;
+                object-fit: cover;
+                opacity: 0.6;
+                cursor: pointer;
+                transition: opacity 0.3s, transform 0.3s;
+                flex-shrink: 0;
+                border-radius: 4px;
+            `;
+            video.muted = true;
+            video.autoplay = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.onmouseenter = function() {
+                this.style.opacity = '1';
+                this.style.transform = 'scale(1.1)';
+            };
+            video.onmouseleave = function() {
+                this.style.opacity = '0.6';
+                this.style.transform = 'scale(1)';
+            };
+        }
+        return video;
+    } else {
+        const img = document.createElement('img');
+        img.src = src;
+        if (isMain) {
+            img.style.cssText = `
+                max-width: 85vw;
+                max-height: 85vh;
+                min-width: 100px;
+                min-height: 100px;
+                object-fit: contain;
+                flex-shrink: 1;
+            `;
+        } else {
+            img.style.cssText = `
+                width: 15vw;
+                height: 15vw;
+                max-height: 50vh;
+                min-width: 60px;
+                min-height: 60px;
+                object-fit: contain;
+                opacity: 0.6;
+                cursor: pointer;
+                transition: opacity 0.3s, transform 0.3s;
+                flex-shrink: 0;
+            `;
+            img.onmouseenter = function() {
+                this.style.opacity = '1';
+                this.style.transform = 'scale(1.1)';
+            };
+            img.onmouseleave = function() {
+                this.style.opacity = '0.6';
+                this.style.transform = 'scale(1)';
+            };
+        }
+        return img;
+    }
+}
+
 function showIconPreview(iconUrls, index = 0) {
     window.isPreviewActive = true;
     currentIconUrls = iconUrls;
@@ -26,6 +113,7 @@ function showIconPreview(iconUrls, index = 0) {
         `;
 
         const container = document.createElement('div');
+        container.id = 'lightboxContainer';
         container.style.cssText = `
             display: flex;
             align-items: center;
@@ -36,66 +124,25 @@ function showIconPreview(iconUrls, index = 0) {
             box-sizing: border-box;
         `;
 
-        const prevImg = document.createElement('img');
+        const prevImg = createMediaElement('', false);
         prevImg.id = 'lightboxPrev';
-        prevImg.style.cssText = `
-            width: 15vw;
-            height: 15vw;
-            max-height: 50vh;
-            min-width: 60px;
-            min-height: 60px;
-            object-fit: contain;
-            opacity: 0.6;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.3s;
-            flex-shrink: 0;
-        `;
-        prevImg.onmouseenter = function() {
-            this.style.opacity = '1';
-            this.style.transform = 'scale(1.1)';
-        };
-        prevImg.onmouseleave = function() {
-            this.style.opacity = '0.6';
-            this.style.transform = 'scale(1)';
-        };
 
-        const mainImg = document.createElement('img');
-        mainImg.id = 'lightboxMain';
-        mainImg.style.cssText = `
-            width: 60vw;
-            height: 60vw;
-            max-height: 85vh;
-            min-width: 100px;
-            min-height: 100px;
-            object-fit: contain;
+        const mainContainer = document.createElement('div');
+        mainContainer.id = 'lightboxMain';
+        mainContainer.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 1;
+            max-width: 85vw;
+            max-height: 85vh;
         `;
 
-        const nextImg = document.createElement('img');
+        const nextImg = createMediaElement('', false);
         nextImg.id = 'lightboxNext';
-        nextImg.style.cssText = `
-            width: 15vw;
-            height: 15vw;
-            max-height: 50vh;
-            min-width: 60px;
-            min-height: 60px;
-            object-fit: contain;
-            opacity: 0.6;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.3s;
-            flex-shrink: 0;
-        `;
-        nextImg.onmouseenter = function() {
-            this.style.opacity = '1';
-            this.style.transform = 'scale(1.1)';
-        };
-        nextImg.onmouseleave = function() {
-            this.style.opacity = '0.6';
-            this.style.transform = 'scale(1)';
-        };
 
         container.appendChild(prevImg);
-        container.appendChild(mainImg);
+        container.appendChild(mainContainer);
         container.appendChild(nextImg);
         lightbox.appendChild(container);
         document.body.appendChild(lightbox);
@@ -104,40 +151,56 @@ function showIconPreview(iconUrls, index = 0) {
     }
 
     const prevImg = document.getElementById('lightboxPrev');
-    const mainImg = document.getElementById('lightboxMain');
+    const mainContainer = document.getElementById('lightboxMain');
     const nextImg = document.getElementById('lightboxNext');
 
     const updateImages = (index) => {
         currentIconIndex = index;
-        mainImg.src = currentIconUrls[currentIconIndex];
 
+        // 更新主预览
+        mainContainer.innerHTML = '';
+        const mainEl = createMediaElement(currentIconUrls[currentIconIndex], true);
+        mainEl.onclick = function(e) {
+            e.stopPropagation();
+            closePreview();
+        };
+        mainContainer.appendChild(mainEl);
+
+        // 更新缩略图导航
         const prevIndex = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
         const nextIndex = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
 
-        prevImg.src = currentIconUrls[prevIndex];
-        nextImg.src = currentIconUrls[nextIndex];
+        const newPrev = createMediaElement(currentIconUrls[prevIndex], false);
+        newPrev.id = 'lightboxPrev';
+        prevImg.replaceWith(newPrev);
+        const newNext = createMediaElement(currentIconUrls[nextIndex], false);
+        newNext.id = 'lightboxNext';
+        nextImg.replaceWith(newNext);
     };
 
     updateImages(currentIconIndex);
 
-    prevImg.onclick = function(e) {
-        e.stopPropagation();
-        const newIndex = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
-        updateImages(newIndex);
+    const updateNav = () => {
+        const p = document.getElementById('lightboxPrev');
+        const n = document.getElementById('lightboxNext');
+        if (p) {
+            p.onclick = function(e) {
+                e.stopPropagation();
+                const newIndex = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
+                updateImages(newIndex);
+            };
+        }
+        if (n) {
+            n.onclick = function(e) {
+                e.stopPropagation();
+                const newIndex = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
+                updateImages(newIndex);
+            };
+        }
     };
-
-    nextImg.onclick = function(e) {
-        e.stopPropagation();
-        const newIndex = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
-        updateImages(newIndex);
-    };
+    updateNav();
 
     lightbox.onclick = function() {
-        closePreview();
-    };
-
-    mainImg.onclick = function(e) {
-        e.stopPropagation();
         closePreview();
     };
 
@@ -147,6 +210,9 @@ function showIconPreview(iconUrls, index = 0) {
 function closePreview() {
     const lightbox = document.getElementById('lightbox');
     if (lightbox) {
+        // 停止所有视频播放
+        const videos = lightbox.querySelectorAll('video');
+        videos.forEach(v => { v.pause(); v.src = ''; });
         lightbox.style.display = 'none';
     }
     window.isPreviewActive = false;
@@ -192,20 +258,44 @@ function nextIcon() {
 }
 
 function updatePreviewImages(index) {
+    const mainContainer = document.getElementById('lightboxMain');
     const prevImg = document.getElementById('lightboxPrev');
-    const mainImg = document.getElementById('lightboxMain');
     const nextImg = document.getElementById('lightboxNext');
 
-    if (!mainImg || !prevImg || !nextImg) return;
+    if (!mainContainer || !prevImg || !nextImg) return;
 
     currentIconIndex = index;
-    mainImg.src = currentIconUrls[currentIconIndex];
 
+    // 更新主预览
+    mainContainer.innerHTML = '';
+    const mainEl = createMediaElement(currentIconUrls[currentIconIndex], true);
+    mainEl.onclick = function(e) {
+        e.stopPropagation();
+        closePreview();
+    };
+    mainContainer.appendChild(mainEl);
+
+    // 更新缩略图
     const prevIndex = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
     const nextIndex = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
 
-    prevImg.src = currentIconUrls[prevIndex];
-    nextImg.src = currentIconUrls[nextIndex];
+    const newPrev = createMediaElement(currentIconUrls[prevIndex], false);
+    newPrev.id = 'lightboxPrev';
+    newPrev.onclick = function(e) {
+        e.stopPropagation();
+        const newIdx = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
+        updatePreviewImages(newIdx);
+    };
+    prevImg.replaceWith(newPrev);
+
+    const newNext = createMediaElement(currentIconUrls[nextIndex], false);
+    newNext.id = 'lightboxNext';
+    newNext.onclick = function(e) {
+        e.stopPropagation();
+        const newIdx = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
+        updatePreviewImages(newIdx);
+    };
+    nextImg.replaceWith(newNext);
 }
 
 document.addEventListener('keydown', function(e) {

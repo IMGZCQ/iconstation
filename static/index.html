@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -84,34 +84,6 @@
             position: relative;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: 0;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 20% 20%, var(--glow-color) 0%, transparent 30%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 30%),
-                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 40%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
         .dynamic-bg {
             position: fixed;
             top: 0;
@@ -120,17 +92,16 @@
             height: 100%;
             z-index: 0;
             background: url('https://t.alcy.cc/fj') center/cover;
-            filter: blur(3px);
-            opacity: 0.7;
+            opacity: 0.15;
             pointer-events: none;
         }
 
         :root[data-theme="light"] .dynamic-bg {
-            opacity: 0.1;
+            opacity: 0.05;
         }
 
         :root[data-theme="dark"] .dynamic-bg {
-            opacity: 0.3;
+            opacity: 0.1;
         }
 
 
@@ -145,15 +116,13 @@
         }
 
         .navbar {
-            background: linear-gradient(180deg, rgba(20, 30, 60, 0.7) 0%, rgba(20, 30, 60, 0.3) 100%);
-            backdrop-filter: blur(25px) saturate(180%);
+            background: var(--card-bg);
             border-bottom: 1px solid var(--glass-border);
             padding: 0.5rem 0;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         :root[data-theme="light"] .navbar {
@@ -194,7 +163,7 @@
         :root[data-theme="light"] .navbar-icon {
             box-shadow: 0 4px 20px rgba(30, 64, 175, 0.6);
             border: 2px solid rgba(30, 64, 175, 0.7);
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            background: #0087ff;
             padding: 4px;
             border-radius: 4px;
         }
@@ -217,7 +186,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
             letter-spacing: 1px;
             white-space: nowrap;
         }
@@ -230,33 +198,29 @@
         }
 
         .back-btn {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            background: rgba(0, 240, 255, 0.1);
             border: 1px solid rgba(0, 240, 255, 0.3);
             color: var(--primary);
             padding: 0.7rem 1.5rem;
             border-radius: 12px;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             font-weight: 600;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.1);
         }
 
         .back-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            background: rgba(0, 240, 255, 0.2);
             border-color: var(--primary);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .auth-btn {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border: 2px solid rgba(0, 240, 255, 0.4);
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.4);
             color: var(--primary);
             border-radius: 8px;
             padding: 0.5rem 0.8rem;
@@ -265,27 +229,22 @@
             align-items: center;
             gap: 0.6rem;
             font-weight: 700;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
+            transition: background 0.2s, transform 0.2s;
             white-space: nowrap;
             flex-shrink: 0;
             font-size: 0.9rem;
         }
 
         .auth-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: rgba(0, 240, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .about-btn-update {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%) !important;
+            background: var(--card-bg) !important;
             border-color: rgba(16, 185, 129, 0.8) !important;
             color: #10b981 !important;
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4),
-                0 0 15px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .search-box {
@@ -307,10 +266,8 @@
             outline: none;
             background: rgba(20, 30, 60, 0.6);
             color: white;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 8px 32px rgba(0, 240, 255, 0.1),
-                inset 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
         }
 
         .search-box input:focus {
@@ -332,7 +289,6 @@
             transform: translateY(-50%);
             color: var(--primary);
             font-size: 18px;
-            filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
         }
 
         .clear-btn {
@@ -346,7 +302,7 @@
             cursor: pointer;
             padding: 4px;
             border-radius: 50%;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -377,9 +333,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(20, 30, 60, 0.6);
-            backdrop-filter: blur(10px);
-            transition: .4s;
+            background: var(--card-bg);
+            transition: .2s;
             border-radius: 24px;
             border: 2px solid rgba(0, 240, 255, 0.3);
         }
@@ -391,10 +346,9 @@
             width: 16px;
             left: 2px;
             bottom: 2px;
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
-            transition: .4s;
+            background: var(--primary);
+            transition: .2s;
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
 
         input:checked+.slider {
@@ -431,14 +385,12 @@
 
         .icon-card {
             background: var(--card-bg);
-            backdrop-filter: blur(20px) saturate(180%);
             border-radius: 16px;
             padding: 1rem;
             text-align: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             position: relative;
             overflow: hidden;
             display: flex;
@@ -447,27 +399,25 @@
         }
 
         .icon-card:hover {
-            transform: translateY(-8px) scale(1.02);
+            transform: translateY(-4px);
             border-color: var(--primary);
-            box-shadow: 0 20px 50px rgba(0, 240, 255, 0.15),
-                0 0 30px rgba(0, 240, 255, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
 
         :root[data-theme="light"] .icon-card {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         :root[data-theme="light"] .icon-card:hover {
-            box-shadow: 0 12px 30px rgba(30, 64, 175, 0.15);
+            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.1);
         }
 
         :root[data-theme="dark"] .icon-card {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         :root[data-theme="dark"] .icon-card:hover {
-            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.12);
         }
 
 
@@ -479,21 +429,12 @@
             border-radius: 12px;
             background: var(--icon-bg);
             padding: 0.5rem;
-            transition: all 0.4s;
+            transition: transform 0.2s;
             flex-shrink: 0;
         }
 
         .icon-card:hover .icon-image {
             transform: scale(1.05);
-            filter: drop-shadow(0 8px 20px rgba(0, 240, 255, 0.3));
-        }
-
-        :root[data-theme="light"] .icon-card:hover .icon-image {
-            filter: drop-shadow(0 8px 20px rgba(30, 64, 175, 0.2));
-        }
-
-        :root[data-theme="dark"] .icon-card:hover .icon-image {
-            filter: drop-shadow(0 8px 20px rgba(56, 189, 248, 0.2));
         }
 
         .icon-name {
@@ -504,7 +445,6 @@
             text-overflow: ellipsis;
             line-height: 1.4;
             font-weight: 600;
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
             min-height: 1.4rem;
         }
 
@@ -533,14 +473,13 @@
             min-width: auto;
             padding: 0.5rem 0.3rem;
             border: 1px solid rgba(0, 240, 255, 0.4);
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            background: var(--card-bg);
             color: var(--primary);
             border-radius: 10px;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
             letter-spacing: 0.5px;
             white-space: nowrap;
             display: flex;
@@ -575,7 +514,7 @@
 
         .delete-btn {
             border-color: rgba(236, 72, 153, 0.4);
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            background: var(--card-bg);
             color: #ec4899;
         }
 
@@ -596,23 +535,22 @@
         .pagination button {
             padding: 0.6rem 1rem;
             border: 1px solid rgba(0, 240, 255, 0.3);
-            background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(20, 30, 60, 0.3) 100%);
+            background: var(--card-bg);
             color: var(--primary);
             border-radius: 12px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
             min-width: 50px;
-            backdrop-filter: blur(15px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .pagination button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            background: var(--card-bg);
             color: #0f172a;
             transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-color: transparent;
         }
 
@@ -627,14 +565,11 @@
 
         .pagination .page-info {
             padding: 0.6rem 1rem;
-            background: linear-gradient(135deg, rgba(20, 30, 60, 0.7) 0%, rgba(20, 30, 60, 0.4) 100%);
+            background: var(--card-bg);
             border-radius: 12px;
             font-weight: bold;
             color: var(--primary);
             border: 1px solid rgba(0, 240, 255, 0.3);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
             min-width: 70px;
             text-align: center;
         }
@@ -646,9 +581,9 @@
         }
 
         :root[data-theme="light"] .pagination button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            background: var(--card-bg);
             color: #ffffff;
-            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         :root[data-theme="light"] .pagination button:disabled {
@@ -671,9 +606,9 @@
         }
 
         :root[data-theme="dark"] .pagination button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 100%);
+            background: var(--card-bg);
             color: #0f172a;
-            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         :root[data-theme="dark"] .pagination button:disabled {
@@ -699,7 +634,6 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 0.75rem;
-            backdrop-filter: blur(15px);
         }
 
         .pagination-info {
@@ -750,22 +684,20 @@
             padding: 0.5rem 0.75rem;
             min-width: 45px;
             border: 1px solid rgba(0, 240, 255, 0.3);
-            background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(20, 30, 60, 0.3) 100%);
-            color: var(--primary);
+            background: var(--card-bg);
             border-radius: 12px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .pagination-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            background: var(--card-bg);
             color: #0f172a;
             transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-color: transparent;
         }
 
@@ -790,32 +722,28 @@
         .pagination-input {
             width: 50px;
             padding: 0.4rem;
-            background: rgba(20, 30, 60, 0.6);
+            background: var(--card-bg);
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 8px;
             color: white;
             text-align: center;
-            backdrop-filter: blur(10px);
         }
 
         .pagination-go-btn {
             padding: 0.4rem 0.6rem;
             border: 1px solid rgba(0, 240, 255, 0.4);
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            background: var(--card-bg);
             color: var(--primary);
             border-radius: 10px;
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .pagination-go-btn:hover {
-            background: rgba(0, 240, 255, 0.15);
+            background: rgba(0, 240, 255, 0.1);
             color: var(--primary);
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2);
             border-color: rgba(0, 240, 255, 0.5);
         }
 
@@ -843,7 +771,7 @@
         }
 
         :root[data-theme="light"] .pagination-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            background: var(--card-bg);
             color: #ffffff;
             box-shadow: 0 8px 25px rgba(30, 64, 175, 0.35);
         }
@@ -888,9 +816,9 @@
         }
 
         :root[data-theme="dark"] .pagination-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 100%);
+            background: var(--card-bg);
             color: #0f172a;
-            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         :root[data-theme="dark"] .pagination-btn:disabled {
@@ -914,7 +842,7 @@
             padding: 5rem;
             font-size: 1.2rem;
             color: var(--primary);
-            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+            text-shadow: none;
         }
 
         .no-results {
@@ -935,9 +863,7 @@
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             z-index: 9999;
-            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 600;
-            backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 240, 255, 0.3);
             max-width: calc(100vw - 2rem);
             font-size: 0.9rem;
@@ -1081,19 +1007,18 @@
             bottom: auto;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(20, 30, 60, 0.9);
+            background: var(--card-bg);
             color: white;
             padding: 0.75rem 1rem;
             border-radius: 10px;
             border: 1px solid rgba(0, 240, 255, 0.3);
-            backdrop-filter: blur(12px);
             font-size: 0.75rem;
             text-align: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             white-space: pre-line;
             visibility: hidden;
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: opacity 0.2s ease;
             z-index: 1000;
             pointer-events: none;
             width: max-content;
@@ -1115,7 +1040,6 @@
         .tooltip-container:hover .tooltip {
             visibility: visible;
             opacity: 1;
-            transform: translateX(-20%) translateY(4px);
         }
 
         .checkbox-wrapper {
@@ -1123,7 +1047,7 @@
         }
 
         .toggle-btn {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            background: var(--card-bg);
             border: 1px solid rgba(0, 240, 255, 0.3);
             border-radius: 10px;
             padding: 0.5rem 0.8rem;
@@ -1134,14 +1058,13 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: border-color 0.2s, background-color 0.2s;
             white-space: nowrap;
         }
 
         .toggle-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            background: rgba(0, 240, 255, 0.08);
+            border-color: var(--primary);
         }
 
         .toggle-btn svg {
@@ -1161,7 +1084,6 @@
             left: 0;
             margin-top: 0.25rem;
             background: rgba(20, 30, 60, 0.98);
-            backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 240, 255, 0.3);
             border-radius: 12px;
             padding: 0.75rem;
@@ -1170,7 +1092,6 @@
             min-width: 150px;
             z-index: 100;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.2s ease;
         }
 
         .checkbox-content.expanded {
@@ -1196,17 +1117,16 @@
             border: 2px solid rgba(0, 240, 255, 0.5);
             border-radius: 6px;
             background: rgba(20, 30, 60, 0.5);
-            backdrop-filter: blur(10px);
             display: inline-block;
             position: relative;
             margin-right: 0.7rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .cyberpunk-checkbox:before {
             content: "";
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            background: var(--primary);
             display: block;
             position: absolute;
             top: 50%;
@@ -1215,8 +1135,7 @@
             width: 10px;
             height: 10px;
             border-radius: 3px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+            transition: transform 0.2s;
         }
 
         .cyberpunk-checkbox:checked:before {
@@ -1225,7 +1144,7 @@
 
         .cyberpunk-checkbox:checked {
             border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.1);
         }
 
         .cyberpunk-radio {
@@ -1235,17 +1154,16 @@
             border: 2px solid rgba(0, 240, 255, 0.5);
             border-radius: 50%;
             background: rgba(20, 30, 60, 0.5);
-            backdrop-filter: blur(10px);
             display: inline-block;
             position: relative;
             margin-right: 0.7rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .cyberpunk-radio:before {
             content: "";
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            background: var(--primary);
             display: block;
             position: absolute;
             top: 50%;
@@ -1254,8 +1172,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+            transition: transform 0.2s;
         }
 
         .cyberpunk-radio:checked:before {
@@ -1264,7 +1181,6 @@
 
         .cyberpunk-radio:checked {
             border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         .cyberpunk-checkbox-label,
@@ -1286,13 +1202,12 @@
         }
 
         .control-panel {
-            background: rgba(20, 30, 60, 0.4);
-            backdrop-filter: blur(25px);
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 0.5rem;
             margin: 0.5rem;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
             width: 100%;
@@ -1312,7 +1227,7 @@
         }
 
         .upload-btn {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            background: var(--card-bg);
             border: 2px solid rgba(0, 240, 255, 0.4);
             color: var(--primary);
             border-radius: 12px;
@@ -1322,18 +1237,16 @@
             align-items: center;
             gap: 0.5rem;
             font-weight: 700;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(15px);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
             box-shadow: 0 6px 20px rgba(0, 240, 255, 0.15);
             white-space: nowrap;
             font-size: 0.9rem;
         }
 
         .upload-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            background: var(--card-bg);
             transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .cdn-select {
@@ -1342,10 +1255,9 @@
             color: white;
             border-radius: 12px;
             padding: 0.6rem 0.8rem;
-            backdrop-filter: blur(15px);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             min-width: 120px;
             max-width: 100%;
@@ -1366,43 +1278,37 @@
         }
 
         .custom-url-input {
-            background: rgba(20, 30, 60, 0.6);
+            background: var(--card-bg);
             border: 2px solid rgba(0, 240, 255, 0.3);
             color: white;
             border-radius: 12px;
             padding: 0.6rem 0.8rem;
-            backdrop-filter: blur(15px);
             font-weight: 600;
             font-size: 0.85rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.2s;
             width: 260px;
             box-sizing: border-box;
         }
 
         .custom-url-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
             outline: none;
         }
 
         .custom-url-confirm {
-            background: rgba(0, 240, 255, 0.2);
+            background: rgba(0, 240, 255, 0.1);
             border: 2px solid rgba(0, 240, 255, 0.3);
             color: white;
             border-radius: 12px;
             padding: 0.6rem 1rem;
-            backdrop-filter: blur(15px);
             font-weight: 600;
             font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .custom-url-confirm:hover {
             border-color: var(--primary);
-            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
         }
 
         :root[data-theme="light"] .custom-url-input {
@@ -1426,15 +1332,14 @@
         }
 
         .theme-select {
-            background: rgba(20, 30, 60, 0.6);
+            background: var(--card-bg);
             border: 2px solid rgba(0, 240, 255, 0.3);
             color: white;
             border-radius: 12px;
             padding: 0.6rem 0.8rem;
-            backdrop-filter: blur(15px);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             min-width: 60px;
             max-width: 100%;
@@ -1612,9 +1517,30 @@
             color: var(--text-primary);
         }
 
+        :root[data-theme="light"] .confirm-btn {
+            background: #1e40af;
+            color: #ffffff;
+        }
+
+        :root[data-theme="light"] .confirm-btn.danger {
+            background: #dc2626;
+        }
+
         :root[data-theme="dark"] .cancel-btn {
             background: rgba(107, 114, 128, 0.15);
             border-color: rgba(107, 114, 128, 0.3);
+            color: var(--text-primary);
+        }
+
+        :root[data-theme="dark"] .confirm-btn {
+            background: rgba(0, 240, 255, 0.2);
+            color: #ffffff;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+        }
+
+        :root[data-theme="dark"] .confirm-btn.danger {
+            background: rgba(236, 72, 153, 0.2);
+            border-color: rgba(236, 72, 153, 0.4);
         }
 
         .warning-msg {
@@ -1625,19 +1551,17 @@
             border-radius: 12px;
             margin-top: 0.75rem;
             font-weight: 600;
-            backdrop-filter: blur(10px);
             font-size: 0.85rem;
         }
 
         .multi-select-btn.active {
-            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25) 0%, rgba(251, 191, 36, 0.25) 100%);
+            background: rgba(234, 179, 8, 0.15);
             border-color: rgba(234, 179, 8, 0.6);
             color: #fbbf24;
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
         }
 
         .upload-btn.multi-select-btn.active {
-            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25) 0%, rgba(251, 191, 36, 0.25) 100%);
+            background: var(--card-bg);
             border-color: rgba(234, 179, 8, 0.6);
             color: #fbbf24;
             box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
@@ -1645,7 +1569,7 @@
 
         .upload-btn.delete-btn {
             border-color: rgba(236, 72, 153, 0.4);
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            background: var(--card-bg);
             color: #ec4899;
         }
 
@@ -1671,15 +1595,14 @@
             border: 3px solid rgba(0, 240, 255, 0.5);
             border-radius: 10px;
             background: rgba(20, 30, 60, 0.8);
-            backdrop-filter: blur(10px);
             z-index: 10;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .icon-checkbox:checked {
             border-color: var(--primary);
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            background: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .icon-checkbox:before {
@@ -1776,19 +1699,90 @@
             align-items: center;
             justify-content: center;
             z-index: 10000;
-            backdrop-filter: blur(5px);
             padding: 1rem;
         }
 
         .dialog-box {
-            background: linear-gradient(135deg, rgba(10, 15, 30, 0.95) 0%, rgba(20, 30, 60, 0.95) 100%);
+            background: var(--card-bg);
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 16px;
             padding: 1.5rem;
             width: 100%;
             max-width: 340px;
-            box-shadow: 0 16px 40px rgba(0, 240, 255, 0.2);
-            animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-progress-box {
+            max-width: 460px;
+            min-width: 340px;
+            padding: 1.5rem 1.8rem;
+        }
+
+        .upload-progress-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-progress-counter {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+        }
+
+        .upload-progress-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .upload-progress-item:last-child {
+            border-bottom: none;
+        }
+
+        .upload-progress-item-status {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .upload-progress-item-name {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .upload-progress-bar-wrap {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.4rem;
+        }
+
+        .upload-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.7), var(--primary));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .upload-progress-summary {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(0, 240, 255, 0.08);
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         @keyframes dialogSlideIn {
@@ -1808,7 +1802,7 @@
             font-weight: 700;
             color: var(--primary);
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            background: var(--card-bg);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -1817,11 +1811,11 @@
         .category-item {
             padding: 0.75rem;
             border: 1px solid var(--glass-border);
-            background: rgba(20, 30, 60, 0.5);
+            background: var(--card-bg);
             border-radius: 10px;
             margin-bottom: 0.5rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
             color: var(--primary);
             font-weight: 600;
             text-align: center;
@@ -1856,17 +1850,13 @@
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 10px;
             outline: none;
-            background: rgba(20, 30, 60, 0.6);
+            background: var(--card-bg);
             color: white;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s;
+            transition: border-color 0.2s;
         }
 
         .dialog-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 4px 25px rgba(0, 240, 255, 0.25),
-                0 0 0 4px rgba(0, 240, 255, 0.1);
         }
 
         .dialog-input::placeholder {
@@ -1886,40 +1876,41 @@
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
             flex: 1;
             text-align: center;
         }
 
         .cancel-btn {
-            background: rgba(148, 163, 184, 0.15);
+            background: rgba(148, 163, 184, 0.1);
             border: 1px solid rgba(148, 163, 184, 0.3);
-            color: #94a3b8;
+            color: var(--text-primary);
         }
 
         .cancel-btn:hover {
-            background: rgba(148, 163, 184, 0.25);
-            transform: translateY(-2px);
+            background: rgba(148, 163, 184, 0.2);
         }
 
         .confirm-btn {
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
-            color: #0f172a;
-            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .confirm-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .confirm-btn.danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+            background: rgba(236, 72, 153, 0.15);
+            border: 1px solid rgba(236, 72, 153, 0.4);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .confirm-btn.danger:hover {
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .dialog-overlay {
@@ -1931,18 +1922,17 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            backdrop-filter: blur(8px);
         }
 
         .about-dialog-box {
-            background: linear-gradient(135deg, rgba(10, 15, 30, 0.95) 0%, rgba(20, 30, 60, 0.95) 100%);
+            background: var(--card-bg);
             border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 16px;
             padding: 1.5rem;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 16px 40px rgba(0, 240, 255, 0.2);
-            animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
         }
 
         .about-dialog-header {
@@ -1964,7 +1954,7 @@
         .about-dialog-title {
             font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 50%, #ec4899 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -1976,7 +1966,7 @@
         }
 
         .about-dialog-body {
-            color: #cbd5e1;
+            color: var(--text-secondary);
             font-size: 0.9rem;
             line-height: 1.6;
             margin-bottom: 1.25rem;
@@ -1989,19 +1979,18 @@
 
         .about-dialog-close-btn {
             padding: 0.6rem 1.5rem;
-            background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%);
-            color: #0f172a;
-            border: none;
+            background: var(--secondary);
+            color: #fff;
+            border: 1px solid transparent;
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.3);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .about-dialog-close-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         :root[data-theme="light"] .about-dialog-box {
@@ -2016,14 +2005,52 @@
         :root[data-theme="light"] .about-dialog-icon {
             box-shadow: 0 4px 20px rgba(30, 64, 175, 0.6);
             border: 2px solid rgba(30, 64, 175, 0.7);
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            background: #0087ff;
             padding: 4px;
             border-radius: 8px;
         }
 
-        :root[data-theme="dark"] .about-dialog-box {
-            background: rgba(17, 24, 39, 0.98);
-            border-color: rgba(255, 255, 255, 0.08);
+        :root[data-theme="light"] .about-dialog-close-btn {
+            background: #1e40af;
+            color: #ffffff;
+        }
+
+        :root[data-theme="light"] .upload-progress-item {
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="light"] .upload-progress-bar-wrap {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        :root[data-theme="light"] .upload-progress-bar-fill {
+            background: linear-gradient(90deg, #1e40af, #7c3aed);
+        }
+
+        :root[data-theme="light"] .upload-progress-summary {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+
+        :root[data-theme="dark"] .about-dialog-icon {
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        :root[data-theme="dark"] .about-dialog-close-btn {
+            background: rgba(56, 189, 248, 0.2);
+            color: #e2e8f0;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+
+        :root[data-theme="dark"] .upload-progress-bar-wrap {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        :root[data-theme="dark"] .upload-progress-summary {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
         }
     </style>
     <script>
@@ -2202,7 +2229,7 @@
                         </label>
                     </div>
                 </div>
-                <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
+                <input type="file" id="fileInput" accept=".png,.svg,.jpg,.jpeg,.webp,.gif,.bmp,.ico,.tiff,.tif,.avif,.mp4,.webm,image/png,image/svg+xml,image/jpeg,image/webp,image/gif,image/bmp,image/x-icon,image/tiff,image/avif,video/mp4,video/webm" style="display: none;" multiple>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="搜索图标名称...">
                     <svg class="search-icon icon" viewBox="0 0 20 20">
@@ -2311,6 +2338,18 @@
                 <button class="dialog-btn cancel-btn" id="dialogCancelBtn">取消</button>
                 <button class="dialog-btn confirm-btn" id="dialogConfirmBtn">确认</button>
             </div>
+        </div>
+    </div>
+
+    <div id="uploadProgressDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box upload-progress-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="upload-progress-title" id="uploadProgressTitle">正在上传...</div>
+                <button id="uploadProgressCloseBtn" style="background:none;border:none;color:var(--primary);font-size:1.4rem;cursor:pointer;padding:0 0.2rem;line-height:1;">×</button>
+            </div>
+            <div class="upload-progress-counter" id="uploadProgressCounter"></div>
+            <div id="uploadProgressList"></div>
+            <div class="upload-progress-summary" id="uploadProgressSummary" style="display:none;"></div>
         </div>
     </div>
 
@@ -2708,6 +2747,7 @@
         }
 
         function handleImageError(img) {
+            if (img.tagName === 'VIDEO') return;
             const name = img.getAttribute('data-name');
             const url = img.getAttribute('data-url');
             let index = parseInt(img.getAttribute('data-fallback-index') || '0');
@@ -2801,10 +2841,11 @@
 
             grid.innerHTML = pageIcons.map((icon, index) => {
                 const rawFileName = icon.name.split(/[/\\]/).pop();
-                const nameWithoutExt = rawFileName.replace(/\.png$/i, '');
+                const nameWithoutExt = rawFileName.replace(/\.(png|svg|jpg|jpeg|webp|gif|bmp|ico|tiff|tif|avif|mp4|webm)$/i, '');
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
                 const iconSrc = getIconUrl(icon);
+                const isVideo = /\.(mp4|webm)$/i.test(rawFileName);
                 const iconEmoji = isMac ? '🍎' : (isUser ? '✅' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
@@ -2822,16 +2863,10 @@
                                    ${isSelected ? 'checked' : ''} 
                                    onchange="toggleIconSelection(${globalIndex})">
                             <label for="checkbox-${globalIndex}" class="icon-label">
-                                <img class="icon-image"
-                                     src="${iconSrc}"
-                                     alt="${nameWithoutExt}"
-                                     data-name="${safeName}"
-                                     data-url="${safeUrl}"
-                                     data-offline-url="${offlineUrl}"
-                                     data-fallback-index="0"
-                                     data-global-index="${globalIndex}"
-                                     style="cursor: pointer;"
-                                     onerror="handleImageError(this)">
+                                ${isVideo
+                                    ? `<video class="icon-image" src="${iconSrc}" alt="${nameWithoutExt}" data-name="${safeName}" data-url="${safeUrl}" data-offline-url="${offlineUrl}" data-fallback-index="0" data-global-index="${globalIndex}" muted autoplay loop playsinline style="cursor: pointer;"></video>`
+                                    : `<img class="icon-image" src="${iconSrc}" alt="${nameWithoutExt}" data-name="${safeName}" data-url="${safeUrl}" data-offline-url="${offlineUrl}" data-fallback-index="0" data-global-index="${globalIndex}" style="cursor: pointer;" onerror="handleImageError(this)">`
+                                }
                             </label>
                             <div class="icon-name"><span>${iconEmoji}</span> ${nameWithoutExt}</div>
                         </div>
@@ -2840,17 +2875,10 @@
 
                 return `
                     <div class="icon-card" title="${safeDisplayName}">
-                        <img class="icon-image"
-                             src="${iconSrc}"
-                             alt="${nameWithoutExt}"
-                             data-name="${safeName}"
-                             data-url="${safeUrl}"
-                             data-offline-url="${offlineUrl}"
-                             data-fallback-index="0"
-                             data-global-index="${globalIndex}"
-                             onclick="previewIcon(event);"
-                             style="cursor: pointer;"
-                             onerror="handleImageError(this)">
+                        ${isVideo
+                            ? `<video class="icon-image" src="${iconSrc}" alt="${nameWithoutExt}" data-name="${safeName}" data-url="${safeUrl}" data-offline-url="${offlineUrl}" data-fallback-index="0" data-global-index="${globalIndex}" muted autoplay loop playsinline style="cursor: pointer;" onclick="previewIcon(event)"></video>`
+                            : `<img class="icon-image" src="${iconSrc}" alt="${nameWithoutExt}" data-name="${safeName}" data-url="${safeUrl}" data-offline-url="${offlineUrl}" data-fallback-index="0" data-global-index="${globalIndex}" style="cursor: pointer;" onclick="previewIcon(event);" onerror="handleImageError(this)">`
+                        }
                         <div class="icon-name"><span>${iconEmoji}</span> ${nameWithoutExt}</div>
                         <div class="icon-buttons" data-name="${safeName}" data-uploaded="${icon.isUploaded}">
                             <button class="icon-btn" onclick="downloadIcon(event);" title="下载图标">
@@ -2991,16 +3019,12 @@
             const showMac = checkMacIcons ? checkMacIcons.checked : true;
             const showHomarr = checkHomarrIcons ? checkHomarrIcons.checked : true;
 
-            const radioAllCategories = document.getElementById('radioAllCategories');
-            const showAllCategories = radioAllCategories ? radioAllCategories.checked : true;
-            let selectedCategory = '';
-            if (!showAllCategories) {
-                const categoryContent = document.getElementById('categoryContent');
-                if (categoryContent) {
-                    const selectedRadio = categoryContent.querySelector('.cyberpunk-radio:checked');
-                    if (selectedRadio && selectedRadio.id !== 'radioAllCategories') {
-                        selectedCategory = selectedRadio.value;
-                    }
+            const categoryContent = document.getElementById('categoryContent');
+            let selectedCategory = null;
+            if (categoryContent) {
+                const selectedRadio = categoryContent.querySelector('.cyberpunk-radio:checked');
+                if (selectedRadio && selectedRadio.id !== 'radioAllCategories') {
+                    selectedCategory = selectedRadio.value;
                 }
             }
 
@@ -3013,7 +3037,7 @@
                 if (isMac && !showMac) return false;
                 if (isHomarr && !showHomarr) return false;
 
-                if (!showAllCategories && isUser) {
+                if (selectedCategory !== null && isUser) {
                     const iconCategory = icon.category || '';
                     if (iconCategory !== selectedCategory) return false;
                 }
@@ -3046,7 +3070,7 @@
                 return;
             }
 
-            let html = '<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="">全部分类</label>';
+            let html = '<label class="cyberpunk-radio-label"><input type="radio" name="categoryRadio" class="cyberpunk-radio" id="radioAllCategories" checked value="___ALL___">全部分类</label>';
 
             if (categories.length > 1 || (categories.length === 1 && categories[0] !== '')) {
                 categories.sort((a, b) => {
@@ -3064,6 +3088,12 @@
             const radios = categoryContent.querySelectorAll('.cyberpunk-radio');
             radios.forEach(r => {
                 r.addEventListener('change', function () {
+                    // 手动互斥：选择具体分类时取消"全部分类"，反之亦然
+                    if (this.id === 'radioAllCategories') {
+                        radios.forEach(rad => { if (rad.id !== 'radioAllCategories') rad.checked = false; });
+                    } else {
+                        radios[0].checked = false;
+                    }
                     applyFilters();
                 });
             });
@@ -3410,7 +3440,8 @@
                         }
                         return;
                     }
-                    const ext = mime.includes('png') ? '.png' : (mime.includes('jpeg') ? '.jpg' : (mime.includes('webp') ? '.webp' : '.png'));
+                    const MEXT_MAP = [['png','.png'],['jpeg','.jpg'],['webp','.webp'],['gif','.gif'],['bmp','.bmp'],['x-icon','.ico'],['tiff','.tiff'],['avif','.avif'],['mp4','.mp4'],['webm','.webm']];
+                    const ext = MEXT_MAP.reduce((r, [m, e]) => r || (mime.includes(m) ? e : ''), '') || '.png';
                     const a = document.createElement('a');
                     const blobUrl = URL.createObjectURL(blob);
                     a.href = blobUrl;
@@ -3609,7 +3640,7 @@
         });
 
         document.getElementById('categoryConfirmBtn').addEventListener('click', () => {
-            if (uploadTargetCategory === null) {
+            if (!uploadTargetCategory) {
                 showToast('请选择或创建一个分类');
                 return;
             }
@@ -3621,51 +3652,77 @@
             const files = e.target.files;
             if (!files || files.length === 0) return;
 
-            let successCount = 0;
-            let failCount = 0;
-
-            showToast(`⏳ 正在上传 ${files.length} 个文件...`);
-
+            const fileEntries = [];
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const fileName = uploadTargetCategory ? uploadTargetCategory + '/' + file.name : file.name;
+                fileEntries.push({ file, fileName, id: i });
+            }
+
+            const progressState = fileEntries.map((_, i) => ({
+                index: i,
+                status: 'pending',
+                progress: 0,
+                message: ''
+            }));
+
+            showUploadProgress(fileEntries, progressState);
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < fileEntries.length; i++) {
+                const entry = fileEntries[i];
+                progressState[i].status = 'uploading';
+                progressState[i].progress = 0;
+                updateUploadProgress(progressState);
+
                 try {
-                    const result = await uploadFileChunked(file, fileName);
+                    const result = await uploadFileChunked(entry.file, entry.fileName, (progress) => {
+                        progressState[i].progress = progress;
+                        updateUploadProgress(progressState);
+                    });
+
                     if (result.success) {
                         successCount++;
-                        if (result.renamed) {
-                            showToast(result.message || `文件名已存在,已自动改名为${result.path.split('/').pop()}`);
-                        }
+                        progressState[i].status = 'success';
+                        progressState[i].message = result.renamed ? result.message || '已自动改名' : '完成';
                     } else {
                         failCount++;
-                        console.error(`上传 ${file.name} 失败:`, result.message || result.error);
+                        progressState[i].status = 'failed';
+                        progressState[i].message = result.message || result.error || '失败';
                     }
                 } catch (error) {
                     failCount++;
-                    console.error(`上传 ${file.name} 出错:`, error);
+                    progressState[i].status = 'failed';
+                    progressState[i].message = error.message || '出错';
+                    console.error(`上传 ${entry.file.name} 出错:`, error);
+                }
+
+                progressState[i].progress = 100;
+                updateUploadProgress(progressState);
+
+                if (i === fileEntries.length - 1) {
+                    await new Promise(r => setTimeout(r, 800));
+                    hideUploadProgress(successCount, failCount, fileEntries.length);
                 }
             }
 
             if (successCount > 0) {
-                if (failCount > 0) {
-                    showToast(`✓ 成功上传 ${successCount} 个文件，失败 ${failCount} 个`);
-                } else {
-                    showToast(`✓ 成功上传 ${successCount} 个文件`);
-                }
                 loadIcons(true);
-            } else {
-                showToast(`✗ 上传失败 ${failCount} 个文件`);
             }
 
             e.target.value = '';
         });
 
-        async function uploadFileChunked(file, fileName = file.name) {
+        async function uploadFileChunked(file, fileName = file.name, onProgress) {
             const CHUNK_SIZE = 1 * 1024 * 1024;
             const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
             const uploadId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
             try {
+                onProgress && onProgress(0);
+
                 const authToken = localStorage.getItem('authToken') || '';
                 const initRes = await fetch('api/upload/user_icon/init', {
                     method: 'POST',
@@ -3709,7 +3766,11 @@
                         const errText = await chunkRes.text();
                         throw new Error(`分片 ${chunkIndex + 1}/${totalChunks} 上传失败: ${errText}`);
                     }
+
+                    onProgress && onProgress(Math.round(((chunkIndex + 1) / totalChunks) * 100));
                 }
+
+                onProgress && onProgress(100);
 
                 const mergeRes = await fetch('api/upload/user_icon/merge', {
                     method: 'POST',
@@ -3865,14 +3926,15 @@
                 title: '重命名图标',
                 message: '请输入新的图标名称（不含扩展名）：',
                 input: true,
-                defaultValue: oldName.replace(/\.(png|svg|jpg|jpeg|webp)$/i, ''),
+                defaultValue: oldName.split('/').pop().replace(/\.(png|svg|jpg|jpeg|webp|gif|bmp|ico|tiff|tif|avif|mp4|webm)$/i, ''),
                 confirmText: '重命名'
             });
 
             if (newName === null || newName.trim() === '') return;
 
-            const ext = oldName.match(/\.(png|svg|jpg|jpeg|webp)$/i);
-            const newFileName = newName.trim() + (ext ? ext[0] : '.png');
+            const oldDir = oldName.substring(0, oldName.lastIndexOf('/'));
+            const ext = oldName.match(/\.(png|svg|jpg|jpeg|webp|gif|bmp|ico|tiff|tif|avif|mp4|webm)$/i);
+            const newFileName = (oldDir ? oldDir + '/' + newName.trim() : newName.trim()) + (ext ? ext[0] : '.png');
 
             if (newFileName === oldName) {
                 showToast('名称未改变');
@@ -4060,6 +4122,67 @@
                 dialogResolve(null);
             }
         }
+
+        function showUploadProgress(files, progressState) {
+            const dialog = document.getElementById('uploadProgressDialog');
+            const counter = document.getElementById('uploadProgressCounter');
+            const list = document.getElementById('uploadProgressList');
+            const summary = document.getElementById('uploadProgressSummary');
+
+            summary.style.display = 'none';
+            counter.textContent = `共 ${files.length} 个文件`;
+
+            list.innerHTML = files.map((f, i) => `
+                <div class="upload-progress-item" data-index="${i}">
+                    <div class="upload-progress-item-status" id="status-${i}">⏳</div>
+                    <div style="flex:1;">
+                        <div class="upload-progress-item-name">${f.fileName.split('/').pop()}</div>
+                        <div class="upload-progress-bar-wrap">
+                            <div class="upload-progress-bar-fill" id="bar-${i}"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            dialog.style.display = 'flex';
+        }
+
+        function updateUploadProgress(progressState) {
+            progressState.forEach((item, i) => {
+                const bar = document.getElementById('bar-' + i);
+                const status = document.getElementById('status-' + i);
+                if (bar) bar.style.width = item.progress + '%';
+                if (status) {
+                    status.textContent = item.status === 'success' ? '✓' : item.status === 'failed' ? '✗' : item.status === 'uploading' ? '⏳' : '•';
+                    status.style.color = item.status === 'success' ? '#00ff88' : item.status === 'failed' ? '#ff4444' : '';
+                }
+            });
+        }
+
+        function hideUploadProgress(successCount, failCount, totalCount) {
+            const dialog = document.getElementById('uploadProgressDialog');
+            const summary = document.getElementById('uploadProgressSummary');
+            const title = document.getElementById('uploadProgressTitle');
+
+            summary.style.display = 'block';
+            if (successCount > 0 && failCount > 0) {
+                title.textContent = '上传完成';
+                summary.textContent = `✓ 成功 ${successCount} 个，✗ 失败 ${failCount} 个`;
+                summary.style.color = '#ffaa00';
+            } else if (failCount === 0) {
+                title.textContent = '上传完成';
+                summary.textContent = `✓ 全部成功（${successCount} 个）`;
+                summary.style.color = '#00ff88';
+            } else {
+                title.textContent = '上传失败';
+                summary.textContent = `✗ 全部失败（${failCount} 个）`;
+                summary.style.color = '#ff4444';
+            }
+        }
+
+        document.getElementById('uploadProgressCloseBtn').addEventListener('click', () => {
+            document.getElementById('uploadProgressDialog').style.display = 'none';
+        });
 
         document.getElementById('dialogCancelBtn').addEventListener('click', closeDialog);
 
@@ -4460,7 +4583,8 @@
                             });
                         }
                     } else {
-                        const ext = mime.includes('png') ? '.png' : (mime.includes('jpeg') ? '.jpg' : (mime.includes('webp') ? '.webp' : '.png'));
+                        const MEXT_MAP = [['png','.png'],['jpeg','.jpg'],['webp','.webp'],['gif','.gif'],['bmp','.bmp'],['x-icon','.ico'],['tiff','.tiff'],['avif','.avif'],['mp4','.mp4'],['webm','.webm']];
+                        const ext = MEXT_MAP.reduce((r, [m, e]) => r || (mime.includes(m) ? e : ''), '') || '.png';
                         const a = document.createElement('a');
                         const blobUrl = URL.createObjectURL(blob);
                         a.href = blobUrl;

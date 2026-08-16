@@ -22,7 +22,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.3.2"
+	Version     = "0.3.6"
 	maxLogLines = 100
 )
 
@@ -387,7 +387,7 @@ func listUploadIcons(w http.ResponseWriter, r *http.Request) {
 		rel, _ := filepath.Rel(userDataDir, p)
 		rel = strings.ReplaceAll(rel, "\\", "/")
 		ext := strings.ToLower(filepath.Ext(rel))
-		allow := map[string]bool{".png": true, ".svg": true, ".jpg": true, ".jpeg": true, ".webp": true}
+		allow := map[string]bool{".png": true, ".svg": true, ".jpg": true, ".jpeg": true, ".webp": true, ".gif": true, ".bmp": true, ".ico": true, ".tiff": true, ".tif": true, ".avif": true, ".mp4": true, ".webm": true}
 		if allow[ext] {
 			cat := ""
 			dir := filepath.Dir(rel)
@@ -416,16 +416,33 @@ func uploadInit(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadChunk(w http.ResponseWriter, r *http.Request) {
-	_ = r.ParseMultipartForm(32 << 20)
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "解析请求失败: " + err.Error()})
+		return
+	}
 	uploadID := r.FormValue("uploadId")
 	chunkIdx := r.FormValue("chunkIndex")
 	dir := filepath.Join(chunksDir, uploadID)
-	_ = os.MkdirAll(dir, 0755)
-	file, _, _ := r.FormFile("file")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建分片目录失败: " + err.Error()})
+		return
+	}
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "读取上传文件失败: " + err.Error()})
+		return
+	}
 	defer file.Close()
-	dst, _ := os.Create(filepath.Join(dir, chunkIdx))
+	dst, err := os.Create(filepath.Join(dir, chunkIdx))
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建分片文件失败: " + err.Error()})
+		return
+	}
 	defer dst.Close()
-	_, _ = io.Copy(dst, file)
+	if _, err := io.Copy(dst, file); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "写入分片失败: " + err.Error()})
+		return
+	}
 	sendJSON(w, map[string]interface{}{"success": true})
 }
 
@@ -472,18 +489,44 @@ func uploadMerge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 扩展名白名单校验
+	ext := strings.ToLower(filepath.Ext(dstRel))
+	allowedExts := map[string]bool{".png": true, ".svg": true, ".jpg": true, ".jpeg": true, ".webp": true, ".gif": true, ".bmp": true, ".ico": true, ".tiff": true, ".tif": true, ".avif": true, ".mp4": true, ".webm": true}
+	if !allowedExts[ext] {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "不支持的文件格式"})
+		return
+	}
+
 	uploadDir := filepath.Join(chunksDir, req.UploadID)
 	finalName, renamed := getUniqueFileName(filepath.Base(dst), filepath.Dir(dst))
 	finalPath := filepath.Join(filepath.Dir(dst), finalName)
 
-	_ = os.MkdirAll(filepath.Dir(finalPath), 0755)
-	out, _ := os.Create(finalPath)
+	if err := os.MkdirAll(filepath.Dir(finalPath), 0755); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建目录失败: " + err.Error()})
+		return
+	}
+	out, err := os.Create(finalPath)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建文件失败: " + err.Error()})
+		return
+	}
 	defer out.Close()
 
-	entries, _ := os.ReadDir(uploadDir)
+	entries, err := os.ReadDir(uploadDir)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "读取分片目录失败: " + err.Error()})
+		return
+	}
 	for i := 0; i < len(entries); i++ {
-		chunk, _ := os.ReadFile(filepath.Join(uploadDir, fmt.Sprintf("%d", i)))
-		_, _ = out.Write(chunk)
+		chunk, err := os.ReadFile(filepath.Join(uploadDir, fmt.Sprintf("%d", i)))
+		if err != nil {
+			sendJSON(w, map[string]interface{}{"success": false, "message": fmt.Sprintf("读取分片 %d 失败: %v", i, err)})
+			return
+		}
+		if _, err = out.Write(chunk); err != nil {
+			sendJSON(w, map[string]interface{}{"success": false, "message": fmt.Sprintf("写入分片 %d 失败: %v", i, err)})
+			return
+		}
 	}
 	_ = os.RemoveAll(uploadDir)
 
