@@ -150,55 +150,7 @@ function showIconPreview(iconUrls, index = 0) {
         setupTouchEvents(lightbox);
     }
 
-    const prevImg = document.getElementById('lightboxPrev');
-    const mainContainer = document.getElementById('lightboxMain');
-    const nextImg = document.getElementById('lightboxNext');
-
-    const updateImages = (index) => {
-        currentIconIndex = index;
-
-        // 更新主预览
-        mainContainer.innerHTML = '';
-        const mainEl = createMediaElement(currentIconUrls[currentIconIndex], true);
-        mainEl.onclick = function(e) {
-            e.stopPropagation();
-            closePreview();
-        };
-        mainContainer.appendChild(mainEl);
-
-        // 更新缩略图导航
-        const prevIndex = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
-        const nextIndex = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
-
-        const newPrev = createMediaElement(currentIconUrls[prevIndex], false);
-        newPrev.id = 'lightboxPrev';
-        prevImg.replaceWith(newPrev);
-        const newNext = createMediaElement(currentIconUrls[nextIndex], false);
-        newNext.id = 'lightboxNext';
-        nextImg.replaceWith(newNext);
-    };
-
-    updateImages(currentIconIndex);
-
-    const updateNav = () => {
-        const p = document.getElementById('lightboxPrev');
-        const n = document.getElementById('lightboxNext');
-        if (p) {
-            p.onclick = function(e) {
-                e.stopPropagation();
-                const newIndex = currentIconIndex > 0 ? currentIconIndex - 1 : currentIconUrls.length - 1;
-                updateImages(newIndex);
-            };
-        }
-        if (n) {
-            n.onclick = function(e) {
-                e.stopPropagation();
-                const newIndex = currentIconIndex < currentIconUrls.length - 1 ? currentIconIndex + 1 : 0;
-                updateImages(newIndex);
-            };
-        }
-    };
-    updateNav();
+    updatePreviewImages(currentIconIndex);
 
     lightbox.onclick = function() {
         closePreview();

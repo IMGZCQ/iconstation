@@ -1252,7 +1252,7 @@
         .cdn-select {
             background: rgba(20, 30, 60, 0.6);
             border: 2px solid rgba(0, 240, 255, 0.3);
-            color: white;
+            color: var(--primary);
             border-radius: 12px;
             padding: 0.6rem 0.8rem;
             font-weight: 600;
@@ -1274,7 +1274,7 @@
 
         .cdn-select option {
             background: #1a1a2e;
-            color: white;
+            color: var(--primary);
         }
 
         .custom-url-input {
@@ -1321,64 +1321,70 @@
             color: #1e293b;
         }
 
+        .theme-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(20, 30, 60, 0.6);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 0.5rem 0.9rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .theme-btn .icon {
+            width: 1.1em;
+            height: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
+        }
+
+        :root[data-theme="light"] .cdn-select {
+            background: rgba(30, 64, 175, 0.08);
+            border-color: rgba(30, 64, 175, 0.3);
+            color: var(--primary);
+        }
+
         :root[data-theme="light"] .cdn-select option {
             background: #f1f5f9;
-            color: #1e293b;
+            color: var(--primary);
+        }
+
+        :root[data-theme="light"] .theme-btn {
+            background: rgba(30, 64, 175, 0.08);
+            border-color: rgba(30, 64, 175, 0.3);
+            color: var(--primary);
+        }
+
+        :root[data-theme="light"] .theme-btn:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.15);
+        }
+
+        :root[data-theme="dark"] .cdn-select {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.3);
+            color: var(--primary);
         }
 
         :root[data-theme="dark"] .cdn-select option {
             background: #1e293b;
-            color: #e2e8f0;
+            color: var(--primary);
         }
 
-        .theme-select {
-            background: var(--card-bg);
-            border: 2px solid rgba(0, 240, 255, 0.3);
-            color: white;
-            border-radius: 12px;
-            padding: 0.6rem 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: border-color 0.2s, background-color 0.2s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            min-width: 60px;
-            max-width: 100%;
-            box-sizing: border-box;
-            font-size: 0.85rem;
-        }
-
-        .theme-select:hover,
-        .theme-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 6px 25px rgba(0, 240, 255, 0.2);
-            outline: none;
-        }
-
-        .theme-select option {
-            background: #1a1a2e;
-            color: white;
-        }
-
-        :root[data-theme="light"] .theme-select {
-            background: rgba(255, 255, 255, 0.8);
-            border-color: rgba(30, 64, 175, 0.3);
-            color: #1e293b;
-        }
-
-        :root[data-theme="light"] .theme-select option {
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        :root[data-theme="dark"] .theme-select {
-            background: rgba(30, 41, 59, 0.6);
+        :root[data-theme="dark"] .theme-btn {
+            background: rgba(56, 189, 248, 0.1);
             border-color: rgba(56, 189, 248, 0.3);
-            color: #e2e8f0;
-        }
-
-        :root[data-theme="dark"] .theme-select option {
-            background: #1e293b;
-            color: #e2e8f0;
+            color: var(--primary);
         }
 
         :root[data-theme="light"] .search-box input {
@@ -2257,11 +2263,10 @@
                 <div
                     style="display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-size: 0.9rem; font-weight: 600;">
                     <span>主题</span>
-                    <select id="themeSelect" class="theme-select">
-                        <option value="default" selected>默认</option>
-                        <option value="light">浅色</option>
-                        <option value="dark">深色</option>
-                    </select>
+                    <button type="button" id="themeBtn" class="theme-btn" title="点击切换主题">
+                        <svg class="icon" viewBox="0 0 24 24"><use href="#icon-theme-default" /></svg>
+                        <span id="themeBtnText">默认</span>
+                    </button>
                 </div>
             </div>
 
@@ -3826,6 +3831,12 @@
             renderIcons();
         });
 
+        const themeInfos = {
+            default: { icon: 'icon-theme-default', text: '默认' },
+            light: { icon: 'icon-theme-light', text: '浅色' },
+            dark: { icon: 'icon-theme-dark', text: '深色' }
+        };
+
         function setTheme(theme) {
             const root = document.documentElement;
             if (theme === 'default') {
@@ -3834,16 +3845,23 @@
                 root.setAttribute('data-theme', theme);
             }
             localStorage.setItem('iconStationTheme', theme);
+            const info = themeInfos[theme] || themeInfos.default;
+            const btnIcon = document.querySelector('#themeBtn .icon use');
+            const btnText = document.getElementById('themeBtnText');
+            if (btnIcon) btnIcon.setAttribute('href', '#' + info.icon);
+            if (btnText) btnText.textContent = info.text;
         }
 
         function loadTheme() {
             const savedTheme = localStorage.getItem('iconStationTheme') || 'default';
-            document.getElementById('themeSelect').value = savedTheme;
             setTheme(savedTheme);
         }
 
-        document.getElementById('themeSelect').addEventListener('change', (e) => {
-            setTheme(e.target.value);
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            const themes = ['default', 'light', 'dark'];
+            const currentIndex = themes.indexOf(localStorage.getItem('iconStationTheme') || 'default');
+            const nextIndex = (currentIndex + 1) % themes.length;
+            setTheme(themes[nextIndex]);
         });
 
         loadTheme();
