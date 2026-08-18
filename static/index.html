@@ -2548,13 +2548,24 @@
             }
         }
 
+        // 当前是否通过 /app/iconstation 前缀访问（sock 网关）
+        function isAppIconstationPath() {
+            return window.location.pathname.startsWith('/app/iconstation');
+        }
+
+        // 拼接本地相对路径的完整 URL，自动带上 /app/iconstation 前缀
+        function resolveLocalUrl(rel) {
+            const prefix = isAppIconstationPath() ? '/app/iconstation' : '';
+            return window.location.origin + prefix + '/' + String(rel).replace(/^\//, '');
+        }
+
         function getIconUrl(icon) {
             const isMac = !!icon.isMacIcon;
             const isUser = !!icon.isUploaded;
 
             // 优先使用离线本地图标
             if (icon.offline_url) {
-                return window.location.origin + '/' + icon.offline_url.replace(/^\//, '');
+                return resolveLocalUrl(icon.offline_url);
             }
 
             if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
@@ -2562,7 +2573,7 @@
                 if (url.startsWith('http://') || url.startsWith('https://')) {
                     return url;
                 }
-                return window.location.origin + '/' + url.replace(/^\//, '');
+                return resolveLocalUrl(url);
             }
 
             const url = icon.download_url || '';
