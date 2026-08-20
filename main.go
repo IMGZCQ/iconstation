@@ -22,7 +22,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.3.7"
+	Version     = "0.3.8"
 	maxLogLines = 300
 )
 
@@ -185,7 +185,7 @@ func main() {
 
 		listener, err := net.Listen("unix", sockPath)
 		if err != nil {
-			log.Printf("Failed to create unix socket listener: %v", err)
+			// log.Printf("Failed to create unix socket listener: %v", err)
 			return
 		}
 		defer listener.Close()
