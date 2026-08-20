@@ -1870,9 +1870,10 @@
             };
 
             const getIconEmoji = (icon) => {
+                    if (icon.isUploaded) return '✅';
+                    if (icon.offline_url) return '🟩';
                     if (icon.isMacIcon) return '🍎';
                     if (icon.isHomarrIcon) return '🏠';
-                    if (icon.isUploaded) return '✅';
                     return urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧';
                 };
 

@@ -2860,7 +2860,7 @@
                 const isUser = !!icon.isUploaded;
                 const iconSrc = getIconUrl(icon);
                 const isVideo = /\.(mp4|webm)$/i.test(rawFileName);
-                const iconEmoji = isMac ? '🍎' : (isUser ? '✅' : (icon.offline_url ? '🟩' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧'));
+                const iconEmoji = isUser ? '✅' : (icon.offline_url ? '🟩' : isMac ? '🍎' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeDisplayName = rawFileName.replace(/"/g, '&quot;');
