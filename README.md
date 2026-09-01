@@ -147,9 +147,11 @@ services:
 
 ## ☕ 支持项目
 
-如果你觉得这个项目对你有帮助，欢迎打赏支持！
+如果您觉得这个工具对您有帮助，欢迎通过以下方式赞赏支持开发者。
 
-![打赏](https://github.com/user-attachments/assets/7c58ea66-ca1a-4d65-8b26-cce89bde813c)
+您的支持是我持续开发和维护这个项目的动力！感谢每一位用户的认可与鼓励。
+
+<img width="446" height="267" alt="pay" src="https://github.com/user-attachments/assets/3327c9b2-f8e6-4610-bb13-d8a4382b92f5" />
 
 ***
 
