@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -2215,6 +2215,10 @@
                             <input type="checkbox" class="cyberpunk-checkbox" id="checkMacIcons" checked>
                             MacIcon
                         </label>
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkOpenIcons" checked>
+                            OpenIcon
+                        </label>
                     </div>
                 </div>
                 <div class="checkbox-wrapper" id="categorySection" style="display: none;">
@@ -2256,7 +2260,7 @@
                         <option value="raw">🟧Github原址</option>
                         <option value="custom">🔗自定义</option>
                     </select>
-                    <input type="text" id="customUrlInput" class="custom-url-input" placeholder="输入加速地址前缀，如 https://example.com/" style="display: none;">
+                    <input type="text" id="customUrlInput" class="custom-url-input" placeholder="如：https://gh-proxy.org/" style="display: none;">
                     <button id="customUrlConfirm" class="custom-url-confirm" style="display: none;">确定</button>
                 </div>
                 <div
@@ -2522,15 +2526,24 @@
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
         const HOMARR_CDN_PREFIX = 'https://ghfast.top/';
-        const HOMARR_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/main/png/';
+        const HOMARR_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/';
+        const OPENICON_RAW_PREFIX = 'https://raw.githubusercontent.com/sunkolin/open-icon-repository/main/';
+        const OPENICON_CDN_PREFIX = 'https://ghfast.top/';
+        const OPENICON_JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/sunkolin/open-icon-repository@main/';
         let urlMode = 'ghfast';
-        let customPrefix = localStorage.getItem('customUrlPrefix') || '';
+        // 仅接受带 http(s) 协议头的前缀，避免历史遗留的非法值导致全部图标加载失败
+        const DEFAULT_CUSTOM_PREFIX = 'https://gh-proxy.org/';
+        let customPrefix = (() => {
+            const saved = localStorage.getItem('customUrlPrefix') || '';
+            return /^https?:\/\//i.test(saved) ? saved : DEFAULT_CUSTOM_PREFIX;
+        })();
 
         // 离线图标路径映射：source -> 本地目录
         const OFFLINE_ICON_DIRS = {
             'hdicons': 'deskdata/offline_icon/HDicons/',
             'homarr': 'deskdata/offline_icon/Homarr/',
-            'macicons': 'deskdata/offline_icon/Macicon/'
+            'macicons': 'deskdata/offline_icon/Macicon/',
+            'openicon': 'deskdata/offline_icon/OpenIcon/'
         };
 
         // 获取离线图标本地路径
@@ -2542,6 +2555,8 @@
                 return OFFLINE_ICON_DIRS.macicons + filename;
             } else if (icon.isHomarrIcon) {
                 return OFFLINE_ICON_DIRS.homarr + filename;
+            } else if (icon.isOpenIcon) {
+                return OFFLINE_ICON_DIRS.openicon + filename;
             } else {
                 // HDicons 或其他图标源
                 return OFFLINE_ICON_DIRS.hdicons + filename;
@@ -2577,6 +2592,19 @@
             }
 
             const url = icon.download_url || '';
+            if (url.startsWith(OPENICON_RAW_PREFIX)) {
+                const relPath = url.slice(OPENICON_RAW_PREFIX.length);
+                if (urlMode === 'ghfast') {
+                    return OPENICON_CDN_PREFIX + url;
+                } else if (urlMode === 'cdn') {
+                    return OPENICON_JSDELIVR_PREFIX + relPath;
+                } else if (urlMode === 'custom' && customPrefix) {
+                    return customPrefix + url.replace(/^https?:\/\//, '');
+                } else {
+                    return url;
+                }
+            }
+
             if (!url.startsWith('https://raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/') &&
                 !url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
                 return url;
@@ -2738,7 +2766,33 @@
                     console.warn('加载MacIcons失败', e);
                 }
 
-                iconsData = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons];
+                let openIcons = [];
+                try {
+                    const openResponse = await fetch('json/open-icon.json');
+                    if (openResponse.ok) {
+                        const openRaw = await openResponse.json();
+                        openIcons = Array.isArray(openRaw.icons)
+                            ? openRaw.icons.map(i => {
+                                const name = (() => {
+                                    const ext = (i.url && i.url.match(/\.(png|svg)(?:\?.*)?$/i)) ? i.url.match(/\.(png|svg)(?:\?.*)?$/i)[1].toLowerCase() : 'png';
+                                    return i.name && /\.(png|svg)$/i.test(i.name) ? i.name : `${i.name}.${ext}`;
+                                })();
+                                // 从URL提取实际文件名（URL 为百分号编码，需解码）
+                                const urlFilename = i.url ? decodeURIComponent(i.url.split('/').pop().split('?')[0]) : name;
+                                return {
+                                    name: name,
+                                    download_url: i.url,
+                                    isOpenIcon: true,
+                                    offline_url: OFFLINE_ICON_DIRS.openicon + urlFilename
+                                };
+                            })
+                            : [];
+                    }
+                } catch (e) {
+                    console.warn('加载OpenIcon图标失败', e);
+                }
+
+                iconsData = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons, ...openIcons];
                 updateCategories();
                 applyFilters(!keepPage);
 
@@ -2766,17 +2820,10 @@
             const url = img.getAttribute('data-url');
             let index = parseInt(img.getAttribute('data-fallback-index') || '0');
 
-            // 如果当前src是离线URL，先回退到原始在线URL
+            // 如果当前src是离线URL，说明离线图标不存在，改用当前加速模式的在线地址
             const currentSrc = img.src;
             if (currentSrc.includes('deskdata/offline_icon/')) {
-                img.src = url;
-                img.setAttribute('data-fallback-index', '0');
-                const card = img.closest('.icon-card');
-                if (card) {
-                    const emojiSpan = card.querySelector('.icon-name span');
-                    if (emojiSpan) emojiSpan.textContent = '🟧';
-                }
-                return;
+                index = 0;
             }
 
             let ghfastUrl = url;
@@ -2784,6 +2831,8 @@
                 ghfastUrl = CDN_PREFIX + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
             } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
                 ghfastUrl = HOMARR_CDN_PREFIX + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + name;
+            } else if (url.startsWith(OPENICON_RAW_PREFIX)) {
+                ghfastUrl = OPENICON_CDN_PREFIX + url;
             }
 
             let jsdelivrUrl = url;
@@ -2791,6 +2840,8 @@
                 jsdelivrUrl = JSDELIVR_PREFIX + name;
             } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
                 jsdelivrUrl = HOMARR_JSDELIVR_PREFIX + name;
+            } else if (url.startsWith(OPENICON_RAW_PREFIX)) {
+                jsdelivrUrl = OPENICON_JSDELIVR_PREFIX + url.slice(OPENICON_RAW_PREFIX.length);
             }
 
             let customUrl = url;
@@ -2799,6 +2850,8 @@
                     customUrl = customPrefix + 'raw.githubusercontent.com/xushier/HD-Icons/main/border-radius/' + name;
                 } else if (url.startsWith('https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/')) {
                     customUrl = customPrefix + 'raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/' + name;
+                } else if (url.startsWith(OPENICON_RAW_PREFIX)) {
+                    customUrl = customPrefix + url.replace(/^https?:\/\//, '');
                 }
             }
 
@@ -2858,9 +2911,10 @@
                 const nameWithoutExt = rawFileName.replace(/\.(png|svg|jpg|jpeg|webp|gif|bmp|ico|tiff|tif|avif|mp4|webm)$/i, '');
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
+                const isOpen = !!icon.isOpenIcon;
                 const iconSrc = getIconUrl(icon);
                 const isVideo = /\.(mp4|webm)$/i.test(rawFileName);
-                const iconEmoji = isUser ? '✅' : (icon.offline_url ? '🟩' : isMac ? '🍎' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
+                const iconEmoji = isUser ? '✅' : (icon.offline_url ? '🟩' : isMac ? '🍎' : isOpen ? '🧩' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeDisplayName = rawFileName.replace(/"/g, '&quot;');
@@ -3028,10 +3082,12 @@
             const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
             const checkMacIcons = document.getElementById('checkMacIcons');
             const checkHomarrIcons = document.getElementById('checkHomarrIcons');
+            const checkOpenIcons = document.getElementById('checkOpenIcons');
             const showUser = checkUserIcons ? checkUserIcons.checked : false;
             const showBuiltin = checkBuiltinIcons ? checkBuiltinIcons.checked : true;
             const showMac = checkMacIcons ? checkMacIcons.checked : true;
             const showHomarr = checkHomarrIcons ? checkHomarrIcons.checked : true;
+            const showOpen = checkOpenIcons ? checkOpenIcons.checked : true;
 
             const categoryContent = document.getElementById('categoryContent');
             let selectedCategory = null;
@@ -3046,10 +3102,12 @@
                 const isUser = !!icon.isUploaded;
                 const isMac = !!icon.isMacIcon;
                 const isHomarr = !!icon.isHomarrIcon;
+                const isOpen = !!icon.isOpenIcon;
                 if (isUser && !showUser) return false;
-                if (!isUser && !isMac && !isHomarr && !showBuiltin) return false;
+                if (!isUser && !isMac && !isHomarr && !isOpen && !showBuiltin) return false;
                 if (isMac && !showMac) return false;
                 if (isHomarr && !showHomarr) return false;
+                if (isOpen && !showOpen) return false;
 
                 if (selectedCategory !== null && isUser) {
                     const iconCategory = icon.category || '';
@@ -3235,11 +3293,13 @@
             const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
             const checkMacIcons = document.getElementById('checkMacIcons');
             const checkHomarrIcons = document.getElementById('checkHomarrIcons');
+            const checkOpenIcons = document.getElementById('checkOpenIcons');
             const state = {
                 user: checkUserIcons ? checkUserIcons.checked : false,
                 builtin: checkBuiltinIcons ? checkBuiltinIcons.checked : true,
                 mac: checkMacIcons ? checkMacIcons.checked : true,
-                homarr: checkHomarrIcons ? checkHomarrIcons.checked : true
+                homarr: checkHomarrIcons ? checkHomarrIcons.checked : true,
+                openicon: checkOpenIcons ? checkOpenIcons.checked : true
             };
             localStorage.setItem('iconSourceState', JSON.stringify(state));
         }
@@ -3253,11 +3313,13 @@
                     const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
                     const checkMacIcons = document.getElementById('checkMacIcons');
                     const checkHomarrIcons = document.getElementById('checkHomarrIcons');
+                    const checkOpenIcons = document.getElementById('checkOpenIcons');
                     const categorySection = document.getElementById('categorySection');
                     if (checkUserIcons) checkUserIcons.checked = state.user;
                     if (checkBuiltinIcons) checkBuiltinIcons.checked = state.builtin;
                     if (checkMacIcons) checkMacIcons.checked = state.mac;
                     if (checkHomarrIcons) checkHomarrIcons.checked = state.homarr;
+                    if (checkOpenIcons) checkOpenIcons.checked = state.openicon !== undefined ? state.openicon : true;
                     if (categorySection && checkUserIcons) {
                         categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
                     }
@@ -3269,6 +3331,7 @@
         const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
         const checkMacIcons = document.getElementById('checkMacIcons');
         const checkHomarrIcons = document.getElementById('checkHomarrIcons');
+        const checkOpenIcons = document.getElementById('checkOpenIcons');
         const categorySection = document.getElementById('categorySection');
 
         if (checkUserIcons) checkUserIcons.addEventListener('change', () => {
@@ -3281,6 +3344,7 @@
         if (checkBuiltinIcons) checkBuiltinIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkMacIcons) checkMacIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkHomarrIcons) checkHomarrIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        if (checkOpenIcons) checkOpenIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
 
         loadCheckboxState();
 
@@ -3833,7 +3897,23 @@
                 alert('请输入加速地址前缀');
                 return;
             }
+            if (!/^https?:\/\//i.test(val)) {
+                alert('加速地址前缀必须以 http:// 或 https:// 开头，例如 https://gh-proxy.com/');
+                return;
+            }
+            let parsed;
+            try {
+                parsed = new URL(val);
+            } catch (e) {
+                alert('加速地址前缀格式不正确，请检查后重新输入');
+                return;
+            }
+            if (!parsed.hostname) {
+                alert('加速地址前缀缺少有效的域名');
+                return;
+            }
             if (!val.endsWith('/')) val += '/';
+            input.value = val;
             customPrefix = val;
             localStorage.setItem('customUrlPrefix', customPrefix);
             renderIcons();

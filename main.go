@@ -22,7 +22,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.3.8"
+	Version     = "0.3.9"
 	maxLogLines = 300
 )
 
