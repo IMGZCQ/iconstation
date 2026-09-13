@@ -578,8 +578,15 @@
             width: 100%;
             max-width: 400px;
             max-height: 80vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-progress-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .upload-progress-modal-title {
@@ -856,7 +863,8 @@
             width: 100%;
             max-width: 500px;
             max-height: 80vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .category-title {
@@ -872,6 +880,9 @@
             flex-direction: column;
             gap: 0.5rem;
             margin-bottom: 1rem;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .category-item {
@@ -1026,6 +1037,9 @@
             padding: 1.5rem;
             width: 100%;
             max-width: 400px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
@@ -1073,6 +1087,9 @@
             font-size: 0.85rem;
             line-height: 1.6;
             margin-bottom: 1.25rem;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .about-footer {
@@ -2251,7 +2268,12 @@
                                             autoplay: true,
                                             loop: true,
                                             playsInline: true,
-                                            onError: (e) => handleImageError(e, icon)
+                                            onError: (e) => handleImageError(e, icon),
+                                            // 只播放1秒后暂停，避免GPU持续占用
+                                            onTimeUpdate: (e) => {
+                                                const v = e.target;
+                                                if (v.currentTime >= 1 && !v.paused) v.pause();
+                                            }
                                         })
                                         : h('img', {
                                             className: 'icon-image',
@@ -2411,7 +2433,7 @@
                             }, '×')
                         ),
                         uploadEntries.length > 0 && h('div', { className: 'upload-progress-modal-counter' }, `共 ${uploadEntries.length} 个文件`),
-                        h('div', null,
+                        h('div', { className: 'upload-progress-list' },
                             uploadEntries.map(entry => h('div', { className: 'upload-progress-entry', key: entry.index },
                                 h('div', {
                                     className: 'upload-progress-entry-status',
@@ -2434,11 +2456,13 @@
                         ),
                         uploadComplete && h('div', {
                             className: 'upload-progress-result',
-                            style: uploadComplete.failCount > 0 && uploadComplete.successCount > 0
+                            style: { cursor: 'pointer',
+                                ...(uploadComplete.failCount > 0 && uploadComplete.successCount > 0
                                 ? { color: '#ffaa00' }
                                 : uploadComplete.failCount === 0
                                     ? { color: '#00ff88' }
-                                    : { color: '#ff4444' }
+                                    : { color: '#ff4444' }) },
+                            onClick: () => { setUploading(false); setUploadEntries([]); setUploadComplete(null); }
                         },
                             uploadComplete.successCount > 0 && uploadComplete.failCount > 0
                                 ? `✓ 成功 ${uploadComplete.successCount} 个，✗ 失败 ${uploadComplete.failCount} 个`

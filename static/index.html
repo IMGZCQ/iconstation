@@ -1720,8 +1720,17 @@
 
         .upload-progress-box {
             max-width: 460px;
-            min-width: 340px;
+            min-width: min(340px, 100%);
             padding: 1.5rem 1.8rem;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #uploadProgressList {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .upload-progress-title {
@@ -1789,6 +1798,7 @@
             text-align: center;
             font-weight: 600;
             font-size: 0.9rem;
+            cursor: pointer;
         }
 
         @keyframes dialogSlideIn {
@@ -1937,6 +1947,9 @@
             padding: 1.5rem;
             width: 100%;
             max-width: 420px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(8px);
         }
@@ -1976,6 +1989,9 @@
             font-size: 0.9rem;
             line-height: 1.6;
             margin-bottom: 1.25rem;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .about-dialog-footer {
@@ -2970,6 +2986,31 @@
                 renderPagination();
             }
         }
+
+        // 网格视频缩略图只播放1秒后暂停，避免GPU持续占用（捕获阶段监听，覆盖动态渲染的元素；大屏预览的视频无 icon-image 类，不受影响）
+        // 鼠标悬浮时恢复播放并循环，离开后暂停
+        document.addEventListener('timeupdate', function (e) {
+            const v = e.target;
+            if (v && v.tagName === 'VIDEO' && v.classList.contains('icon-image') && !v._hovering && v.currentTime >= 1 && !v.paused) {
+                v.pause();
+            }
+        }, true);
+
+        document.addEventListener('mouseover', function (e) {
+            const v = e.target && e.target.closest ? e.target.closest('video.icon-image') : null;
+            if (v) {
+                v._hovering = true;
+                if (v.paused) v.play().catch(() => { });
+            }
+        }, true);
+
+        document.addEventListener('mouseout', function (e) {
+            const v = e.target && e.target.closest ? e.target.closest('video.icon-image') : null;
+            if (v) {
+                v._hovering = false;
+                v.pause();
+            }
+        }, true);
 
         function previewIcon(event) {
             const img = event.target;
@@ -4287,6 +4328,10 @@
         }
 
         document.getElementById('uploadProgressCloseBtn').addEventListener('click', () => {
+            document.getElementById('uploadProgressDialog').style.display = 'none';
+        });
+
+        document.getElementById('uploadProgressSummary').addEventListener('click', () => {
             document.getElementById('uploadProgressDialog').style.display = 'none';
         });
 
