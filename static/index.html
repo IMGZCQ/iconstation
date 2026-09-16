@@ -2235,6 +2235,10 @@
                             <input type="checkbox" class="cyberpunk-checkbox" id="checkOpenIcons" checked>
                             OpenIcon
                         </label>
+                        <label class="cyberpunk-checkbox-label">
+                            <input type="checkbox" class="cyberpunk-checkbox" id="checkThiingsIcons" checked>
+                            Thiings
+                        </label>
                     </div>
                 </div>
                 <div class="checkbox-wrapper" id="categorySection" style="display: none;">
@@ -2506,6 +2510,20 @@
             }
         }
 
+        // 三段式版本号比较：a > b 返回 true
+        function isVersionGreater(a, b) {
+            const pa = String(a || '').split('.').map(n => parseInt(n, 10) || 0);
+            const pb = String(b || '').split('.').map(n => parseInt(n, 10) || 0);
+            const len = Math.max(pa.length, pb.length);
+            for (let i = 0; i < len; i++) {
+                const av = pa[i] || 0;
+                const bv = pb[i] || 0;
+                if (av > bv) return true;
+                if (av < bv) return false;
+            }
+            return false;
+        }
+
         function compareVersions() {
             if (!cachedApiVersion) return;
 
@@ -2516,7 +2534,8 @@
             if (!versionSpan) return;
 
             const aboutVersion = versionSpan.textContent.trim();
-            if (aboutVersion && aboutVersion !== cachedApiVersion) {
+            // 仅当远端版本号大于本地版本时提示有更新
+            if (aboutVersion && isVersionGreater(aboutVersion, cachedApiVersion)) {
                 const aboutBtn = document.getElementById('aboutBtn');
                 if (aboutBtn) {
                     aboutBtn.classList.add('about-btn-update');
@@ -2559,7 +2578,8 @@
             'hdicons': 'deskdata/offline_icon/HDicons/',
             'homarr': 'deskdata/offline_icon/Homarr/',
             'macicons': 'deskdata/offline_icon/Macicon/',
-            'openicon': 'deskdata/offline_icon/OpenIcon/'
+            'openicon': 'deskdata/offline_icon/OpenIcon/',
+            'thiings': 'deskdata/offline_icon/Thiings/'
         };
 
         // 获取离线图标本地路径
@@ -2573,6 +2593,8 @@
                 return OFFLINE_ICON_DIRS.homarr + filename;
             } else if (icon.isOpenIcon) {
                 return OFFLINE_ICON_DIRS.openicon + filename;
+            } else if (icon.isThiingsIcon) {
+                return OFFLINE_ICON_DIRS.thiings + filename;
             } else {
                 // HDicons 或其他图标源
                 return OFFLINE_ICON_DIRS.hdicons + filename;
@@ -2592,6 +2614,7 @@
 
         function getIconUrl(icon) {
             const isMac = !!icon.isMacIcon;
+            const isThiings = !!icon.isThiingsIcon;
             const isUser = !!icon.isUploaded;
 
             // 优先使用离线本地图标
@@ -2599,7 +2622,7 @@
                 return resolveLocalUrl(icon.offline_url);
             }
 
-            if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
+            if (isMac || isThiings || isUser || icon.download_url?.startsWith('deskdata/')) {
                 const url = icon.download_url;
                 if (url.startsWith('http://') || url.startsWith('https://')) {
                     return url;
@@ -2808,7 +2831,32 @@
                     console.warn('加载OpenIcon图标失败', e);
                 }
 
-                iconsData = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons, ...openIcons];
+                let thiingsIcons = [];
+                try {
+                    const thiingsResponse = await fetch('json/thiings-icons.json');
+                    if (thiingsResponse.ok) {
+                        const thiingsRaw = await thiingsResponse.json();
+                        thiingsIcons = Array.isArray(thiingsRaw.icons)
+                            ? thiingsRaw.icons.map(i => {
+                                // Thiings name 无扩展名，URL 为 Next.js 图片优化地址，扩展名统一为 .png
+                                const name = (() => {
+                                    if (i.name && /\.(png|svg)$/i.test(i.name)) return i.name;
+                                    return `${i.name}.png`;
+                                })();
+                                return {
+                                    name: name,
+                                    download_url: i.url,
+                                    isThiingsIcon: true,
+                                    offline_url: OFFLINE_ICON_DIRS.thiings + name
+                                };
+                            })
+                            : [];
+                    }
+                } catch (e) {
+                    console.warn('加载Thiings图标失败', e);
+                }
+
+                iconsData = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons, ...openIcons, ...thiingsIcons];
                 updateCategories();
                 applyFilters(!keepPage);
 
@@ -2928,9 +2976,10 @@
                 const isMac = !!icon.isMacIcon;
                 const isUser = !!icon.isUploaded;
                 const isOpen = !!icon.isOpenIcon;
+                const isThiings = !!icon.isThiingsIcon;
                 const iconSrc = getIconUrl(icon);
                 const isVideo = /\.(mp4|webm)$/i.test(rawFileName);
-                const iconEmoji = isUser ? '✅' : (icon.offline_url ? '🟩' : isMac ? '🍎' : isOpen ? '🧩' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
+                const iconEmoji = isUser ? '✅' : (icon.offline_url ? '🟩' : isMac ? '🍎' : isThiings ? '💫' : isOpen ? '🧩' : urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧');
 
                 const safeName = icon.name.replace(/"/g, '&quot;');
                 const safeDisplayName = rawFileName.replace(/"/g, '&quot;');
@@ -3124,11 +3173,13 @@
             const checkMacIcons = document.getElementById('checkMacIcons');
             const checkHomarrIcons = document.getElementById('checkHomarrIcons');
             const checkOpenIcons = document.getElementById('checkOpenIcons');
+            const checkThiingsIcons = document.getElementById('checkThiingsIcons');
             const showUser = checkUserIcons ? checkUserIcons.checked : false;
             const showBuiltin = checkBuiltinIcons ? checkBuiltinIcons.checked : true;
             const showMac = checkMacIcons ? checkMacIcons.checked : true;
             const showHomarr = checkHomarrIcons ? checkHomarrIcons.checked : true;
             const showOpen = checkOpenIcons ? checkOpenIcons.checked : true;
+            const showThiings = checkThiingsIcons ? checkThiingsIcons.checked : true;
 
             const categoryContent = document.getElementById('categoryContent');
             let selectedCategory = null;
@@ -3144,11 +3195,13 @@
                 const isMac = !!icon.isMacIcon;
                 const isHomarr = !!icon.isHomarrIcon;
                 const isOpen = !!icon.isOpenIcon;
+                const isThiings = !!icon.isThiingsIcon;
                 if (isUser && !showUser) return false;
-                if (!isUser && !isMac && !isHomarr && !isOpen && !showBuiltin) return false;
+                if (!isUser && !isMac && !isHomarr && !isOpen && !isThiings && !showBuiltin) return false;
                 if (isMac && !showMac) return false;
                 if (isHomarr && !showHomarr) return false;
                 if (isOpen && !showOpen) return false;
+                if (isThiings && !showThiings) return false;
 
                 if (selectedCategory !== null && isUser) {
                     const iconCategory = icon.category || '';
@@ -3335,12 +3388,14 @@
             const checkMacIcons = document.getElementById('checkMacIcons');
             const checkHomarrIcons = document.getElementById('checkHomarrIcons');
             const checkOpenIcons = document.getElementById('checkOpenIcons');
+            const checkThiingsIcons = document.getElementById('checkThiingsIcons');
             const state = {
                 user: checkUserIcons ? checkUserIcons.checked : false,
                 builtin: checkBuiltinIcons ? checkBuiltinIcons.checked : true,
                 mac: checkMacIcons ? checkMacIcons.checked : true,
                 homarr: checkHomarrIcons ? checkHomarrIcons.checked : true,
-                openicon: checkOpenIcons ? checkOpenIcons.checked : true
+                openicon: checkOpenIcons ? checkOpenIcons.checked : true,
+                thiings: checkThiingsIcons ? checkThiingsIcons.checked : true
             };
             localStorage.setItem('iconSourceState', JSON.stringify(state));
         }
@@ -3355,12 +3410,14 @@
                     const checkMacIcons = document.getElementById('checkMacIcons');
                     const checkHomarrIcons = document.getElementById('checkHomarrIcons');
                     const checkOpenIcons = document.getElementById('checkOpenIcons');
+                    const checkThiingsIcons = document.getElementById('checkThiingsIcons');
                     const categorySection = document.getElementById('categorySection');
                     if (checkUserIcons) checkUserIcons.checked = state.user;
                     if (checkBuiltinIcons) checkBuiltinIcons.checked = state.builtin;
                     if (checkMacIcons) checkMacIcons.checked = state.mac;
                     if (checkHomarrIcons) checkHomarrIcons.checked = state.homarr;
                     if (checkOpenIcons) checkOpenIcons.checked = state.openicon !== undefined ? state.openicon : true;
+                    if (checkThiingsIcons) checkThiingsIcons.checked = state.thiings !== undefined ? state.thiings : true;
                     if (categorySection && checkUserIcons) {
                         categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
                     }
@@ -3373,6 +3430,7 @@
         const checkMacIcons = document.getElementById('checkMacIcons');
         const checkHomarrIcons = document.getElementById('checkHomarrIcons');
         const checkOpenIcons = document.getElementById('checkOpenIcons');
+        const checkThiingsIcons = document.getElementById('checkThiingsIcons');
         const categorySection = document.getElementById('categorySection');
 
         if (checkUserIcons) checkUserIcons.addEventListener('change', () => {
@@ -3386,6 +3444,7 @@
         if (checkMacIcons) checkMacIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkHomarrIcons) checkHomarrIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkOpenIcons) checkOpenIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
+        if (checkThiingsIcons) checkThiingsIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
 
         loadCheckboxState();
 

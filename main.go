@@ -22,7 +22,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.4.1"
+	Version     = "0.4.2"
 	maxLogLines = 300
 )
 
@@ -365,6 +365,8 @@ func withAuth(handler http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, `{"error":"Token无效"}`, http.StatusUnauthorized)
 			return
 		}
+		// 滑动续期：活跃用户的 token 过期时间顺延 30 分钟，与前端 checkLoginStatus 行为对齐
+		validTokens.Store(token, time.Now().Add(30*time.Minute))
 		handler(w, r)
 	}
 }

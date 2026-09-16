@@ -1136,6 +1136,20 @@
         const { useState, useEffect, useCallback, useRef } = React;
         const { createElement: h, Fragment } = React;
 
+        // 三段式版本号比较：a > b 返回 true
+        const isVersionGreater = (a, b) => {
+            const pa = String(a || '').split('.').map(n => parseInt(n, 10) || 0);
+            const pb = String(b || '').split('.').map(n => parseInt(n, 10) || 0);
+            const len = Math.max(pa.length, pb.length);
+            for (let i = 0; i < len; i++) {
+                const av = pa[i] || 0;
+                const bv = pb[i] || 0;
+                if (av > bv) return true;
+                if (av < bv) return false;
+            }
+            return false;
+        };
+
         const CDN_PREFIX = 'https://ghfast.top/';
         const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/xushier/HD-Icons/border-radius/';
         const HOMARR_CDN_PREFIX = 'https://ghfast.top/';
@@ -1149,7 +1163,8 @@
             'hdicons': 'deskdata/offline_icon/HDicons/',
             'homarr': 'deskdata/offline_icon/Homarr/',
             'macicons': 'deskdata/offline_icon/Macicon/',
-            'openicon': 'deskdata/offline_icon/OpenIcon/'
+            'openicon': 'deskdata/offline_icon/OpenIcon/',
+            'thiings': 'deskdata/offline_icon/Thiings/'
         };
 
         function Icon(props) {
@@ -1182,11 +1197,12 @@
                             builtin: state.builtin !== undefined ? state.builtin : true,
                             mac: state.mac !== undefined ? state.mac : true,
                             homarr: state.homarr !== undefined ? state.homarr : true,
-                            openicon: state.openicon !== undefined ? state.openicon : true
+                            openicon: state.openicon !== undefined ? state.openicon : true,
+                            thiings: state.thiings !== undefined ? state.thiings : true
                         };
                     }
                 } catch (e) { }
-                return { user: true, builtin: true, mac: true, homarr: true, openicon: true };
+                return { user: true, builtin: true, mac: true, homarr: true, openicon: true, thiings: true };
             };
             const [showFilters, setShowFilters] = useState(getInitialFilters);
             const [showUserFilter, setShowUserFilter] = useState(false);
@@ -1261,7 +1277,8 @@
                 const aboutVersion = versionSpan.textContent.trim();
                 const apiVersion = version.replace(/^v/, '');
 
-                if (aboutVersion && aboutVersion !== apiVersion) {
+                // 仅当远端版本号大于本地版本时提示有更新
+                if (aboutVersion && isVersionGreater(aboutVersion, apiVersion)) {
                     setAboutBlink(true);
                 }
             }, [version, aboutContent]);
@@ -1437,7 +1454,32 @@
                         console.warn('加载OpenIcon图标失败', e);
                     }
 
-                    const allIcons = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons, ...openIcons];
+                    let thiingsIcons = [];
+                    try {
+                        const thiingsResponse = await fetch('json/thiings-icons.json');
+                        if (thiingsResponse.ok) {
+                            const thiingsRaw = await thiingsResponse.json();
+                            thiingsIcons = Array.isArray(thiingsRaw.icons)
+                                ? thiingsRaw.icons.map(i => {
+                                    // Thiings name 无扩展名，URL 为 Next.js 图片优化地址，扩展名统一为 .png
+                                    const name = (() => {
+                                        if (i.name && /\.(png|svg)$/i.test(i.name)) return i.name;
+                                        return `${i.name}.png`;
+                                    })();
+                                    return {
+                                        name: name,
+                                        download_url: i.url,
+                                        isThiingsIcon: true,
+                                        offline_url: OFFLINE_ICON_DIRS.thiings + name
+                                    };
+                                })
+                                : [];
+                        }
+                    } catch (e) {
+                        console.warn('加载Thiings图标失败', e);
+                    }
+
+                    const allIcons = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons, ...openIcons, ...thiingsIcons];
                     setIcons(allIcons);
 
                     const userIcons = allIcons.filter(icon => icon.isUploaded);
@@ -1492,11 +1534,13 @@
                     const isMac = !!icon.isMacIcon;
                     const isHomarr = !!icon.isHomarrIcon;
                     const isOpen = !!icon.isOpenIcon;
+                    const isThiings = !!icon.isThiingsIcon;
                     if (isUser && !showFilters.user) return false;
-                    if (!isUser && !isMac && !isHomarr && !isOpen && !showFilters.builtin) return false;
+                    if (!isUser && !isMac && !isHomarr && !isOpen && !isThiings && !showFilters.builtin) return false;
                     if (isMac && !showFilters.mac) return false;
                     if (isHomarr && !showFilters.homarr) return false;
                     if (isOpen && !showFilters.openicon) return false;
+                    if (isThiings && !showFilters.thiings) return false;
 
                     if (selectedCategory !== 'all' && isUser) {
                         const iconCategory = icon.category || '';
@@ -1867,6 +1911,7 @@
 
             const getIconSrc = (icon) => {
                 const isMac = !!icon.isMacIcon;
+                const isThiings = !!icon.isThiingsIcon;
                 const isUser = !!icon.isUploaded;
 
                 // 当前是否通过 /app/iconstation 前缀访问（sock 网关）
@@ -1882,7 +1927,7 @@
                     return resolveLocalUrl(icon.offline_url);
                 }
 
-                if (isMac || isUser || icon.download_url?.startsWith('deskdata/')) {
+                if (isMac || isThiings || isUser || icon.download_url?.startsWith('deskdata/')) {
                     const url = icon.download_url;
                     if (url.startsWith('http://') || url.startsWith('https://')) {
                         return url;
@@ -1934,6 +1979,7 @@
                     if (icon.offline_url) return '🟩';
                     if (icon.isMacIcon) return '🍎';
                     if (icon.isHomarrIcon) return '🏠';
+                    if (icon.isThiingsIcon) return '💫';
                     if (icon.isOpenIcon) return '🧩';
                     return urlMode === 'ghfast' ? '🟦' : urlMode === 'cdn' ? '🟪' : '🟧';
                 };
@@ -2232,7 +2278,15 @@
                             localStorage.setItem('iconSourceState', JSON.stringify(newFilters));
                             return newFilters;
                         })
-                    }, `OpenIcon ${showFilters.openicon ? '✓' : ''}`)
+                    }, `OpenIcon ${showFilters.openicon ? '✓' : ''}`),
+                    h('button', {
+                        className: `filter-chip ${showFilters.thiings ? 'active' : ''}`,
+                        onClick: () => setShowFilters(f => {
+                            const newFilters = { ...f, thiings: !f.thiings };
+                            localStorage.setItem('iconSourceState', JSON.stringify(newFilters));
+                            return newFilters;
+                        })
+                    }, `Thiings ${showFilters.thiings ? '✓' : ''}`)
                 ),
                 showUserFilter && showFilters.user && categories.length > 1 && h('div', { className: 'filter-bar' },
                     h('button', {
