@@ -126,5 +126,10 @@
       <path d="M0 0h512v512H0z" fill="none"/>
       <path fill="currentColor" fill-rule="evenodd" d="M234.667 85.334H64V256h170.667zm192 0h-128v127.999h128zM64 277.333h170.667V448H64zm432.911 45.004l-33.819-26.014l-92.829 120.655l-68.214-59.703l-28.096 32.11l102.435 89.631z" clip-rule="evenodd"/>
     </symbol>
+    <!-- 分享图标 -->
+    <symbol id="icon-share" viewBox="0 0 20 20">
+      <path d="M0 0h20v20H0z" fill="none"/>
+      <path fill="currentColor" d="M15 12a3 3 0 0 0-2.24.99L7.9 9.7a3.5 3.5 0 0 0 0-.4l4.86-2.43A3 3 0 1 0 12 4a3 3 0 0 0 .07.66L7.07 7.17a3 3 0 1 0 0 4.66l5.07 2.54A3 3 0 1 0 15 12z"/>
+    </symbol>
   </defs>
 </svg>

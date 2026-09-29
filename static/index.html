@@ -869,6 +869,106 @@
             font-size: 0.9rem;
         }
 
+        /* 通知容器 */
+        #notificationContainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .notification {
+            pointer-events: auto;
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            max-width: 85vw;
+            cursor: pointer;
+            animation: notifCenterIn 0.3s ease-out;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .notification.info {
+            background: rgba(0, 240, 255, 0.12);
+            color: #00f0ff;
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+
+        .notification.success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .notification.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .notification.warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        :root[data-theme="light"] .notification.info {
+            background: rgba(30, 64, 175, 0.08);
+            color: #1e40af;
+            border-color: rgba(30, 64, 175, 0.2);
+        }
+
+        :root[data-theme="light"] .notification.success {
+            background: rgba(21, 128, 61, 0.08);
+            color: #15803d;
+            border-color: rgba(21, 128, 61, 0.2);
+        }
+
+        :root[data-theme="light"] .notification.error {
+            background: rgba(185, 28, 28, 0.08);
+            color: #b91c1c;
+            border-color: rgba(185, 28, 28, 0.2);
+        }
+
+        :root[data-theme="light"] .notification.warning {
+            background: rgba(180, 83, 9, 0.08);
+            color: #b45309;
+            border-color: rgba(180, 83, 9, 0.2);
+        }
+
+        @keyframes notifCenterIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes notifCenterOut {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100px);
@@ -2089,7 +2189,8 @@
             if (isMobileDevice() && isSmallScreen() && !localStorage.getItem('forceDesktop')) {
                 var urlParams = new URLSearchParams(window.location.search);
                 if (!urlParams.has('desktop')) {
-                    window.location.href = 'mobile.html';
+                    // 保留 URL 参数（如 source/class），跳转后由 mobile.html 继续识别
+                    window.location.href = 'mobile.html' + window.location.search;
                     return;
                 }
             }
@@ -2149,6 +2250,7 @@
 
 <body>
     <div id="icons-container"></div>
+    <div id="notificationContainer"></div>
     <div class="dynamic-bg"></div>
     <script>
         (function () {
@@ -2858,6 +2960,7 @@
 
                 iconsData = [...uploadedIcons, ...jsonIcons, ...homarrIcons, ...macIcons, ...openIcons, ...thiingsIcons];
                 updateCategories();
+                applyUrlClassParam();
                 applyFilters(!keepPage);
 
                 const categorySection = document.getElementById('categorySection');
@@ -3446,7 +3549,74 @@
         if (checkOpenIcons) checkOpenIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
         if (checkThiingsIcons) checkThiingsIcons.addEventListener('change', () => { saveCheckboxState(); applyFilters(); });
 
+        // 从 URL 参数读取指定的图标源：?source=local/hdicons/homarr/mac/openicon/thiings
+        // 匹配成功则只显示该源，不匹配则保持默认（localStorage 或全选）
+        function getUrlSourceParam() {
+            const params = new URLSearchParams(window.location.search);
+            const source = (params.get('source') || '').toLowerCase().trim();
+            if (!source) return null;
+            const sourceMap = {
+                'local': 'user',
+                'hdicons': 'builtin',
+                'hdicon': 'builtin',
+                'builtin': 'builtin',
+                'homarr': 'homarr',
+                'mac': 'mac',
+                'macicon': 'mac',
+                'macicons': 'mac',
+                'openicon': 'openicon',
+                'open': 'openicon',
+                'thiings': 'thiings'
+            };
+            return sourceMap[source] || null;
+        }
+
+        function applyUrlSourceParam() {
+            const target = getUrlSourceParam();
+            if (!target) return false;
+            const checkUserIcons = document.getElementById('checkUserIcons');
+            const checkBuiltinIcons = document.getElementById('checkBuiltinIcons');
+            const checkMacIcons = document.getElementById('checkMacIcons');
+            const checkHomarrIcons = document.getElementById('checkHomarrIcons');
+            const checkOpenIcons = document.getElementById('checkOpenIcons');
+            const checkThiingsIcons = document.getElementById('checkThiingsIcons');
+            if (checkUserIcons) checkUserIcons.checked = (target === 'user');
+            if (checkBuiltinIcons) checkBuiltinIcons.checked = (target === 'builtin');
+            if (checkMacIcons) checkMacIcons.checked = (target === 'mac');
+            if (checkHomarrIcons) checkHomarrIcons.checked = (target === 'homarr');
+            if (checkOpenIcons) checkOpenIcons.checked = (target === 'openicon');
+            if (checkThiingsIcons) checkThiingsIcons.checked = (target === 'thiings');
+            const categorySection = document.getElementById('categorySection');
+            if (categorySection && checkUserIcons) {
+                categorySection.style.display = checkUserIcons.checked ? 'block' : 'none';
+            }
+            return true;
+        }
+
+        function getUrlClassParam() {
+            const params = new URLSearchParams(window.location.search);
+            const cls = params.get('class');
+            return cls ? cls.trim() : null;
+        }
+
+        // 在 updateCategories() 渲染完分类后调用，选中匹配的分类（支持中文）
+        function applyUrlClassParam() {
+            const cls = getUrlClassParam();
+            if (!cls) return;
+            const categoryContent = document.getElementById('categoryContent');
+            if (!categoryContent) return;
+            const radios = categoryContent.querySelectorAll('.cyberpunk-radio');
+            let matched = null;
+            radios.forEach(r => {
+                if (r.id !== 'radioAllCategories' && r.value === cls) matched = r;
+            });
+            if (!matched) return;
+            radios.forEach(r => { r.checked = false; });
+            matched.checked = true;
+        }
+
         loadCheckboxState();
+        applyUrlSourceParam();
 
         const toggleBtn = document.getElementById('toggleFilterBtn');
         const checkboxContent = document.getElementById('checkboxContent');
@@ -3482,18 +3652,41 @@
             });
         }
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'slideIn 0.4s reverse';
-                setTimeout(() => toast.remove(), 400);
-            }, 2000);
+        // 通知（页面居中浮层,支持多通知堆叠,点击或 2.5s 自动关闭）
+        function showNotification(message, type) {
+            type = type || 'info';
+            var container = document.getElementById('notificationContainer');
+            if (!container) { console.log('[' + type + ']', message); return; }
+            var n = document.createElement('div');
+            n.className = 'notification ' + type;
+            n.textContent = message;
+            // 多通知时纵向错开,避免完全重叠
+            var index = container.querySelectorAll('.notification').length;
+            if (index > 0) {
+                // 中心点不动,前后通知分别向上/向下偏移
+                var offset = index * 88;
+                n.style.top = 'calc(50% + ' + offset + 'px)';
+            }
+            container.appendChild(n);
+
+            var removed = false;
+            function remove() {
+                if (removed) return;
+                removed = true;
+                n.style.animation = 'notifCenterOut 0.5s ease-in forwards';
+                setTimeout(function () { n.remove(); }, 510);
+            }
+            n.addEventListener('click', remove);
+            setTimeout(remove, 3000);
         }
 
-        function copyUrl(event) {
+        // 兼容旧调用：showToast(msg) -> showNotification(msg, 'info')
+        let currentToast = null;
+        function showToast(message) {
+            showNotification(message, 'info');
+        }
+
+        async function copyUrl(event) {
             if (event) event.stopPropagation();
 
             const button = event.target;
@@ -3501,8 +3694,35 @@
             const img = card.querySelector('.icon-image');
             const name = img.getAttribute('data-name');
             const url = img.getAttribute('data-url');
+            const isUploaded = card.querySelector('.icon-buttons').getAttribute('data-uploaded') === 'true';
 
             let actualUrl = getIconUrl({ name, download_url: url });
+
+            // 已上传图标生成分享链接
+            if (isUploaded && actualUrl.includes('deskdata/user_icon/')) {
+                try {
+                    const iconPath = name.replace(/\\/g, '/');
+                    const response = await fetch('api/share/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Auth-Token': localStorage.getItem('authToken') || ''
+                        },
+                        body: JSON.stringify({ iconPath: iconPath })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        actualUrl = window.location.origin + result.shareUrl;
+                    } else {
+                        showToast('✗ ' + (result.message || '生成分享链接失败'));
+                        return;
+                    }
+                } catch (e) {
+                    console.error('生成分享链接失败:', e);
+                    showToast('✗ 生成分享链接失败');
+                    return;
+                }
+            }
 
             if (actualUrl.includes('deskdata/user_icon/')) {
                 actualUrl = decodeURIComponent(actualUrl);
@@ -3887,7 +4107,21 @@
             }
 
             if (successCount > 0) {
-                loadIcons(true);
+                await loadIcons(true);
+                // 上传完成后跳转到上传目标分类
+                const categoryContent = document.getElementById('categoryContent');
+                if (categoryContent) {
+                    const radios = categoryContent.querySelectorAll('.cyberpunk-radio');
+                    let matched = null;
+                    radios.forEach(r => {
+                        if (r.id !== 'radioAllCategories' && r.value === uploadTargetCategory) matched = r;
+                    });
+                    if (matched) {
+                        radios.forEach(r => { r.checked = false; });
+                        matched.checked = true;
+                        applyFilters();
+                    }
+                }
             }
 
             e.target.value = '';
@@ -4354,6 +4588,7 @@
         }
 
         function updateUploadProgress(progressState) {
+            let uploadingIndex = -1;
             progressState.forEach((item, i) => {
                 const bar = document.getElementById('bar-' + i);
                 const status = document.getElementById('status-' + i);
@@ -4362,7 +4597,13 @@
                     status.textContent = item.status === 'success' ? '✓' : item.status === 'failed' ? '✗' : item.status === 'uploading' ? '⏳' : '•';
                     status.style.color = item.status === 'success' ? '#00ff88' : item.status === 'failed' ? '#ff4444' : '';
                 }
+                if (item.status === 'uploading' && uploadingIndex === -1) uploadingIndex = i;
             });
+            // 列表过长时，自动滚动到当前上传的文件
+            if (uploadingIndex !== -1) {
+                const item = document.querySelector(`#uploadProgressList .upload-progress-item[data-index="${uploadingIndex}"]`);
+                if (item) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
 
         function hideUploadProgress(successCount, failCount, totalCount) {

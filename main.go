@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/hmac"
 	"crypto/sha256"
 	"embed"
 	"encoding/hex"
@@ -22,7 +23,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.4.2"
+	Version     = "0.4.5"
 	maxLogLines = 300
 )
 
@@ -79,6 +80,11 @@ type PasswordData struct {
 	PasswordHash string    `json:"passwordHash"`
 	CreatedAt    time.Time `json:"createdAt"`
 	Open         *bool     `json:"open,omitempty"`
+}
+
+// ShareRequest 生成分享链接请求
+type ShareRequest struct {
+	IconPath string `json:"iconPath"`
 }
 
 type LoginRequest struct {
@@ -141,6 +147,7 @@ func main() {
 	http.HandleFunc("/api/rename/user_icon", withAuth(renameIcon))
 	http.HandleFunc("/api/delete/user_icon", withAuth(deleteIcon))
 	http.HandleFunc("/api/move/user_icon", withAuth(moveIcon))
+	http.HandleFunc("/api/share/create", withAuth(createShareLink))
 
 	http.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
 		if !isUserIconAccessible(r) {
@@ -252,7 +259,67 @@ func isUserIconAccessible(r *http.Request) bool {
 			return true
 		}
 	}
+	// 检查分享签名
+	if isValidShareRequest(r) {
+		return true
+	}
 	return getOpenStatus()
+}
+
+// isValidShareRequest 验证分享签名 URL
+func isValidShareRequest(r *http.Request) bool {
+	sig := r.URL.Query().Get("share")
+	if sig == "" {
+		return false
+	}
+	iconPath := strings.TrimPrefix(r.URL.Path, "/deskdata/user_icon/")
+	return sig == generateShareSignature(iconPath)
+}
+
+// generateShareSignature 生成分享签名（HMAC-SHA256 截断 + hex）
+func generateShareSignature(iconPath string) string {
+	pwFile := filepath.Join(userDataRoot, "pw.json")
+	data, err := os.ReadFile(pwFile)
+	if err != nil {
+		return ""
+	}
+	var pwData PasswordData
+	if err := json.Unmarshal(data, &pwData); err != nil {
+		return ""
+	}
+	h := hmac.New(sha256.New, []byte(pwData.PasswordHash))
+	h.Write([]byte(iconPath))
+	return hex.EncodeToString(h.Sum(nil)[:12])
+}
+
+// createShareLink 生成分享链接 API
+func createShareLink(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req ShareRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "参数错误"})
+		return
+	}
+	// 校验文件是否存在
+	target, err := safeJoinPath(userDataDir, req.IconPath)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "文件不存在"})
+		return
+	}
+	sig := generateShareSignature(req.IconPath)
+	if sig == "" {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "生成签名失败"})
+		return
+	}
+	shareURL := fmt.Sprintf("/deskdata/user_icon/%s?share=%s", req.IconPath, sig)
+	sendJSON(w, map[string]interface{}{"success": true, "shareUrl": shareURL})
 }
 
 func getOpenStatus() bool {

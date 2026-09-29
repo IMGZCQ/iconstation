@@ -18,7 +18,8 @@
             }
 
             if (window.innerWidth > 768) {
-                window.location.href = 'index.html';
+                // 保留 URL 参数（如 source/class），跳转后由 index.html 继续识别
+                window.location.href = 'index.html' + window.location.search;
                 return;
             }
         })();
@@ -672,6 +673,106 @@
             white-space: nowrap;
         }
 
+        /* 通知容器 */
+        .notification-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .notification {
+            pointer-events: auto;
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            max-width: 85vw;
+            cursor: pointer;
+            animation: notifCenterIn 0.3s ease-out;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .notification.info {
+            background: rgba(0, 240, 255, 0.12);
+            color: #00f0ff;
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+
+        .notification.success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .notification.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .notification.warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        :root[data-theme="light"] .notification.info {
+            background: rgba(30, 64, 175, 0.08);
+            color: #1e40af;
+            border-color: rgba(30, 64, 175, 0.2);
+        }
+
+        :root[data-theme="light"] .notification.success {
+            background: rgba(21, 128, 61, 0.08);
+            color: #15803d;
+            border-color: rgba(21, 128, 61, 0.2);
+        }
+
+        :root[data-theme="light"] .notification.error {
+            background: rgba(185, 28, 28, 0.08);
+            color: #b91c1c;
+            border-color: rgba(185, 28, 28, 0.2);
+        }
+
+        :root[data-theme="light"] .notification.warning {
+            background: rgba(180, 83, 9, 0.08);
+            color: #b45309;
+            border-color: rgba(180, 83, 9, 0.2);
+        }
+
+        @keyframes notifCenterIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes notifCenterOut {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+
         @keyframes toastIn {
             from {
                 opacity: 0;
@@ -1187,7 +1288,50 @@
             const shouldResetPageRef = useRef(true);
             const [theme, setTheme] = useState(() => { try { return localStorage.getItem('iconStationTheme') || 'default'; } catch(e) { return 'default'; } });
             const [urlMode, setUrlMode] = useState('ghfast');
+            // 从 URL 参数读取指定的图标源：?source=local/hdicons/homarr/mac/openicon/thiings
+            // 匹配成功则只显示该源；不匹配则返回 null，走 localStorage 默认
+            const getUrlSourceParam = () => {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const source = (params.get('source') || '').toLowerCase().trim();
+                    if (!source) return null;
+                    const sourceMap = {
+                        'local': 'user',
+                        'hdicons': 'builtin',
+                        'hdicon': 'builtin',
+                        'builtin': 'builtin',
+                        'homarr': 'homarr',
+                        'mac': 'mac',
+                        'macicon': 'mac',
+                        'macicons': 'mac',
+                        'openicon': 'openicon',
+                        'open': 'openicon',
+                        'thiings': 'thiings'
+                    };
+                    return sourceMap[source] || null;
+                } catch (e) { return null; }
+            };
+
+            const getUrlClassParam = () => {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const cls = params.get('class');
+                    return cls ? cls.trim() : null;
+                } catch (e) { return null; }
+            };
+
             const getInitialFilters = () => {
+                const urlSource = getUrlSourceParam();
+                if (urlSource) {
+                    return {
+                        user: urlSource === 'user',
+                        builtin: urlSource === 'builtin',
+                        mac: urlSource === 'mac',
+                        homarr: urlSource === 'homarr',
+                        openicon: urlSource === 'openicon',
+                        thiings: urlSource === 'thiings'
+                    };
+                }
                 try {
                     const saved = localStorage.getItem('iconSourceState');
                     if (saved) {
@@ -1213,7 +1357,24 @@
             const [newCategoryName, setNewCategoryName] = useState('');
             const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
             const [previewIndex, setPreviewIndex] = useState(null);
-            const [toast, setToast] = useState(null);
+            const [toastList, setToastList] = useState([]);
+
+            const showNotification = (message, type) => {
+                type = type || 'info';
+                const id = Date.now() + Math.random();
+                setToastList(prev => [...prev, { id, message, type }]);
+                setTimeout(() => {
+                    setToastList(prev => prev.filter(t => t.id !== id));
+                }, 3000);
+            };
+
+            const showToast = (message) => {
+                showNotification(message, 'info');
+            };
+
+            const removeToast = (id) => {
+                setToastList(prev => prev.filter(t => t.id !== id));
+            };
             const [loading, setLoading] = useState(true);
             const [isLoggedIn, setIsLoggedIn] = useState(() => { try { return localStorage.getItem('isLoggedIn') === 'true'; } catch(e) { return false; } });
             const [showAboutModal, setShowAboutModal] = useState(false);
@@ -1223,7 +1384,16 @@
             const [uploadProgressVisible, setUploading] = useState(false);
             const [uploadEntries, setUploadEntries] = useState([]);
             const [uploadComplete, setUploadComplete] = useState(null);
+            const uploadListRef = useRef(null);
             const touchStartX = useRef(0);
+
+            // 上传列表过长时，自动滚动到当前上传的文件
+            useEffect(() => {
+                const idx = uploadEntries.findIndex(e => e.status === 'uploading');
+                if (idx === -1 || !uploadListRef.current) return;
+                const item = uploadListRef.current.children[idx];
+                if (item) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, [uploadEntries]);
 
             useEffect(() => {
                 document.documentElement.setAttribute('data-theme', theme === 'default' ? '' : theme);
@@ -1503,7 +1673,14 @@
 
                     setCategories(allCategories);
                     if (!keepPage) {
-                        setSelectedCategory('all');
+                        // 优先使用 URL 参数中的分类（仅在 source=local 时生效，支持中文）
+                        const urlSource = getUrlSourceParam();
+                        const urlClass = getUrlClassParam();
+                        if (urlSource === 'user' && urlClass !== null && allCategories.indexOf(urlClass) !== -1) {
+                            setSelectedCategory(urlClass);
+                        } else {
+                            setSelectedCategory('all');
+                        }
                     }
 
                     if (!isValid) {
@@ -1608,11 +1785,6 @@
                     case 'cdn': return 'CDN加速';
                     default: return 'Github原地址';
                 }
-            };
-
-            const showToast = (message) => {
-                setToast(message);
-                setTimeout(() => setToast(null), 2000);
             };
 
             const handleAuth = () => {
@@ -1755,7 +1927,12 @@
                     }
 
                     setUploadComplete({ successCount, failCount, total: fileEntries.length });
-                    if (successCount > 0) loadIcons(true);
+                    if (successCount > 0) {
+                        // 上传完成后跳转到上传目标分类
+                        setSelectedCategory(uploadTargetCategory);
+                        setCurrentPage(1);
+                        loadIcons(true);
+                    }
                     console.log('[upload] complete:', { successCount, failCount });
                 };
                     
@@ -2041,7 +2218,34 @@
 
             const copyUrl = async (icon, e) => {
                 e.stopPropagation();
-                const url = getIconSrc(icon);
+                let url = getIconSrc(icon);
+                
+                // 已上传图标生成分享链接
+                if (icon.isUploaded && url.includes('deskdata/user_icon/')) {
+                    try {
+                        const iconPath = icon.name.replace(/\\/g, '/');
+                        const response = await fetch('api/share/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Auth-Token': localStorage.getItem('authToken') || ''
+                            },
+                            body: JSON.stringify({ iconPath: iconPath })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            url = window.location.origin + result.shareUrl;
+                        } else {
+                            showToast('✗ ' + (result.message || '生成分享链接失败'));
+                            return;
+                        }
+                    } catch (e) {
+                        console.error('生成分享链接失败:', e);
+                        showToast('✗ 生成分享链接失败');
+                        return;
+                    }
+                }
+                
                 try {
                     if (navigator.clipboard && window.isSecureContext) {
                         await navigator.clipboard.writeText(url);
@@ -2476,7 +2680,14 @@
                         )
                     )
                 ),
-                toast && h('div', { className: 'toast' }, toast),
+                toastList.length > 0 && h('div', { className: 'notification-container' },
+                    toastList.map((t, i) => h('div', {
+                        key: t.id,
+                        className: 'notification ' + t.type,
+                        style: i > 0 ? { top: 'calc(50% + ' + (i * 88) + 'px)' } : {},
+                        onClick: () => removeToast(t.id)
+                    }, t.message))
+                ),
                 uploadProgressVisible && h('div', { className: 'upload-progress-overlay', onClick: () => { setUploading(false); setUploadEntries([]); setUploadComplete(null); } },
                     h('div', { className: 'upload-progress-modal', onClick: (e) => e.stopPropagation() },
                         h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' } },
@@ -2487,7 +2698,7 @@
                             }, '×')
                         ),
                         uploadEntries.length > 0 && h('div', { className: 'upload-progress-modal-counter' }, `共 ${uploadEntries.length} 个文件`),
-                        h('div', { className: 'upload-progress-list' },
+                        h('div', { className: 'upload-progress-list', ref: uploadListRef },
                             uploadEntries.map(entry => h('div', { className: 'upload-progress-entry', key: entry.index },
                                 h('div', {
                                     className: 'upload-progress-entry-status',
