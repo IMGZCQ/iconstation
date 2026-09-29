@@ -1,0 +1,795 @@
+package main
+
+import (
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"embed"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/fs"
+	"log"
+	"math/big"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+)
+
+//go:embed static
+var staticFS embed.FS
+
+const (
+	Version     = "0.4.6"
+	maxLogLines = 300
+)
+
+var (
+	userDataDir  string
+	chunksDir    string
+	userDataRoot string
+	validTokens  sync.Map
+)
+
+type limitedLogWriter struct {
+	file *os.File
+	mu   sync.Mutex
+}
+
+func (w *limitedLogWriter) Write(p []byte) (n int, err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	data, err := os.ReadFile(w.file.Name())
+	if err != nil {
+		return w.file.Write(p)
+	}
+	lines := strings.Split(string(data), "\n")
+	if len(lines) > maxLogLines {
+		trimmed := strings.Join(lines[len(lines)-maxLogLines:], "\n")
+		if trimmed != "" && !strings.HasSuffix(trimmed, "\n") {
+			trimmed += "\n"
+		}
+		os.WriteFile(w.file.Name(), []byte(trimmed), 0644)
+	}
+	return w.file.Write(p)
+}
+
+func init() {
+	exePath, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	exeDir := filepath.Dir(exePath)
+	userDataRoot = filepath.Join(exeDir, "UserData")
+	userDataDir = filepath.Join(userDataRoot, "icons")
+	chunksDir = filepath.Join(userDataRoot, "chunks")
+
+	logFile, err := os.OpenFile(filepath.Join(userDataRoot, "运行日志.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Printf("日志文件打开失败: %v", err)
+	} else {
+		log.SetOutput(io.MultiWriter(os.Stderr, &limitedLogWriter{file: logFile}))
+	}
+}
+
+type PasswordData struct {
+	PasswordHash string    `json:"passwordHash"`
+	Description  string    `json:"description,omitempty"`
+	CreatedAt    time.Time `json:"createdAt"`
+	Open         *bool     `json:"open,omitempty"`
+}
+
+// ShareData 分享密钥配置
+type ShareData struct {
+	Secret      string    `json:"secret"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"createdAt"`
+}
+
+// ShareRequest 生成分享链接请求
+type ShareRequest struct {
+	IconPath string `json:"iconPath"`
+}
+
+type LoginRequest struct {
+	Password string `json:"password"`
+	Open     bool   `json:"open"`
+}
+
+type InitPasswordRequest struct {
+	Password string `json:"password"`
+	Open     bool   `json:"open"`
+}
+
+func main() {
+	_ = os.MkdirAll(userDataDir, 0755)
+	_ = os.MkdirAll(chunksDir, 0755)
+	_ = os.MkdirAll(userDataRoot, 0755)
+
+	staticSubFS, err := fs.Sub(staticFS, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 定时清理过期 token（10分钟一次）
+	go func() {
+		ticker := time.NewTicker(10 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			now := time.Now()
+			validTokens.Range(func(key, value interface{}) bool {
+				if exp, ok := value.(time.Time); ok && now.After(exp) {
+					validTokens.Delete(key)
+				}
+				return true
+			})
+		}
+	}()
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "max-age=86400")
+		if r.URL.Path == "/" {
+			http.ServeFileFS(w, r, staticSubFS, "index.html")
+			return
+		}
+		http.FileServer(http.FS(staticSubFS)).ServeHTTP(w, r)
+	})
+
+	http.HandleFunc("/api/check-init", checkInit)
+	http.HandleFunc("/api/init-password", initPassword)
+	http.HandleFunc("/api/login", login)
+	http.HandleFunc("/api/logout", logout)
+	http.HandleFunc("/api/get-open", getOpen)
+	http.HandleFunc("/api/version", getVersion)
+	http.HandleFunc("/api/about-content", getAboutContent)
+	http.HandleFunc("/api/list-upload-icons", listUploadIcons)
+	http.HandleFunc("/api/create-category", withAuth(createCategory))
+	http.HandleFunc("/api/list-categories", listCategories)
+	http.HandleFunc("/api/upload/user_icon/init", withAuth(uploadInit))
+	http.HandleFunc("/api/upload/user_icon/chunk", withAuth(uploadChunk))
+	http.HandleFunc("/api/upload/user_icon/merge", withAuth(uploadMerge))
+	http.HandleFunc("/api/rename/user_icon", withAuth(renameIcon))
+	http.HandleFunc("/api/delete/user_icon", withAuth(deleteIcon))
+	http.HandleFunc("/api/move/user_icon", withAuth(moveIcon))
+	http.HandleFunc("/api/share/create", withAuth(createShareLink))
+
+	http.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
+		if !isUserIconAccessible(r) {
+			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			return
+		}
+
+		path := strings.TrimPrefix(r.URL.Path, "/deskdata/user_icon/")
+		path = filepath.Clean(path)
+		target := filepath.Join(userDataDir, path)
+
+		// 安全校验：禁止路径穿越
+		if !strings.HasPrefix(target, userDataDir+string(filepath.Separator)) && target != userDataDir {
+			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			return
+		}
+
+		http.ServeFile(w, r, target)
+	})
+
+	// 离线图标目录处理
+	http.HandleFunc("/deskdata/offline_icon/", func(w http.ResponseWriter, r *http.Request) {
+		path := strings.TrimPrefix(r.URL.Path, "/deskdata/offline_icon/")
+		path = filepath.Clean(path)
+		offlineDir := filepath.Join(userDataRoot, "offline_icon")
+		target := filepath.Join(offlineDir, path)
+
+		// 安全校验：禁止路径穿越
+		if !strings.HasPrefix(target, offlineDir+string(filepath.Separator)) && target != offlineDir {
+			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			return
+		}
+
+		http.ServeFile(w, r, target)
+	})
+
+	log.Println("内部运行端口:9168(请使用外部映射端口访问)")
+
+	go func() {
+		sockPath := "/target/iconstation.sock"
+		_ = os.Remove(sockPath)
+
+		listener, err := net.Listen("unix", sockPath)
+		if err != nil {
+			// log.Printf("Failed to create unix socket listener: %v", err)
+			return
+		}
+		defer listener.Close()
+
+		_ = os.Chmod(sockPath, 0777)
+
+		sockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/app/iconstation" {
+				http.Redirect(w, r, "/app/iconstation/", http.StatusPermanentRedirect)
+				return
+			} else if strings.HasPrefix(r.URL.Path, "/app/iconstation/") {
+				r.URL.Path = strings.TrimPrefix(r.URL.Path, "/app/iconstation")
+			}
+			http.DefaultServeMux.ServeHTTP(w, r)
+		})
+
+		log.Println("统一网关已连接,使用 /app/iconstation 访问")
+		log.Fatal(http.Serve(listener, sockHandler))
+	}()
+
+	log.Fatal(http.ListenAndServe(":9168", nil))
+}
+
+func getVersion(w http.ResponseWriter, r *http.Request) {
+	sendJSON(w, map[string]interface{}{"version": Version})
+}
+
+func getAboutContent(w http.ResponseWriter, r *http.Request) {
+	resp, err := http.Get("https://fndesk.imcq.top/?url=iconstation_gg&ver=" + Version)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"content": "", "error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"content": "", "error": err.Error()})
+		return
+	}
+
+	sendJSON(w, map[string]interface{}{"content": string(body), "error": ""})
+}
+
+func checkInit(w http.ResponseWriter, r *http.Request) {
+	pwFile := filepath.Join(userDataRoot, "pw.json")
+	_, err := os.Stat(pwFile)
+	sendJSON(w, map[string]interface{}{"initialized": err == nil})
+}
+
+func getOpen(w http.ResponseWriter, r *http.Request) {
+	sendJSON(w, map[string]interface{}{"open": getOpenStatus()})
+}
+
+func isUserIconAccessible(r *http.Request) bool {
+	token := r.Header.Get("X-Auth-Token")
+	if token == "" {
+		token = r.URL.Query().Get("token")
+	}
+
+	if token != "" {
+		exp, ok := validTokens.Load(token)
+		if ok && time.Now().Before(exp.(time.Time)) {
+			return true
+		}
+	}
+	// 检查分享签名
+	if isValidShareRequest(r) {
+		return true
+	}
+	return getOpenStatus()
+}
+
+// isValidShareRequest 验证分享签名 URL
+func isValidShareRequest(r *http.Request) bool {
+	sig := r.URL.Query().Get("share")
+	if sig == "" {
+		return false
+	}
+	iconPath := strings.TrimPrefix(r.URL.Path, "/deskdata/user_icon/")
+	return sig == generateShareSignature(iconPath)
+}
+
+// getShareSecret 获取或初始化分享密钥
+func getShareSecret() string {
+	shareFile := filepath.Join(userDataRoot, "share.json")
+	data, err := os.ReadFile(shareFile)
+	if err == nil {
+		var shareData ShareData
+		if json.Unmarshal(data, &shareData) == nil && shareData.Secret != "" {
+			return shareData.Secret
+		}
+	}
+	// 初始化新的分享密钥
+	secret := generateRandomString(32)
+	shareData := ShareData{
+		Secret:      secret,
+		Description: "IconStation 分享密钥文件。用于生成和验证本地图标的分享链接签名。删除此文件后，所有已生成的分享链接将失效，系统会自动重新生成新的密钥。",
+		CreatedAt:   time.Now(),
+	}
+	jsonData, _ := json.MarshalIndent(shareData, "", "  ")
+	os.WriteFile(shareFile, jsonData, 0644)
+	return secret
+}
+
+// generateRandomString 生成随机字符串（使用 crypto/rand）
+func generateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		// 使用 crypto/rand 生成真随机数
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			// 回退到时间戳随机
+			b[i] = charset[time.Now().UnixNano()%int64(len(charset))]
+			continue
+		}
+		b[i] = charset[n.Int64()]
+	}
+	return string(b)
+}
+
+// generateShareSignature 生成分享签名（HMAC-SHA256 截断 + hex）
+func generateShareSignature(iconPath string) string {
+	secret := getShareSecret()
+	if secret == "" {
+		return ""
+	}
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(iconPath))
+	return hex.EncodeToString(h.Sum(nil)[:12])
+}
+
+// createShareLink 生成分享链接 API
+func createShareLink(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req ShareRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "参数错误"})
+		return
+	}
+	// 校验文件是否存在
+	target, err := safeJoinPath(userDataDir, req.IconPath)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "文件不存在"})
+		return
+	}
+	sig := generateShareSignature(req.IconPath)
+	if sig == "" {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "生成签名失败"})
+		return
+	}
+	shareURL := fmt.Sprintf("/deskdata/user_icon/%s?share=%s", req.IconPath, sig)
+	sendJSON(w, map[string]interface{}{"success": true, "shareUrl": shareURL})
+}
+
+func getOpenStatus() bool {
+	pwFile := filepath.Join(userDataRoot, "pw.json")
+	data, err := os.ReadFile(pwFile)
+	if err != nil {
+		return false
+	}
+	var pwData PasswordData
+	if err := json.Unmarshal(data, &pwData); err != nil {
+		return false
+	}
+	return pwData.Open != nil && *pwData.Open
+}
+
+func hashPassword(password string) string {
+	hash := sha256.Sum256([]byte(password))
+	return hex.EncodeToString(hash[:])
+}
+
+func initPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	pwFile := filepath.Join(userDataRoot, "pw.json")
+	if _, err := os.Stat(pwFile); err == nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "已设置密码"})
+		return
+	}
+	var req InitPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "参数错误"})
+		return
+	}
+	if len(req.Password) < 6 {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "密码至少6位"})
+		return
+	}
+	pwData := PasswordData{
+		PasswordHash: hashPassword(req.Password),
+		Description:  "IconStation 密码配置文件。存储登录密码哈希和游客访问开关状态。删除此文件后重启程序，将进入初始化密码设置流程。",
+		CreatedAt:    time.Now(),
+		Open:         &req.Open,
+	}
+	data, _ := json.Marshal(pwData)
+	_ = os.WriteFile(pwFile, data, 0644)
+
+	token := generateToken()
+	validTokens.Store(token, time.Now().Add(30*time.Minute))
+	sendJSON(w, map[string]interface{}{"success": true, "token": token})
+}
+
+func login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	pwFile := filepath.Join(userDataRoot, "pw.json")
+	data, err := os.ReadFile(pwFile)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "未初始化"})
+		return
+	}
+	var pwData PasswordData
+	_ = json.Unmarshal(data, &pwData)
+
+	var req LoginRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	if hashPassword(req.Password) != pwData.PasswordHash {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "密码错误"})
+		return
+	}
+
+	pwData.Open = &req.Open
+	newData, _ := json.Marshal(pwData)
+	_ = os.WriteFile(pwFile, newData, 0644)
+
+	token := generateToken()
+	validTokens.Store(token, time.Now().Add(30*time.Minute))
+	sendJSON(w, map[string]interface{}{"success": true, "token": token})
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("X-Auth-Token")
+	if token != "" {
+		validTokens.Delete(token)
+	}
+	sendJSON(w, map[string]interface{}{"success": true})
+}
+
+func generateToken() string {
+	hash := sha256.Sum256([]byte(time.Now().String() + "iconstation-secure-v2"))
+	return hex.EncodeToString(hash[:])
+}
+
+func withAuth(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("X-Auth-Token")
+		if token == "" {
+			token = r.URL.Query().Get("token")
+		}
+		if token == "" {
+			http.Error(w, `{"error":"Unauthorized"}`, http.StatusUnauthorized)
+			return
+		}
+		exp, ok := validTokens.Load(token)
+		if !ok || time.Now().After(exp.(time.Time)) {
+			validTokens.Delete(token)
+			http.Error(w, `{"error":"Token无效"}`, http.StatusUnauthorized)
+			return
+		}
+		// 滑动续期：活跃用户的 token 过期时间顺延 30 分钟，与前端 checkLoginStatus 行为对齐
+		validTokens.Store(token, time.Now().Add(30*time.Minute))
+		handler(w, r)
+	}
+}
+
+type IconInfo struct {
+	Name     string `json:"name"`
+	Category string `json:"category"`
+}
+
+func listUploadIcons(w http.ResponseWriter, r *http.Request) {
+	if !isUserIconAccessible(r) {
+		sendJSON(w, map[string]interface{}{"files": []IconInfo{}})
+		return
+	}
+	var list []IconInfo
+	_ = filepath.Walk(userDataDir, func(p string, info fs.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		rel, _ := filepath.Rel(userDataDir, p)
+		rel = strings.ReplaceAll(rel, "\\", "/")
+		ext := strings.ToLower(filepath.Ext(rel))
+		allow := map[string]bool{".png": true, ".svg": true, ".jpg": true, ".jpeg": true, ".webp": true, ".gif": true, ".bmp": true, ".ico": true, ".tiff": true, ".tif": true, ".avif": true, ".mp4": true, ".webm": true}
+		if allow[ext] {
+			cat := ""
+			dir := filepath.Dir(rel)
+			if dir != "." {
+				cat = dir
+			}
+			list = append(list, IconInfo{Name: rel, Category: cat})
+		}
+		return nil
+	})
+	sendJSON(w, map[string]interface{}{"files": list})
+}
+
+type UploadInitRequest struct {
+	FileName    string `json:"fileName"`
+	FileSize    int64  `json:"fileSize"`
+	TotalChunks int    `json:"totalChunks"`
+	UploadID    string `json:"uploadId"`
+}
+
+func uploadInit(w http.ResponseWriter, r *http.Request) {
+	var req UploadInitRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+	_ = os.MkdirAll(filepath.Join(chunksDir, req.UploadID), 0755)
+	sendJSON(w, map[string]interface{}{"success": true, "uploadId": req.UploadID})
+}
+
+func uploadChunk(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "解析请求失败: " + err.Error()})
+		return
+	}
+	uploadID := r.FormValue("uploadId")
+	chunkIdx := r.FormValue("chunkIndex")
+	dir := filepath.Join(chunksDir, uploadID)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建分片目录失败: " + err.Error()})
+		return
+	}
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "读取上传文件失败: " + err.Error()})
+		return
+	}
+	defer file.Close()
+	dst, err := os.Create(filepath.Join(dir, chunkIdx))
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建分片文件失败: " + err.Error()})
+		return
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, file); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "写入分片失败: " + err.Error()})
+		return
+	}
+	sendJSON(w, map[string]interface{}{"success": true})
+}
+
+type UploadMergeRequest struct {
+	UploadID string `json:"uploadId"`
+	FileName string `json:"fileName"`
+}
+
+func getUniqueFileName(fileName, dir string) (string, bool) {
+	ext := filepath.Ext(fileName)
+	base := strings.TrimSuffix(fileName, ext)
+	for i := 0; i < 1000; i++ {
+		var candidate string
+		if i == 0 {
+			candidate = fileName
+		} else {
+			candidate = fmt.Sprintf("%s_%d%s", base, i, ext)
+		}
+		if _, err := os.Stat(filepath.Join(dir, candidate)); os.IsNotExist(err) {
+			return candidate, i > 0
+		}
+	}
+	return fileName, false
+}
+
+func safeJoinPath(root, sub string) (string, error) {
+	clean := filepath.Clean(sub)
+	path := filepath.Join(root, clean)
+	if !strings.HasPrefix(path, root+string(filepath.Separator)) && path != root {
+		return "", fmt.Errorf("invalid path")
+	}
+	return path, nil
+}
+
+func uploadMerge(w http.ResponseWriter, r *http.Request) {
+	var req UploadMergeRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	// 安全路径校验
+	dstRel := filepath.Clean(req.FileName)
+	dst, err := safeJoinPath(userDataDir, dstRel)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+
+	// 扩展名白名单校验
+	ext := strings.ToLower(filepath.Ext(dstRel))
+	allowedExts := map[string]bool{".png": true, ".svg": true, ".jpg": true, ".jpeg": true, ".webp": true, ".gif": true, ".bmp": true, ".ico": true, ".tiff": true, ".tif": true, ".avif": true, ".mp4": true, ".webm": true}
+	if !allowedExts[ext] {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "不支持的文件格式"})
+		return
+	}
+
+	uploadDir := filepath.Join(chunksDir, req.UploadID)
+	finalName, renamed := getUniqueFileName(filepath.Base(dst), filepath.Dir(dst))
+	finalPath := filepath.Join(filepath.Dir(dst), finalName)
+
+	if err := os.MkdirAll(filepath.Dir(finalPath), 0755); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建目录失败: " + err.Error()})
+		return
+	}
+	out, err := os.Create(finalPath)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "创建文件失败: " + err.Error()})
+		return
+	}
+	defer out.Close()
+
+	entries, err := os.ReadDir(uploadDir)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "读取分片目录失败: " + err.Error()})
+		return
+	}
+	for i := 0; i < len(entries); i++ {
+		chunk, err := os.ReadFile(filepath.Join(uploadDir, fmt.Sprintf("%d", i)))
+		if err != nil {
+			sendJSON(w, map[string]interface{}{"success": false, "message": fmt.Sprintf("读取分片 %d 失败: %v", i, err)})
+			return
+		}
+		if _, err = out.Write(chunk); err != nil {
+			sendJSON(w, map[string]interface{}{"success": false, "message": fmt.Sprintf("写入分片 %d 失败: %v", i, err)})
+			return
+		}
+	}
+	_ = os.RemoveAll(uploadDir)
+
+	msg := ""
+	if renamed {
+		msg = "已自动重命名"
+	}
+	sendJSON(w, map[string]interface{}{"success": true, "path": finalName, "renamed": renamed, "message": msg})
+}
+
+type RenameRequest struct {
+	OldName string `json:"oldName"`
+	NewName string `json:"newName"`
+}
+
+func renameIcon(w http.ResponseWriter, r *http.Request) {
+	var req RenameRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	old, err1 := safeJoinPath(userDataDir, req.OldName)
+	new, err2 := safeJoinPath(userDataDir, req.NewName)
+	if err1 != nil || err2 != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+
+	if _, err := os.Stat(old); os.IsNotExist(err) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "文件不存在"})
+		return
+	}
+
+	newDir := filepath.Dir(new)
+	newBase := filepath.Base(new)
+	finalName, renamed := getUniqueFileName(newBase, newDir)
+	finalPath := filepath.Join(newDir, finalName)
+	_ = os.Rename(old, finalPath)
+	sendJSON(w, map[string]interface{}{"success": true, "renamed": renamed})
+}
+
+type DeleteRequest struct {
+	FileName string `json:"fileName"`
+}
+
+func deleteIcon(w http.ResponseWriter, r *http.Request) {
+	var req DeleteRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	target, err := safeJoinPath(userDataDir, req.FileName)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "不存在"})
+		return
+	}
+	_ = os.Remove(target)
+	sendJSON(w, map[string]interface{}{"success": true})
+}
+
+type MoveRequest struct {
+	FileName    string `json:"fileName"`
+	NewCategory string `json:"newCategory"`
+}
+
+func moveIcon(w http.ResponseWriter, r *http.Request) {
+	var req MoveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "参数解析失败"})
+		return
+	}
+
+	srcPath, err := safeJoinPath(userDataDir, req.FileName)
+	if err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "非法路径"})
+		return
+	}
+
+	if _, err := os.Stat(srcPath); os.IsNotExist(err) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "文件不存在"})
+		return
+	}
+
+	var dstDir string
+	if req.NewCategory == "" {
+		dstDir = userDataDir
+	} else {
+		dstDir = filepath.Join(userDataDir, req.NewCategory)
+		if err := os.MkdirAll(dstDir, 0755); err != nil {
+			sendJSON(w, map[string]interface{}{"success": false, "message": "创建目录失败"})
+			return
+		}
+	}
+
+	fileName := filepath.Base(srcPath)
+	dstPath := filepath.Join(dstDir, fileName)
+
+	if srcPath == dstPath {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "目标位置相同"})
+		return
+	}
+
+	if _, err := os.Stat(dstPath); err == nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "目标已存在同名文件"})
+		return
+	}
+
+	if err := os.Rename(srcPath, dstPath); err != nil {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "移动失败: " + err.Error()})
+		return
+	}
+
+	sendJSON(w, map[string]interface{}{"success": true})
+}
+
+type CreateCategoryRequest struct {
+	Name string `json:"name"`
+}
+
+func listCategories(w http.ResponseWriter, r *http.Request) {
+	if !isUserIconAccessible(r) {
+		sendJSON(w, map[string]interface{}{"categories": []string{}})
+		return
+	}
+	entries, _ := os.ReadDir(userDataDir)
+	var cats []string
+	for _, e := range entries {
+		if e.IsDir() {
+			cats = append(cats, e.Name())
+		}
+	}
+	sendJSON(w, map[string]interface{}{"categories": cats})
+}
+
+func createCategory(w http.ResponseWriter, r *http.Request) {
+	var req CreateCategoryRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+	name := strings.TrimSpace(req.Name)
+	if name == "" || strings.ContainsAny(name, `/\..`) {
+		sendJSON(w, map[string]interface{}{"success": false, "message": "名称非法"})
+		return
+	}
+	dir := filepath.Join(userDataDir, name)
+	_ = os.MkdirAll(dir, 0755)
+	sendJSON(w, map[string]interface{}{"success": true, "name": name})
+}
+
+func sendJSON(w http.ResponseWriter, data map[string]interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(data)
+}
