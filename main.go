@@ -25,7 +25,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.4.6"
+	Version     = "0.5.0"
 	maxLogLines = 300
 )
 
@@ -161,7 +161,7 @@ func main() {
 
 	http.HandleFunc("/deskdata/user_icon/", func(w http.ResponseWriter, r *http.Request) {
 		if !isUserIconAccessible(r) {
-			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			http.Error(w, `{"error":"【图标空间站】此图片未授权或不存在"}`, http.StatusForbidden)
 			return
 		}
 
@@ -171,7 +171,13 @@ func main() {
 
 		// 安全校验：禁止路径穿越
 		if !strings.HasPrefix(target, userDataDir+string(filepath.Separator)) && target != userDataDir {
-			http.Error(w, `{"error":"Forbidden"}`, http.StatusForbidden)
+			http.Error(w, `{"error":"【图标空间站】此图片未授权或不存在"}`, http.StatusForbidden)
+			return
+		}
+
+		// 检查文件是否存在
+		if _, err := os.Stat(target); os.IsNotExist(err) {
+			http.Error(w, `{"error":"【图标空间站】此图片未授权或不存在"}`, http.StatusForbidden)
 			return
 		}
 
