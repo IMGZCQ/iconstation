@@ -84,6 +84,10 @@
             position: relative;
         }
 
+        body.modal-open {
+            overflow: hidden;
+        }
+
         .dynamic-bg {
             position: fixed;
             top: 0;
@@ -2580,7 +2584,7 @@
     <script>
         function showAboutModal() {
             document.getElementById('aboutDialog').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
         }
 
         async function fetchAboutContent() {
@@ -2605,7 +2609,7 @@
 
         function hideAboutModal() {
             document.getElementById('aboutDialog').style.display = 'none';
-            document.body.style.overflow = '';
+            document.body.classList.remove('modal-open');
         }
 
         document.getElementById('aboutDialog')?.addEventListener('click', function (e) {

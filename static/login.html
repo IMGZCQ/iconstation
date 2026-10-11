@@ -461,10 +461,10 @@
             <div id="initHint" class="init-hint" style="display: none;">首次登录请设置管理员密码</div>
 
             <form id="loginForm">
-                <input type="text" id="username" autocomplete="username" style="display: none;" aria-hidden="true" tabindex="-1">
+                <input type="text" id="username" autocomplete="username" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" aria-hidden="true" tabindex="-1">
                 <div class="form-group">
                     <label for="password" id="passwordLabel">密码</label>
-                    <input type="password" id="password" placeholder="请输入密码" autocomplete="new-password" required>
+                    <input type="password" id="password" placeholder="请输入密码" autocomplete="current-password" required>
                 </div>
                 <div class="form-group" id="confirmGroup" style="display: none;">
                     <label for="confirmPassword">确认密码</label>
@@ -568,12 +568,15 @@
         }
 
         function updateForm() {
+            const passwordInput = document.getElementById('password');
             if (isInit) {
                 formTitle.textContent = '设置管理员密码';
                 submitBtn.textContent = '设置密码';
                 initHint.style.display = 'block';
                 confirmGroup.style.display = 'block';
                 passwordLabel.textContent = '设置密码';
+                // 初始化场景：标记为新密码，避免密码管理器误填旧密码
+                passwordInput.setAttribute('autocomplete', 'new-password');
                 document.getElementById('openCheckboxGroup').style.display = 'flex';
             } else {
                 formTitle.textContent = '管理员登录';
@@ -581,6 +584,8 @@
                 initHint.style.display = 'none';
                 confirmGroup.style.display = 'none';
                 passwordLabel.textContent = '密码';
+                // 登录场景：标记为当前密码，允许密码管理器自动填充
+                passwordInput.setAttribute('autocomplete', 'current-password');
             }
         }
 

@@ -25,7 +25,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.5.0"
+	Version     = "0.5.1"
 	maxLogLines = 300
 )
 
@@ -134,6 +134,7 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "max-age=86400")
+		w.Header().Set("Permissions-Policy", "popover=*")
 		if r.URL.Path == "/" {
 			http.ServeFileFS(w, r, staticSubFS, "index.html")
 			return
