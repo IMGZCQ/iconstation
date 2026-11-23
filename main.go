@@ -25,7 +25,7 @@ import (
 var staticFS embed.FS
 
 const (
-	Version     = "0.5.1"
+	Version     = "0.5.2"
 	maxLogLines = 300
 )
 
@@ -165,6 +165,10 @@ func main() {
 			http.Error(w, `{"error":"【图标空间站】此图片未授权或不存在"}`, http.StatusForbidden)
 			return
 		}
+
+		// 本地图标属私有资源：允许缓存，但每次使用前必须向服务端校验，
+		// 以便退出登录后立即失效，避免浏览器缓存继续显示
+		w.Header().Set("Cache-Control", "private, no-cache")
 
 		path := strings.TrimPrefix(r.URL.Path, "/deskdata/user_icon/")
 		path = filepath.Clean(path)
